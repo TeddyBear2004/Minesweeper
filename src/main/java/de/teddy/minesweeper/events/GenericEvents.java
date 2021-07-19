@@ -1,5 +1,6 @@
 package de.teddy.minesweeper.events;
 
+import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.Inventories;
 import org.bukkit.entity.Player;
@@ -34,6 +35,18 @@ public class GenericEvents implements Listener {
         event.setJoinMessage("");
         event.getPlayer().getInventory().setContents(Inventories.viewerInventory);
         event.getPlayer().setAllowFlight(true);
+        boolean watching = false;
+        for(Game map : Game.values()) {
+        	Board runningGame = map.getRunningGame();
+        	if(runningGame != null) {
+        		map.startViewing(event.getPlayer(), runningGame);
+        		watching = true;
+        		break;
+        	}
+        }
+        if(!watching) {
+        	event.getPlayer().teleport(Game.MAP10X10.getViewingSpawn());
+        }
     }
 
     @EventHandler

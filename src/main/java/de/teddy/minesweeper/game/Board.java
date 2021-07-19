@@ -63,9 +63,12 @@ public class Board {
     private long started;
     private boolean isGenerated;
     private boolean isFinished;
+    
+    List<Player> viewers = new LinkedList<>();
 
     public Board(int width, int height, int bombCount, Location corner, Player player){
         this.player = player;
+        this.viewers.add(player);
         if(width * height - 9 <= bombCount || width * height <= bombCount)
             throw new IllegalArgumentException("bombCount cannot be bigger than width * height");
 
@@ -144,13 +147,15 @@ public class Board {
             }
         }
 
-        subChunkMap.forEach((xyz, listListTuple2) ->
+        subChunkMap.forEach((xyz, listListTuple2) -> {
+        	for(Player p : viewers)
                 PacketUtil.sendMultiBlockChange(
-                        player,
+                        p,
                         ArrayUtils.toPrimitive(listListTuple2.getA().toArray(new Short[0])),
                         new BlockPosition(xyz.getA(), xyz.getB(), xyz.getC()),
                         listListTuple2.getB().toArray(new WrappedBlockData[0]),
-                        true));
+                        true);
+        });
     }
 
     public void draw(){
@@ -202,13 +207,15 @@ public class Board {
             }
         }
 
-        subChunkMap.forEach((xyz, listListTuple2) ->
+        subChunkMap.forEach((xyz, listListTuple2) -> {
+        	for(Player p : viewers)
                 PacketUtil.sendMultiBlockChange(
-                        player,
+                        p,
                         ArrayUtils.toPrimitive(listListTuple2.getA().toArray(new Short[0])),
                         new BlockPosition(xyz.getA(), xyz.getB(), xyz.getC()),
                         listListTuple2.getB().toArray(new WrappedBlockData[0]),
-                        true));
+                        true);
+        });
     }
 
     public Field getField(int x, int y){
@@ -276,7 +283,8 @@ public class Board {
 
 
             Bukkit.getScheduler().runTaskLater(Minesweeper.INSTANCE, () -> {
-                PacketUtil.sendBlockChange(player, new BlockPosition(clone.toVector()), WrappedBlockData.createData(Material.COAL_BLOCK));
+            	for(Player p : viewers)
+            		PacketUtil.sendBlockChange(p, new BlockPosition(clone.toVector()), WrappedBlockData.createData(Material.COAL_BLOCK));
                 Objects.requireNonNull(clone.getWorld()).playSound(clone, Sound.BLOCK_STONE_PLACE, 0.5F, 0);//todo send only to client
             }, (long)(20 * explodeDuration));
 

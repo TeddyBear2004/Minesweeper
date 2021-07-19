@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 public enum Game {
     MAP10X10(new Tuple2<>(new Location(Minesweeper.WORLD, 53, 17, -328), new Location(Minesweeper.WORLD, 58, 20, -315.5)),
@@ -32,13 +33,15 @@ public enum Game {
     }
 
     private final Tuple2<Location, Location> locations;
+    private final Map<Player, Board> gameWatched;
     private final HashMap<Player, Board> runningGames;
     private final int size;
     private final int bombCount;
 
     Game(Tuple2<Location, Location> location, int size, int bombCount){
         this.runningGames = new HashMap<>();
-
+        this.gameWatched = new HashMap<>();
+        
         this.locations = location;
         this.size = size;
         this.bombCount = bombCount;
@@ -58,13 +61,22 @@ public enum Game {
         return runningGames.get(Player);
     }
 
-
+    public Location getViewingSpawn() {
+    	return locations.getB();
+    }
+    
+    public Board getRunningGame() {
+    	return runningGames.values().stream().findFirst().orElse(null);
+    }
+    
     public void requestGame(Player p){
         requestGame(p, true);
     }
 
     public void requestGame(Player p, boolean shouldTeleport){
-        runningGames.put(p, new Board(size, size, bombCount, locations.getA(), p));
+    	Board b = new Board(size, size, bombCount, locations.getA(), p);
+        runningGames.put(p, b);
+        gameWatched.put(p, b);
 
         p.getInventory().clear();
         p.getInventory().setContents(Inventories.gameInventory);
@@ -77,6 +89,19 @@ public enum Game {
 
     public void finishGame(Player p){
         Board board = runningGames.remove(p);
-        board.drawBlancField();
+        Board toWatch = getRunningGame();
+        if(toWatch == null) {
+            board.drawBlancField();
+            board.viewers.forEach(pl -> gameWatched.remove(pl));
+        } else {
+            board.viewers.forEach(pl -> gameWatched.put(pl, toWatch));
+        }
     }
+
+	public void startViewing(Player player, Board runningGame) {
+		if(!runningGames.containsValue(runningGame)) throw new IllegalStateException();
+		gameWatched.put(player, runningGame);
+		runningGame.viewers.add(player);
+		player.teleport(getViewingSpawn());
+	}
 }
