@@ -35,9 +35,10 @@ public class LeftClickEvent implements PacketListener {
         List<BlockPosition> blockPositions = packet.getBlockPositionModifier().getValues();
         List<EnumWrappers.PlayerDigType> playerDigTypes = packet.getPlayerDigTypes().getValues();
 
+        if(Game.isBlockInsideGameField(blockPositions.get(0).toLocation(player.getWorld()).getBlock()))
+            event.setCancelled(true);
+
         if(game == null
-                || blockPositions == null
-                || blockPositions.size() == 0
                 || playerDigTypes == null
                 || playerDigTypes.size() == 0)
             return;

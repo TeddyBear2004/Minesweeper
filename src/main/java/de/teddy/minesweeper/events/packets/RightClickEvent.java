@@ -32,9 +32,10 @@ public class RightClickEvent implements PacketListener {
         List<MovingObjectPositionBlock> movingObjectPositionBlocks = packet.getMovingBlockPositions()
                 .getValues();
 
+        if(Game.isBlockInsideGameField(movingObjectPositionBlocks.get(0).getBlockPosition().toLocation(player.getWorld()).getBlock()))
+            event.setCancelled(true);
+
         if(game == null
-                || movingObjectPositionBlocks == null
-                || movingObjectPositionBlocks.size() == 0
                 || !Game.isBlockInsideGameField(movingObjectPositionBlocks.get(0).getBlockPosition().toLocation(player.getWorld()).getBlock()))
             return;
 

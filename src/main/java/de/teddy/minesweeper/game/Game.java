@@ -54,7 +54,7 @@ public enum Game {
     public static boolean isBlockInsideGameField(Block block){
         return Arrays.stream(values())
                 .anyMatch(game -> IsBetween.isBetween2D(game.locations.getA(), game.size, game.size, block)
-                        && game.locations.getA().getBlockY() == block.getY());
+                        && game.locations.getA().getBlockY() == block.getY() || game.locations.getA().getBlockY() +1== block.getY());
     }
 
     public Board getBoard(Player Player){
