@@ -45,7 +45,7 @@ public class GenericEvents implements Listener {
         	}
         }
         if(!watching) {
-        	event.getPlayer().teleport(Game.MAP10X10.getViewingSpawn());
+        	Game.MAP10X10.startViewing(event.getPlayer(), null);
         }
     }
 
