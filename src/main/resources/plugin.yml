@@ -1,0 +1,10 @@
+name: Minesweeper
+version: ${project.version}
+main: de.teddy.minesweeper.Minesweeper
+api-version: 1.16
+depend:
+  - ProtocolLib
+
+commands:
+  start:
+  score:
