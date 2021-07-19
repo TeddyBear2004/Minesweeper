@@ -94,7 +94,10 @@ public enum Game {
             board.drawBlancField();
             board.viewers.forEach(pl -> gameWatched.remove(pl));
         } else {
-            board.viewers.forEach(pl -> gameWatched.put(pl, toWatch));
+            board.viewers.forEach(pl -> {
+            	gameWatched.put(pl, toWatch);
+                toWatch.viewers.add(pl);
+            });
         }
     }
 
