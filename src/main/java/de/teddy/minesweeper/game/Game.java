@@ -65,6 +65,10 @@ public enum Game {
                         && (game.locations.getA().getBlockY() == block.getY() || game.locations.getA().getBlockY() + 1 == block.getY()));
     }
 
+    public int getFieldHeight(){
+        return locations.getA().getBlockY();
+    }
+
     public Board getBoard(Player Player){
         return runningGames.get(Player);
     }

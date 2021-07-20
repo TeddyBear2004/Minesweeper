@@ -16,6 +16,7 @@ import de.teddy.minesweeper.game.exceptions.BombExplodeException;
 import de.teddy.minesweeper.util.IsBetween;
 import de.teddy.minesweeper.util.PacketUtil;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -46,7 +47,10 @@ public class LeftClickEvent implements PacketListener {
         if(!event.isCancelled()){
             event.setCancelled(true);
             if(board == null)
-                PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(game.getDefaultMaterialAt(location)));
+                if(location.getY() == game.getFieldHeight())
+                    PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(game.getDefaultMaterialAt(location)));
+                else if(location.getY() + 1 == game.getFieldHeight())
+                    PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(Material.AIR));
         }
 
 
