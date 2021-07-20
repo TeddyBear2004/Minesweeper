@@ -84,9 +84,9 @@ public class Inventories {
             timeMeta.setDisplayName(ChatColor.AQUA + "Starte ein Spiel");
             hourGlass.setItemMeta(timeMeta);
 
-            viewerInventory[1] = compass;
+            //viewerInventory[1] = compass;
             viewerInventory[4] = hourGlass;
-            viewerInventory[7] = book;
+            //viewerInventory[7] = book;
         }
 
         {
