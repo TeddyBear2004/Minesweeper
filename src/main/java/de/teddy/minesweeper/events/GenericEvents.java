@@ -61,7 +61,6 @@ public class GenericEvents implements Listener {
         event.setQuitMessage("");
     }
 
-
     @EventHandler
     public void onBlockPlaceEvent(BlockPlaceEvent event){
         if(!event.getPlayer().isOp() || Game.getGame(event.getPlayer()) != null)

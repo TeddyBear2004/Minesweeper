@@ -7,7 +7,6 @@ import de.teddy.minesweeper.commands.StartCommand;
 import de.teddy.minesweeper.events.GenericEvents;
 import de.teddy.minesweeper.events.GenericRightClickEvent;
 import de.teddy.minesweeper.events.OnInventory;
-import de.teddy.minesweeper.events.packets.BlockChangeEvent;
 import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.events.packets.RightClickEvent;
 import de.teddy.minesweeper.game.Inventories;
@@ -39,7 +38,6 @@ public final class Minesweeper extends JavaPlugin {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         protocolManager.addPacketListener(new RightClickEvent());
         protocolManager.addPacketListener(new LeftClickEvent());
-        protocolManager.addPacketListener(new BlockChangeEvent());
 
         /*protocolManager.addPacketListener(new PacketAdapter(this, ListenerPriority.NORMAL, PacketType.Play.Server.CHAT) {
             @Override

@@ -13,12 +13,12 @@ import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
 import de.teddy.minesweeper.util.IsBetween;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class LeftClickEvent implements PacketListener {
@@ -29,21 +29,25 @@ public class LeftClickEvent implements PacketListener {
 
     @Override
     public void onPacketReceiving(PacketEvent event){
-        PacketContainer packet = event.getPacket();
         Player player = event.getPlayer();
+        PacketContainer packet = event.getPacket();
+        BlockPosition blockPosition = packet.getBlockPositionModifier().getValues().get(0);
+        Location location = blockPosition.toLocation(player.getWorld());
         Game game = Game.getGame(player);
-        List<BlockPosition> blockPositions = packet.getBlockPositionModifier().getValues();
-        List<EnumWrappers.PlayerDigType> playerDigTypes = packet.getPlayerDigTypes().getValues();
 
-        if(Game.isBlockInsideGameField(blockPositions.get(0).toLocation(player.getWorld()).getBlock()))
-            event.setCancelled(true);
+        Bukkit.broadcastMessage("37");
 
-        if(game == null
-                || playerDigTypes == null
-                || playerDigTypes.size() == 0)
+        if(!Game.isBlockInsideGameField(blockPosition.toLocation(player.getWorld()).getBlock()))
             return;
-        BlockPosition blockPosition = blockPositions.get(0);
-        Location location = new Location(player.getWorld(), blockPosition.getX(), blockPosition.getY(), blockPosition.getZ());
+
+        if(game == null)
+            return;
+
+        Bukkit.broadcastMessage("40");
+        if(!event.isCancelled()){
+            event.setCancelled(true);
+        }
+
         Board board = game.getBoard(player);
 
         if(board == null
@@ -51,11 +55,11 @@ public class LeftClickEvent implements PacketListener {
                 || board.getCorner().getBlockY() != location.getBlockY()
                 || !Game.isBlockInsideGameField(location.getBlock()))
             return;
-        event.setCancelled(true);
-        if(playerDigTypes.get(0) != EnumWrappers.PlayerDigType.START_DESTROY_BLOCK
+        Bukkit.broadcastMessage("55");
+        if(packet.getPlayerDigTypes().getValues().get(0) != EnumWrappers.PlayerDigType.START_DESTROY_BLOCK
                 || board.isFinished())
             return;
-
+        Bukkit.broadcastMessage("59");
         Board.Field field = board.getField(location.getBlockX(), location.getBlockZ());
 
         try{
@@ -64,9 +68,11 @@ public class LeftClickEvent implements PacketListener {
                 board.draw();
                 return;
             }
+
+            Bukkit.broadcastMessage("69");
             if(field.isMarked())
                 return;
-
+            Bukkit.broadcastMessage("72");
             if(field.isCovered()){
                 board.checkField(location.getBlockX(), location.getBlockZ());
             }else if(System.currentTimeMillis() - lastClicked.getOrDefault(player, (long)-1000) <= 350){

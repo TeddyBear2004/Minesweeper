@@ -15,26 +15,6 @@ import java.lang.reflect.InvocationTargetException;
 
 public class PacketUtil {
     public static void sendActionBar(Player player, String message){
-        /*
-        PacketEvent[player=CraftPlayer{name=TeddyBear_2004},
-        packet=PacketContainer[type=CHAT[class=PacketPlayOutChat, id=15],
-        structureModifier=StructureModifier[fieldType=class java.lang.Object, data=[
-
-        private net.minecraft.server.v1_16_R3.IChatBaseComponent
-        net.minecraft.server.v1_16_R3.PacketPlayOutChat.a,
-
-        public net.kyori.adventure.text.Component
-        net.minecraft.server.v1_16_R3.PacketPlayOutChat.adventure$message,
-
-        public net.md_5.bungee.api.chat.BaseComponent[]
-        net.minecraft.server.v1_16_R3.PacketPlayOutChat.components,
-
-        private net.minecraft.server.v1_16_R3.ChatMessageType
-        net.minecraft.server.v1_16_R3.PacketPlayOutChat.b,
-
-        private java.util.UUID
-        net.minecraft.server.v1_16_R3.PacketPlayOutChat.c]]]]
-         */
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.CHAT, true);
 

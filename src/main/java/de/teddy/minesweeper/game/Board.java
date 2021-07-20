@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.*;
 
 public class Board {
-    private static final Material[] light = {
+    public static final Material[] LIGHT_MATERIALS = {
             Material.WHITE_CONCRETE_POWDER,
             Material.LIME_TERRACOTTA,
             Material.GREEN_CONCRETE,
@@ -40,7 +40,7 @@ public class Board {
             Material.PURPLE_TERRACOTTA,
             Material.RED_TERRACOTTA};
 
-    private static final Material[] dark = {
+    public static final Material[] DARK_MATERIALS = {
             Material.LIGHT_GRAY_CONCRETE_POWDER,
             Material.TERRACOTTA,
             Material.GREEN_TERRACOTTA,
@@ -60,11 +60,10 @@ public class Board {
     private final Field[][] board;
     private final List<Point2D> bombList;
     private final Player player;
+    List<Player> viewers = new LinkedList<>();
     private long started;
     private boolean isGenerated;
     private boolean isFinished;
-    
-    List<Player> viewers = new LinkedList<>();
 
     public Board(int width, int height, int bombCount, Location corner, Player player){
         this.player = player;
@@ -93,6 +92,16 @@ public class Board {
 
     public static boolean isLightField(int x, int y){
         return Math.abs(x + y) % 2 == 0;
+    }
+
+    public static Material[][] getBlancField(int width, int height){
+        Material[][] board = new Material[width][height];
+
+        for(int i = 0; i < board.length; i++)
+            for(int j = 0; j < board[i].length; j++)
+                board[i][j] = isLightField(i, j) ? lightDefault : darkDefault;
+
+        return board;
     }
 
     public boolean isFinished(){
@@ -148,7 +157,7 @@ public class Board {
         }
 
         subChunkMap.forEach((xyz, listListTuple2) -> {
-        	for(Player p : viewers)
+            for(Player p : viewers)
                 PacketUtil.sendMultiBlockChange(
                         p,
                         ArrayUtils.toPrimitive(listListTuple2.getA().toArray(new Short[0])),
@@ -188,7 +197,7 @@ public class Board {
                     if(field.isBomb){
                         m = Material.COAL_BLOCK;
                     }else
-                        m = (b ? light : dark)[field.getNeighborCount()];
+                        m = (b ? LIGHT_MATERIALS : DARK_MATERIALS)[field.getNeighborCount()];
                 }
 
                 Tuple2<List<Short>, List<WrappedBlockData>> listListTuple2 = subChunkMap.get(subChunkTuple);
@@ -208,7 +217,7 @@ public class Board {
         }
 
         subChunkMap.forEach((xyz, listListTuple2) -> {
-        	for(Player p : viewers)
+            for(Player p : viewers)
                 PacketUtil.sendMultiBlockChange(
                         p,
                         ArrayUtils.toPrimitive(listListTuple2.getA().toArray(new Short[0])),
@@ -268,11 +277,14 @@ public class Board {
         win(player);
     }
 
+    public void breakGame(){
+        isFinished = true;
+    }
+
     public void lose(){
         isFinished = true;
         double explodeDuration = 0.5d;
         List<Location> clones = new ArrayList<>();
-
 
         for(Point2D point2D : this.bombList){
             Location clone = this.corner.clone();
@@ -283,8 +295,8 @@ public class Board {
 
 
             Bukkit.getScheduler().runTaskLater(Minesweeper.INSTANCE, () -> {
-            	for(Player p : viewers)
-            		PacketUtil.sendBlockChange(p, new BlockPosition(clone.toVector()), WrappedBlockData.createData(Material.COAL_BLOCK));
+                for(Player p : viewers)
+                    PacketUtil.sendBlockChange(p, new BlockPosition(clone.toVector()), WrappedBlockData.createData(Material.COAL_BLOCK));
                 Objects.requireNonNull(clone.getWorld()).playSound(clone, Sound.BLOCK_STONE_PLACE, 0.5F, 0);//todo send only to client
             }, (long)(20 * explodeDuration));
 
@@ -386,6 +398,20 @@ public class Board {
             this.isMarked = !this.isMarked();
         }
 
+        public Material getActualMaterial(){
+            boolean lightField = isLightField(x, y);
+            if(isCovered)
+                return lightField ? lightDefault : darkDefault;
+
+            if(isBomb)
+                return Material.COAL_BLOCK;
+            else
+                return (lightField ? LIGHT_MATERIALS : DARK_MATERIALS)[getNeighborCount()];
+        }
+
+        public Material getMark(){
+            return isMarked ? Material.REDSTONE_TORCH : Material.AIR;
+        }
 
         public boolean isCovered(){
             return isCovered;
