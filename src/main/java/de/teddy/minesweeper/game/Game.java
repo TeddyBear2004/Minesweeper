@@ -20,8 +20,7 @@ public enum Game {
     MAP24X24(new Tuple2<>(new Location(Minesweeper.WORLD, 47, 15, -67), new Location(Minesweeper.WORLD, 58, 20, -40.5)),
             24, 99),
 
-    MAP_SPECIAL(new Tuple2<>(new Location(Minesweeper.WORLD, 384, 3, -155),
-            new Location(Minesweeper.WORLD, 385, 4, -129)),
+    MAP_SPECIAL(new Tuple2<>(new Location(Minesweeper.WORLD, 47, 15, -67), new Location(Minesweeper.WORLD, 58, 20, -40.5)),
             24, 70);
 
     static{
