@@ -8,12 +8,13 @@ import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.injector.GamePhase;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.EnumWrappers;
+import com.comphenix.protocol.wrappers.WrappedBlockData;
 import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
 import de.teddy.minesweeper.util.IsBetween;
-import org.bukkit.Bukkit;
+import de.teddy.minesweeper.util.PacketUtil;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -40,12 +41,14 @@ public class LeftClickEvent implements PacketListener {
 
         if(game == null)
             return;
+        Board board = game.getBoard(player);
 
         if(!event.isCancelled()){
             event.setCancelled(true);
+            if(board == null)
+                PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(game.getDefaultMaterialAt(location)));
         }
 
-        Board board = game.getBoard(player);
 
         if(board == null
                 || !IsBetween.isBetween2D(board.getCorner(), board.getWidth(), board.getHeight(), location.getBlock())
