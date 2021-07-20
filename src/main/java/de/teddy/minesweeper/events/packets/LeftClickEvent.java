@@ -35,15 +35,12 @@ public class LeftClickEvent implements PacketListener {
         Location location = blockPosition.toLocation(player.getWorld());
         Game game = Game.getGame(player);
 
-        Bukkit.broadcastMessage("37");
-
         if(!Game.isBlockInsideGameField(blockPosition.toLocation(player.getWorld()).getBlock()))
             return;
 
         if(game == null)
             return;
 
-        Bukkit.broadcastMessage("40");
         if(!event.isCancelled()){
             event.setCancelled(true);
         }
@@ -55,11 +52,11 @@ public class LeftClickEvent implements PacketListener {
                 || board.getCorner().getBlockY() != location.getBlockY()
                 || !Game.isBlockInsideGameField(location.getBlock()))
             return;
-        Bukkit.broadcastMessage("55");
+
         if(packet.getPlayerDigTypes().getValues().get(0) != EnumWrappers.PlayerDigType.START_DESTROY_BLOCK
                 || board.isFinished())
             return;
-        Bukkit.broadcastMessage("59");
+
         Board.Field field = board.getField(location.getBlockX(), location.getBlockZ());
 
         try{
@@ -69,10 +66,9 @@ public class LeftClickEvent implements PacketListener {
                 return;
             }
 
-            Bukkit.broadcastMessage("69");
             if(field.isMarked())
                 return;
-            Bukkit.broadcastMessage("72");
+
             if(field.isCovered()){
                 board.checkField(location.getBlockX(), location.getBlockZ());
             }else if(System.currentTimeMillis() - lastClicked.getOrDefault(player, (long)-1000) <= 350){
