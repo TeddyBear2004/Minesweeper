@@ -118,25 +118,34 @@ public enum Game {
         }
     }
 
-    public void finishGame(Player p){
+    public void finishGame(Player p, boolean quit){
         Board board = runningGames.remove(p);
-        if(board == null)
+        if(board == null && !quit)
         	throw new IllegalStateException("The player is not playing any game");
         Board toWatch = getRunningGame();
-        if(toWatch == null){
-            board.drawBlancField();
-            board.viewers.forEach(pl -> {
-                gameWatched.remove(pl);
-                waiting.add(pl);
-            });
-        }else{
-            board.viewers.forEach(pl -> {
-                gameWatched.put(pl, toWatch);
-                toWatch.viewers.add(pl);
-            });
+        if(board != null) {
+        	if(toWatch == null){
+            	board.drawBlancField();
+            	board.viewers.forEach(pl -> {
+                	gameWatched.remove(pl);
+                	waiting.add(pl);
+            	});
+        	}else{
+            	board.viewers.forEach(pl -> {
+                	gameWatched.put(pl, toWatch);
+                	toWatch.viewers.add(pl);
+            	});
+        	}
+        } else {
+        	gameWatched.remove(p);
+        	waiting.remove(p);
         }
     }
-
+    
+    public void finishGame(Player p) {
+    	finishGame(p, false);
+    }
+    
     public void startViewing(Player player, Board runningGame){
         if(runningGame == null || !runningGames.containsValue(runningGame)){
             this.waiting.add(player);
