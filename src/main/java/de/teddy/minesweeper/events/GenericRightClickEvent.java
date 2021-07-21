@@ -39,11 +39,9 @@ public class GenericRightClickEvent implements Listener {
             event.getPlayer().openInventory(Bukkit.createInventory(null, 54));
             //todo inv mit allen laufenden spielen
             event.setCancelled(true);
-            return;
         }else if(itemStack.equals(Inventories.hourGlass)){
             event.getPlayer().openInventory(Inventories.startCommandInventory);
             event.setCancelled(true);
-            return;
         }
     }
 }

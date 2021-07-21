@@ -44,13 +44,20 @@ public class LeftClickEvent implements PacketListener {
             return;
         Board board = game.getBoard(player);
 
+
         if(!event.isCancelled()){
             event.setCancelled(true);
-            if(board == null)
+            if(board == null){
                 if(location.getY() == game.getFieldHeight())
                     PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(game.getDefaultMaterialAt(location)));
                 else if(location.getY() + 1 == game.getFieldHeight())
                     PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(Material.AIR));
+            }else{
+                Board.Field field1 = board.getField(location.getBlockX(), location.getBlockZ());
+                if(location.getY() - 1 == game.getFieldHeight()){
+                    PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(field1.getMark()));
+                }
+            }
         }
 
 

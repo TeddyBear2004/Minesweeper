@@ -94,6 +94,10 @@ public class Board {
         return board;
     }
 
+    public void finish(){
+        isFinished = true;
+    }
+
     public boolean isFinished(){
         return isFinished;
     }
