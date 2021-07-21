@@ -25,17 +25,25 @@ public class GenericRightClickEvent implements Listener {
             if(itemStack.equals(Inventories.reload)){
                 game.finishGame(event.getPlayer());
                 game.requestGame(event.getPlayer(), false);
+                event.setCancelled(true);
+                return;
             }else if(itemStack.equals(Inventories.barrier)){
                 game.finishGame(event.getPlayer());
                 event.getPlayer().getInventory().setContents(Inventories.viewerInventory);
+                event.setCancelled(true);
+                return;
             }
         }
 
         if(itemStack.equals(Inventories.compass)){
             event.getPlayer().openInventory(Bukkit.createInventory(null, 54));
             //todo inv mit allen laufenden spielen
+            event.setCancelled(true);
+            return;
         }else if(itemStack.equals(Inventories.hourGlass)){
             event.getPlayer().openInventory(Inventories.startCommandInventory);
+            event.setCancelled(true);
+            return;
         }
     }
 }
