@@ -23,6 +23,7 @@ public class GenericRightClickEvent implements Listener {
 
         if(game != null){
             if(itemStack.equals(Inventories.reload)){
+                game.finishGame(event.getPlayer());
                 game.requestGame(event.getPlayer(), false);
             }else if(itemStack.equals(Inventories.barrier)){
                 game.finishGame(event.getPlayer());
