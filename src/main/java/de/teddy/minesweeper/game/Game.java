@@ -101,6 +101,10 @@ public enum Game {
     public void requestGame(Player p, boolean shouldTeleport){
         Board b = new Board(size, size, bombCount, locations.getA(), p);
         runningGames.put(p, b);
+        Board prevWatch = gameWatched.get(p);
+        if(prevWatch != null) {
+        	prevWatch.viewers.remove(p);
+        }
         gameWatched.put(p, b);
         waiting.remove(p);
         while(!waiting.isEmpty()){
