@@ -1,15 +1,5 @@
 package de.teddy.minesweeper.game;
 
-/*
-Covered,
--flag,
--question_mark
-
-Uncovered,
--empty
--1..8 (1 grün..red)
- */
-
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
 import de.teddy.minesweeper.Minesweeper;
@@ -51,8 +41,8 @@ public class Board {
             Material.GRAY_TERRACOTTA,
             Material.LIGHT_BLUE_TERRACOTTA};
 
-    private static final Material lightDefault = Material.LIME_CONCRETE_POWDER;
-    private static final Material darkDefault = Material.GREEN_CONCRETE_POWDER;
+    private static final Material LIGHT_DEFAULT = Material.LIME_CONCRETE_POWDER;
+    private static final Material DARK_DEFAULT = Material.GREEN_CONCRETE_POWDER;
     private final int width;
     private final int height;
     private final int bombCount;
@@ -99,7 +89,7 @@ public class Board {
 
         for(int i = 0; i < board.length; i++)
             for(int j = 0; j < board[i].length; j++)
-                board[i][j] = isLightField(i, j) ? lightDefault : darkDefault;
+                board[i][j] = isLightField(i, j) ? LIGHT_DEFAULT : DARK_DEFAULT;
 
         return board;
     }
@@ -144,7 +134,7 @@ public class Board {
                     subChunkMap.put(subChunkTuplePlusOne, new Tuple2<>(new ArrayList<>(), new ArrayList<>()));
                 boolean b = isLightField(i, j);
                 Material m;
-                m = (b ? lightDefault : darkDefault);
+                m = (b ? LIGHT_DEFAULT : DARK_DEFAULT);
 
                 Tuple2<List<Short>, List<WrappedBlockData>> listListTuple2 = subChunkMap.get(subChunkTuple);
                 listListTuple2.getA().add(convertToLocal(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
@@ -192,7 +182,7 @@ public class Board {
                 Material m;
 
                 if(field == null || field.isCovered()){
-                    m = (b ? lightDefault : darkDefault);
+                    m = (b ? LIGHT_DEFAULT : DARK_DEFAULT);
                 }else{
                     if(field.isBomb){
                         m = Material.COAL_BLOCK;
@@ -401,7 +391,7 @@ public class Board {
         public Material getActualMaterial(){
             boolean lightField = isLightField(x, y);
             if(isCovered)
-                return lightField ? lightDefault : darkDefault;
+                return lightField ? LIGHT_DEFAULT : DARK_DEFAULT;
 
             if(isBomb)
                 return Material.COAL_BLOCK;
