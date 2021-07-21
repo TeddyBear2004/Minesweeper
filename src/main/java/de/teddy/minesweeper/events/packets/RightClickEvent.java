@@ -45,7 +45,7 @@ public class RightClickEvent implements PacketListener {
             if(board == null)
                 if(location.getY() == game.getFieldHeight())
                     PacketUtil.sendBlockChange(player, new BlockPosition(location.toVector()), WrappedBlockData.createData(game.getDefaultMaterialAt(location)));
-                else if(location.getY() + 1 == game.getFieldHeight())
+                else if(location.getY() - 1 == game.getFieldHeight())
                     PacketUtil.sendBlockChange(player, new BlockPosition(location.toVector()), WrappedBlockData.createData(Material.AIR));
         }
         if((board == null
