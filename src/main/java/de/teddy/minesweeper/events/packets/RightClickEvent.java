@@ -20,8 +20,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import java.util.List;
-
 public class RightClickEvent implements PacketListener {
     @Override
     public void onPacketSending(PacketEvent event){}
