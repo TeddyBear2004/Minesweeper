@@ -121,7 +121,7 @@ public enum Game {
     public void finishGame(Player p){
         Board board = runningGames.remove(p);
         if(board == null)
-            return;
+        	throw new IllegalStateException("The player is not playing any game");
         Board toWatch = getRunningGame();
         if(toWatch == null){
             board.drawBlancField();
