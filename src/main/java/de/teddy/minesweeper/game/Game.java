@@ -51,12 +51,12 @@ public enum Game {
 
     public static Game getGame(Player player){
         for(Game map : values()){
-            if(map.gameWatched.containsKey(player))
+            if(map.gameWatched.containsKey(player)){
                 return map;
-            if(map.waiting.contains(player))
-                return map;
+            }
         }
-        return null;
+
+        return Arrays.stream(values()).filter(map -> map.waiting.contains(player)).findFirst().orElse(null);
     }
 
     public static boolean isBlockInsideGameField(Block block){
