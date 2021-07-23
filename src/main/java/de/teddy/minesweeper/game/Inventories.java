@@ -105,7 +105,7 @@ public class Inventories {
             BookMeta bookMeta = (BookMeta)book.getItemMeta();
             assert bookMeta != null;
             bookMeta.setDisplayName(ChatColor.YELLOW + "Tutorial");
-            bookMeta.setAuthor("TeddyBear_2004");
+            bookMeta.setAuthor(ChatColor.AQUA + "TeddyBear_2004");
             bookMeta.setTitle("Minesweeper - Tutorial");
             bookMeta.setPages(tutorialPages);
             book.setItemMeta(bookMeta);
