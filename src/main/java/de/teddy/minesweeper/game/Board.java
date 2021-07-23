@@ -55,9 +55,11 @@ public class Board {
     private long started;
     private boolean isGenerated;
     private boolean isFinished;
+    private final Game map;
 
-    public Board(int width, int height, int bombCount, Location corner, Player player){
-        this.player = player;
+    public Board(Game map, int width, int height, int bombCount, Location corner, Player player){
+        this.map = map;
+    	this.player = player;
         this.viewers.add(player);
         if(width * height - 9 <= bombCount || width * height <= bombCount)
             throw new IllegalArgumentException("bombCount cannot be bigger than width * height");

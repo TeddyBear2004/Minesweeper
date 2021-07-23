@@ -108,7 +108,7 @@ public enum Game {
     }
 
     public void requestGame(Player p, boolean shouldTeleport){
-        Board b = new Board(size, size, bombCount, locations.getA(), p);
+        Board b = new Board(this, size, size, bombCount, locations.getA(), p);
         runningGames.put(p, b);
         Board prevWatch = gameWatched.get(p);
         if(prevWatch != null){
