@@ -116,7 +116,12 @@ public enum Game {
             p.teleport(locations.getB());
         }
     }
-
+    
+    private void stopWatching(Player p, Board b) {
+    	gameWatched.remove(p);
+    	b.viewers.remove(p);
+    }
+    
     public static void finishGame(Player p, boolean quit) {
     	Game.getGame(p).finish(p, quit);
     }
@@ -142,15 +147,17 @@ public enum Game {
         board.finish();
         if(toWatch == null){
             board.drawBlancField();
-            board.viewers.forEach(pl -> {
-                gameWatched.remove(pl);
+            while(!board.viewers.isEmpty()) {
+            	Player pl = board.viewers.remove(0);
+            	stopWatching(pl, board);
                 waiting.add(pl);
-            });
+            }
         }else{
-            board.viewers.forEach(pl -> {
-                gameWatched.put(pl, toWatch);
+            while(!board.viewers.isEmpty()) {
+            	Player pl = board.viewers.remove(0);
+            	stopWatching(pl, board);
                 toWatch.viewers.add(pl);
-            });
+            }
         }
     }
 
