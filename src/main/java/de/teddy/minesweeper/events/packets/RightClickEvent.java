@@ -28,6 +28,9 @@ public class RightClickEvent implements PacketListener {
         Player player = event.getPlayer();
         PacketContainer packet = event.getPacket();
 
+        if(player.getInventory().getItemInMainHand().getType() != Material.AIR)
+            return;
+
         Game game = Game.getGame(player);
 
         if(game == null)
