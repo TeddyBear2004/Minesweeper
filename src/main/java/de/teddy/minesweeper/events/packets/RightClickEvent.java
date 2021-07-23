@@ -56,9 +56,6 @@ public class RightClickEvent implements PacketListener {
             return;
         }
 
-        if(board.isFinished())
-            return;
-
         Board.Field field = board.getField(location.getBlockX(), location.getBlockZ());
 
         if(field == null)
@@ -66,6 +63,9 @@ public class RightClickEvent implements PacketListener {
 
         player.getInventory().setContents(Inventories.gameInventory);
         event.setCancelled(true);
+
+        if(board.isFinished())
+            return;
 
         if(packet.getHands().read(0) == EnumWrappers.Hand.OFF_HAND)
             return;
