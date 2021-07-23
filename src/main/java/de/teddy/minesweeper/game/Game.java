@@ -3,6 +3,8 @@ package de.teddy.minesweeper.game;
 import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.util.IsBetween;
 import de.teddy.minesweeper.util.Tuple2;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -77,10 +79,6 @@ public enum Game {
     		stopWatching(p);
     	}
     }
-    
-	private static void distributeViewers(Board b) {
-		
-	}
 
 	public static Game getGame(Player player) {
 		return playerLocation.get(player);
@@ -132,6 +130,11 @@ public enum Game {
         Board b = new Board(this, size, size, bombCount, locations.getA(), p);
         runningGames.put(p, b);
         startWatching(p, b);
+        Bukkit.getOnlinePlayers().forEach(onPlayer -> {
+        	if(gameWatched.get(onPlayer) == null) {
+        		startWatching(onPlayer, b);
+        	}
+        });
         
         p.getInventory().clear();
         p.getInventory().setContents(Inventories.gameInventory);
@@ -161,6 +164,14 @@ public enum Game {
     
     private void finish(Player p){
     	stopGames(p);
+    	Board b = getRunningGame();
+    	if(b != null) {
+	        Bukkit.getOnlinePlayers().forEach(onPlayer -> {
+	        	if(gameWatched.get(onPlayer) == null) {
+	        		startWatching(onPlayer, b);
+	        	}
+	        });
+    	}
         /*Board board = runningGames.remove(p);
 
         if(board == null)
