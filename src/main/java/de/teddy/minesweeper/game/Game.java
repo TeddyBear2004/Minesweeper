@@ -146,34 +146,41 @@ public enum Game {
         }
     }
 
-    public void finishGame(Player p, boolean quit){
+    public static void finishGame(Player p, boolean quit) {
+    	Game.getGame(p).finish(p, quit);
+    }
+    
+    public static void finishGame(Player p) {
+    	finishGame(p, false);
+    }
+    
+    private void finish(Player p, boolean quit){
+    	if(quit) {
+    		if(runningGames.get(p) != null)
+    			finishGame(p, false);
+    		gameWatched.remove(p);
+    		waiting.remove(p);
+    		return;
+    	}
         Board board = runningGames.remove(p);
 
-        if(board == null && !quit)
-            throw new IllegalStateException("The player is not playing any game");
+        if(board == null)
+        	throw new IllegalStateException("The player is not playing any game");
+        
         Board toWatch = getRunningGame();
-        if(board != null){
-            board.finish();
-            if(toWatch == null){
-                board.drawBlancField();
-                board.viewers.forEach(pl -> {
-                    gameWatched.remove(pl);
-                    waiting.add(pl);
-                });
-            }else{
-                board.viewers.forEach(pl -> {
-                    gameWatched.put(pl, toWatch);
-                    toWatch.viewers.add(pl);
-                });
-            }
+        board.finish();
+        if(toWatch == null){
+            board.drawBlancField();
+            board.viewers.forEach(pl -> {
+                gameWatched.remove(pl);
+                waiting.add(pl);
+            });
         }else{
-            gameWatched.remove(p);
-            waiting.remove(p);
+            board.viewers.forEach(pl -> {
+                gameWatched.put(pl, toWatch);
+                toWatch.viewers.add(pl);
+            });
         }
-    }
-
-    public void finishGame(Player p){
-        finishGame(p, false);
     }
 
     public void startViewing(Player player, Board runningGame){
