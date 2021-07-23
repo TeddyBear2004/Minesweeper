@@ -19,19 +19,19 @@ import java.util.Base64;
 import java.util.UUID;
 
 public class Inventories {
-    public static Inventory startCommandInventory;
+    public static final Inventory startCommandInventory;
 
-    public static ItemStack[] gameInventory;
-    public static ItemStack[] viewerInventory;
-    public static ItemStack compass;
-    public static ItemStack book;
-    public static ItemStack hourGlass;
-    public static ItemStack redBanner;
-    public static ItemStack barrier;
-    public static ItemStack reload;
-    public static ItemStack easyMode;
-    public static ItemStack mediumMode;
-    public static ItemStack hardMode;
+    public static final ItemStack[] gameInventory;
+    public static final ItemStack[] viewerInventory;
+    public static final ItemStack compass;
+    public static final ItemStack book;
+    public static final ItemStack hourGlass;
+    public static final ItemStack redBanner;
+    public static final ItemStack barrier;
+    public static final ItemStack reload;
+    public static final ItemStack easyMode;
+    public static final ItemStack mediumMode;
+    public static final ItemStack hardMode;
     private static Method metaSetProfileMethod;
 
     static{
