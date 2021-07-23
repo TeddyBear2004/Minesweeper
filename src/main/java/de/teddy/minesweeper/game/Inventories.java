@@ -7,6 +7,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
@@ -14,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.UUID;
@@ -34,11 +36,13 @@ public class Inventories {
     public static final ItemStack hardMode;
     private static Method metaSetProfileMethod;
 
+    private static final String[] tutorialPages;
+
     static{
         gameInventory = new ItemStack[27];
         viewerInventory = new ItemStack[27];
         startCommandInventory = Bukkit.createInventory(null, 9, ChatColor.AQUA + "Minesweeper");
-
+        //GameInventory
         {
             redBanner = new ItemStack(Material.RED_BANNER);
             ItemMeta bannerMeta = redBanner.getItemMeta();
@@ -63,7 +67,7 @@ public class Inventories {
             gameInventory[2] = reload;
             gameInventory[6] = barrier;
         }
-
+        //ViewerInventory
         {
             compass = new ItemStack(Material.COMPASS);
             ItemMeta compassMeta = compass.getItemMeta();
@@ -71,10 +75,39 @@ public class Inventories {
             compassMeta.setDisplayName(ChatColor.YELLOW + "Sieh anderen Spielern zu");
             compass.setItemMeta(compassMeta);
 
+            tutorialPages = new String[]{
+                    "\u00A72\u00A7nMinesweeper\n" +
+                            "\n" +
+                            "\u00A7rDas Ziel ist es, alle Felder zu enthüllen. Dabei darfst du keine Bombe aktivieren.\n" +
+                            "\n" +
+                            "Die Zahlen zeigen dir, wie viele Bomben in einem 3x3 Feld liegen.",
+                    "\u00A72\u00A7nBenutze:\u00A7r\n" +
+                            "\n" +
+                            "\u00A79\u00A7oLinksklick\u00A7r, um ein Feld zu enthüllen.\n" +
+                            "\n" +
+                            "\u00A7r\u00A79\u00A7oRechtsklick\u00A7r, um eine Flagge zu platzieren.\n" +
+                            "\u00A78->Damit markierst du\n" +
+                            "   die Bomben und\n" +
+                            "   kannst sie nicht\n" +
+                            "   mehr aktivieren.\n" +
+                            "->Entfernen mit\n" +
+                            "   erneutem Rechtklick",
+                    "\u00A79\u00A7oDoppel Linksklick\u00A7r, um\n" +
+                            "alle umliegenden Felder aufzudecken.\n" +
+                            "\u00A78->Nur möglich, wenn im\n" +
+                            "   Umfeld schon\n" +
+                            "   die benötigten\n" +
+                            "   Bomben markiert\n" +
+                            "   wurden."
+            };
+
             book = new ItemStack(Material.WRITTEN_BOOK);
-            ItemMeta bookMeta = book.getItemMeta();
+            BookMeta bookMeta = (BookMeta)book.getItemMeta();
             assert bookMeta != null;
             bookMeta.setDisplayName(ChatColor.YELLOW + "Tutorial");
+            bookMeta.setAuthor("TeddyBear_2004");
+            bookMeta.setTitle("Minesweeper - Tutorial");
+            bookMeta.setPages(tutorialPages);
             book.setItemMeta(bookMeta);
 
             hourGlass = getPlayerHead("http://textures.minecraft.net/texture/b522cac48d1151b0a6eebb72fae26626c394fdc62d5b2064a69266e796a20268");
@@ -86,7 +119,7 @@ public class Inventories {
 
             //viewerInventory[1] = compass;
             viewerInventory[4] = hourGlass;
-            //viewerInventory[7] = book;
+            viewerInventory[7] = book;
         }
 
         {
