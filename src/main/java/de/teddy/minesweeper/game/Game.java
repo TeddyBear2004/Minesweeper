@@ -138,13 +138,12 @@ public enum Game {
         Board b = new Board(this, size, size, bombCount, locations.getA(), p);
         runningGames.put(p, b);
         startWatching(p, b);
-        /*synchronized (waiting) {
+        synchronized (waiting) {
         	while(!waiting.isEmpty()) {
-        		Player wat = waiting.remove(0);
-                gameWatched.put(wat, b);
-                b.viewers.add(wat);
+        		Player wat = waiting.get(0);
+                startWatching(wat, b);
             }
-        }*/
+        }
 
         p.getInventory().clear();
         p.getInventory().setContents(Inventories.gameInventory);
