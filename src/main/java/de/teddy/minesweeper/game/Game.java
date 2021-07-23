@@ -29,30 +29,74 @@ public enum Game {
         }
     }
 
+    private static final Map<Player, Board> gameWatched = new HashMap<>();
+    private static final Map<Player, Board> runningGames = new HashMap<>();
+    private static final List<Player> waiting = new LinkedList<>();
+    
+    private static final Map<Player, Game> playerLocation = new HashMap<>();
+
+    private static void switchToMap(Player p, Game g) {
+    	Game.stopWatching(p);
+    	Board b = runningGames.get(p);
+    	if(b != null) {
+    		Game.finishGame(p);
+    	}
+    	playerLocation.put(p, g);
+        p.teleport(g.getViewingSpawn());
+    }
+    
+    private static void startWatching(Player p, Board b) {
+    	Game cur = playerLocation.get(p);
+    	if(cur != b.map) {
+    		switchToMap(p, b.map);
+    	}
+    	Game.waiting.remove(p);
+    	gameWatched.put(p, b);
+    	b.viewers.add(p);
+    }
+    
+    private static void stopWatching(Player p) {
+    	Board b = gameWatched.remove(p);
+    	if(b != null) {
+    		b.viewers.remove(p);
+    	}
+    }
+    private static void stopWatching(Player p, Board b) {
+    	b.viewers.remove(p);
+    	gameWatched.remove(p);
+    }
+    
+    public static void stopGames(Player p) {
+    	Board b = runningGames.get(p);
+    	if(b != null) {
+    		b.finish();
+    		stopWatching(p, b);
+    		distributeViewers(b);
+    	} else {
+    		stopWatching(p);
+    	}
+    }
+    
+	private static void distributeViewers(Board b) {
+		b.viewers.removeIf(p -> {
+			Game.waiting.add(p);
+			return true;
+		});
+	}
+
+	public static Game getGame(Player player) {
+		return playerLocation.get(player);
+	}
+
+
     private final Tuple2<Location, Location> locations;
     private final int size;
     private final int bombCount;
-
-    private static final Map<Player, Board> gameWatched = new HashMap<>();
-    private static final Map<Player, Board> runningGames = new HashMap<>();
-    private final List<Player> waiting;
-
     Game(Tuple2<Location, Location> location, int size, int bombCount){
-        this.waiting = new LinkedList<>();
-
         this.locations = location;
         this.size = size;
         this.bombCount = bombCount;
     }
-
-	public static Game getGame(Player player) {
-		Board watched = gameWatched.get(player);
-		if (watched != null) {
-			return watched.map;
-		}
-
-		return Arrays.stream(values()).filter(map -> map.waiting.contains(player)).findFirst().orElse(null);
-	}
 
     public static boolean isBlockInsideGameField(Block block){
         return Arrays.stream(values())
@@ -84,32 +128,23 @@ public enum Game {
     public Board getRunningGame(){
         return runningGames.values().stream().filter(b -> b.map == this).findFirst().orElse(null);
     }
-
     
     public void startGame(Player p) {
     	startGame(p, true);
     }
     
     public void startGame(Player p, boolean shouldTeleport) {
-        if(runningGames.get(p) != null) {
-            finishGame(p);
-        }
-        if(gameWatched.get(p) != null) {
-            gameWatched.get(p).viewers.remove(p);
-        }
+    	stopGames(p);
         Board b = new Board(this, size, size, bombCount, locations.getA(), p);
-        for(Game map : Game.values()) {
-        	map.waiting.remove(p);
-        }
         runningGames.put(p, b);
-        gameWatched.put(p, b);
-        synchronized (waiting) {
+        startWatching(p, b);
+        /*synchronized (waiting) {
         	while(!waiting.isEmpty()) {
         		Player wat = waiting.remove(0);
                 gameWatched.put(wat, b);
                 b.viewers.add(wat);
             }
-        }
+        }*/
 
         p.getInventory().clear();
         p.getInventory().setContents(Inventories.gameInventory);
@@ -120,28 +155,17 @@ public enum Game {
         }
     }
     
-    private void stopWatching(Player p, Board b) {
-    	gameWatched.remove(p);
-    	b.viewers.remove(p);
-    }
-    
     public static void finishGame(Player p, boolean quit) {
-    	Game.getGame(p).finish(p, quit);
+    	Game.getGame(p).finish(p);
     }
     
     public static void finishGame(Player p) {
     	finishGame(p, false);
     }
     
-    private void finish(Player p, boolean quit){
-    	if(quit) {
-    		if(runningGames.get(p) != null)
-    			finishGame(p, false);
-    		gameWatched.remove(p);
-    		waiting.remove(p);
-    		return;
-    	}
-        Board board = runningGames.remove(p);
+    private void finish(Player p){
+    	stopGames(p);
+        /*Board board = runningGames.remove(p);
 
         if(board == null)
         	throw new IllegalStateException("The player is not playing any game");
@@ -161,16 +185,14 @@ public enum Game {
             	stopWatching(pl, board);
                 toWatch.viewers.add(pl);
             }
-        }
+        }*/
     }
 
     public void startViewing(Player player, Board runningGame){
-        if(runningGame == null || !runningGames.containsValue(runningGame)){
-            this.waiting.add(player);
-        }else{
-            gameWatched.put(player, runningGame);
-            runningGame.viewers.add(player);
-        }
-        player.teleport(getViewingSpawn());
+    	if(runningGame == null) {
+        	Game.switchToMap(player, Game.MAP10X10);
+    	} else {
+    		Game.startWatching(player, runningGame);
+    	}
     }
 }
