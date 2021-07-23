@@ -3,6 +3,7 @@ package de.teddy.minesweeper.game;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
+import com.comphenix.protocol.wrappers.WrappedParticle;
 import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
 import de.teddy.minesweeper.util.PacketUtil;
@@ -59,7 +60,7 @@ public class Board {
 
     public Board(Game map, int width, int height, int bombCount, Location corner, Player player){
         this.map = map;
-    	this.player = player;
+        this.player = player;
         this.viewers.add(player);
         if(width * height - 9 <= bombCount || width * height <= bombCount)
             throw new IllegalArgumentException("bombCount cannot be bigger than width * height");
@@ -228,7 +229,11 @@ public class Board {
         x = Math.abs(corner.getBlockX() - x);
         y = Math.abs(corner.getBlockZ() - y);
 
-        return board[x][y];
+        try{
+            return board[x][y];
+        }catch(ArrayIndexOutOfBoundsException e){
+            return null;
+        }
     }
 
     public void checkField(int x, int y) throws BombExplodeException{
@@ -302,8 +307,10 @@ public class Board {
         }
         Bukkit.getScheduler().runTaskLater(Minesweeper.INSTANCE, () ->
                 clones.forEach(clone -> {
-                    for(Player p : viewers)
+                    for(Player p : viewers){
                         PacketUtil.sendSoundEffect(p, Sound.ENTITY_GENERIC_EXPLODE, EnumWrappers.SoundCategory.PLAYERS, 0.4f, clone);
+                        PacketUtil.sendParticleEffect(p, clone.clone().add(0.5, 1, 0.5), 10, WrappedParticle.create(Particle.EXPLOSION_NORMAL, null));
+                    }
                 }), 20);
     }
 

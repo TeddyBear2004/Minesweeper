@@ -26,11 +26,11 @@ public class OnInventory implements Listener {
 
             if(event.getWhoClicked() instanceof Player){
                 if(displayName.equals(ChatColor.GREEN + "Einfach")){
-                    Game.MAP10X10.requestGame((Player)event.getWhoClicked());
+                    Game.MAP10X10.startGame((Player)event.getWhoClicked());
                 }else if(displayName.equals(ChatColor.YELLOW + "Mittel")){
-                    Game.MAP18X18.requestGame((Player)event.getWhoClicked());
+                    Game.MAP18X18.startGame((Player)event.getWhoClicked());
                 }else if(displayName.equals(ChatColor.RED + "Schwer")){
-                    Game.MAP24X24.requestGame((Player)event.getWhoClicked());
+                    Game.MAP24X24.startGame((Player)event.getWhoClicked());
                 }
             }
         }

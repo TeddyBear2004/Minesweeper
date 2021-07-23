@@ -46,10 +46,10 @@ public class LeftClickEvent implements PacketListener {
 
         event.setCancelled(true);
 
-        Board board = game.getBoard(player);
+        Board board = Game.getBoard(player);
 
         if(board == null){
-            Board watching = game.getGameWatched(player);
+            Board watching = Game.getGameWatched(player);
 
             if(watching != null){
                 Board.Field field = watching.getField(location.getBlockX(), location.getBlockZ());

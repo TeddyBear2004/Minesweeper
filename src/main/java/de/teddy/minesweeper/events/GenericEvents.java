@@ -54,7 +54,7 @@ public class GenericEvents implements Listener {
         Game game = Game.getGame(event.getPlayer());
         if(game != null){
             game.finishGame(event.getPlayer(), true);
-            Board board = game.getBoard(event.getPlayer());
+            Board board = Game.getBoard(event.getPlayer());
             board.breakGame();
         }
 

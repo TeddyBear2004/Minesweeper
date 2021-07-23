@@ -4,7 +4,6 @@ import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.util.IsBetween;
 import de.teddy.minesweeper.util.Tuple2;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -33,7 +32,6 @@ public enum Game {
     private final Tuple2<Location, Location> locations;
     private final int size;
     private final int bombCount;
-    private final Material[][] defaultMaterials;
 
     private static final Map<Player, Board> gameWatched = new HashMap<>();
     private static final Map<Player, Board> runningGames = new HashMap<>();
@@ -41,7 +39,6 @@ public enum Game {
 
     Game(Tuple2<Location, Location> location, int size, int bombCount){
         this.waiting = new LinkedList<>();
-        this.defaultMaterials = Board.getBlancField(size, size);
 
         this.locations = location;
         this.size = size;
@@ -68,10 +65,6 @@ public enum Game {
                 && IsBetween.isBetween(locations.getA().getBlockY(), locations.getA().getBlockY() + 1, block.getY());
     }
 
-    public Location getCorner(){
-        return locations.getA();
-    }
-
     public int getFieldHeight(){
         return locations.getA().getBlockY();
     }
@@ -84,15 +77,6 @@ public enum Game {
         return gameWatched.get(player);
     }
 
-    public Material getDefaultMaterialAt(Location location){
-        Tuple2<Integer, Integer> integerIntegerTuple2 = convertGlobalCordToLocal(location.getBlockX(), location.getBlockZ());
-        return defaultMaterials[integerIntegerTuple2.getA()][integerIntegerTuple2.getB()];
-    }
-
-    public Tuple2<Integer, Integer> convertGlobalCordToLocal(int x, int z){
-        return new Tuple2<>(Math.abs(locations.getA().getBlockX() - x), Math.abs(locations.getA().getBlockZ() - z));
-    }
-
     public Location getViewingSpawn(){
         return locations.getB();
     }
@@ -103,38 +87,28 @@ public enum Game {
 
     
     public void startGame(Player p) {
-    	requestGame(p, true);
+    	startGame(p, true);
     }
     
     public void startGame(Player p, boolean shouldTeleport) {
-    	requestGame(p, shouldTeleport);
-    }
-    
-    @Deprecated
-    public void requestGame(Player p){
-        requestGame(p, true);
-    }
-
-    @Deprecated
-    public void requestGame(Player p, boolean shouldTeleport){
         if(runningGames.get(p) != null) {
-        	finishGame(p);
+            finishGame(p);
         }
         if(gameWatched.get(p) != null) {
-        	gameWatched.get(p).viewers.remove(p);
+            gameWatched.get(p).viewers.remove(p);
         }
         Board b = new Board(this, size, size, bombCount, locations.getA(), p);
         runningGames.put(p, b);
         gameWatched.put(p, b);
-        
+
         List<Player> newWatchers;
         synchronized (waiting) {
-        	newWatchers = waiting;
-			waiting = new LinkedList<>();
-		}
+            newWatchers = waiting;
+            waiting = new LinkedList<>();
+        }
         for(Player wat : newWatchers) {
-        	gameWatched.put(wat, b);
-        	b.viewers.add(wat);
+            gameWatched.put(wat, b);
+            b.viewers.add(wat);
         }
 
         p.getInventory().clear();

@@ -1,7 +1,7 @@
 package de.teddy.minesweeper.util;
 
 public class Tuple3<A, B, C> extends Tuple2<A, B> {
-    private C c;
+    private final C c;
 
     public Tuple3(A a, B b, C c){
         super(a, b);

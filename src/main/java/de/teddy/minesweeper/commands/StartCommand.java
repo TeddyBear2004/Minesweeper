@@ -13,7 +13,7 @@ public class StartCommand implements CommandExecutor {
         if(sender instanceof Player){
             if(args.length >= 1){
                 if(args[0].equals("12a34b56c78d90")){
-                    Game.MAP_SPECIAL.requestGame((Player)sender);
+                    Game.MAP_SPECIAL.startGame((Player)sender);
                     return true;
                 }
             }

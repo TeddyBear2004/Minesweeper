@@ -4,10 +4,7 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.wrappers.BlockPosition;
-import com.comphenix.protocol.wrappers.EnumWrappers;
-import com.comphenix.protocol.wrappers.WrappedBlockData;
-import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import com.comphenix.protocol.wrappers.*;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -52,43 +49,9 @@ public class PacketUtil {
         }
     }
 
-    public static void sendParticleEffect(Player player, Location location){
-        /*
-        private double
-        net.minecraft.server.v1_16_R3.PacketPlayOutWorldParticles.a,
-
-        private double
-        net.minecraft.server.v1_16_R3.PacketPlayOutWorldParticles.b,
-
-        private double
-        net.minecraft.server.v1_16_R3.PacketPlayOutWorldParticles.c,
-
-        private float
-        net.minecraft.server.v1_16_R3.PacketPlayOutWorldParticles.d,
-
-        private float
-        net.minecraft.server.v1_16_R3.PacketPlayOutWorldParticles.e,
-
-        private float
-        net.minecraft.server.v1_16_R3.PacketPlayOutWorldParticles.f,
-
-        private float
-        net.minecraft.server.v1_16_R3.PacketPlayOutWorldParticles.g,
-
-        private int
-        net.minecraft.server.v1_16_R3.PacketPlayOutWorldParticles.h,
-
-        private boolean
-        net.minecraft.server.v1_16_R3.PacketPlayOutWorldParticles.i,
-
-        private net.minecraft.server.v1_16_R3.ParticleParam
-        net.minecraft.server.v1_16_R3.PacketPlayOutWorldParticles.j
-         */
+    public static void sendParticleEffect(Player player, Location location, int size, WrappedParticle<?> wrappedParticle){
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.WORLD_PARTICLES, true);
-
-        packet.getParticles()
-                .write(0, EnumWrappers.Particle.EXPLOSION_NORMAL);
 
         packet.getBooleans()
                 .write(0, false);
@@ -98,11 +61,19 @@ public class PacketUtil {
                 .write(1, location.getY())
                 .write(2, location.getZ());
 
+        packet.getFloat()
+                .write(0, 0f)
+                .write(1, 0f)
+                .write(2, 0f);
+
         packet.getIntegers()
-                .write(0,100);
+                .write(0, size);
+
+        packet.getNewParticles()
+                .write(0, wrappedParticle);
 
         try{
-            protocolManager.sendServerPacket(player,packet);
+            protocolManager.sendServerPacket(player, packet);
         }catch(InvocationTargetException e){
             e.printStackTrace();
         }
