@@ -31,16 +31,15 @@ public enum Game {
     }
 
     private final Tuple2<Location, Location> locations;
-    private final Map<Player, Board> gameWatched;
-    private final HashMap<Player, Board> runningGames;
-    private final List<Player> waiting;
     private final int size;
     private final int bombCount;
     private final Material[][] defaultMaterials;
 
+    private static final Map<Player, Board> gameWatched = new HashMap<>();
+    private static final Map<Player, Board> runningGames = new HashMap<>();
+    private List<Player> waiting;
+
     Game(Tuple2<Location, Location> location, int size, int bombCount){
-        this.runningGames = new HashMap<>();
-        this.gameWatched = new HashMap<>();
         this.waiting = new LinkedList<>();
         this.defaultMaterials = Board.getBlancField(size, size);
 
@@ -49,15 +48,14 @@ public enum Game {
         this.bombCount = bombCount;
     }
 
-    public static Game getGame(Player player){
-        for(Game map : values()){
-            if(map.gameWatched.containsKey(player)){
-                return map;
-            }
-        }
+	public static Game getGame(Player player) {
+		Board watched = gameWatched.get(player);
+		if (watched != null) {
+			return watched.map;
+		}
 
-        return Arrays.stream(values()).filter(map -> map.waiting.contains(player)).findFirst().orElse(null);
-    }
+		return Arrays.stream(values()).filter(map -> map.waiting.contains(player)).findFirst().orElse(null);
+	}
 
     public static boolean isBlockInsideGameField(Block block){
         return Arrays.stream(values())
@@ -78,11 +76,11 @@ public enum Game {
         return locations.getA().getBlockY();
     }
 
-    public Board getBoard(Player Player){
+    public static Board getBoard(Player Player){
         return runningGames.get(Player);
     }
 
-    public Board getGameWatched(Player player){
+    public static Board getGameWatched(Player player){
         return gameWatched.get(player);
     }
 
@@ -100,26 +98,43 @@ public enum Game {
     }
 
     public Board getRunningGame(){
-        return runningGames.values().stream().findFirst().orElse(null);
+        return runningGames.values().stream().filter(b -> b.map == this).findFirst().orElse(null);
     }
 
+    
+    public void startGame(Player p) {
+    	requestGame(p, true);
+    }
+    
+    public void startGame(Player p, boolean shouldTeleport) {
+    	requestGame(p, shouldTeleport);
+    }
+    
+    @Deprecated
     public void requestGame(Player p){
         requestGame(p, true);
     }
 
+    @Deprecated
     public void requestGame(Player p, boolean shouldTeleport){
+        if(runningGames.get(p) != null) {
+        	finishGame(p);
+        }
+        if(gameWatched.get(p) != null) {
+        	gameWatched.get(p).viewers.remove(p);
+        }
         Board b = new Board(this, size, size, bombCount, locations.getA(), p);
         runningGames.put(p, b);
-        Board prevWatch = gameWatched.get(p);
-        if(prevWatch != null){
-            prevWatch.viewers.remove(p);
-        }
         gameWatched.put(p, b);
-        waiting.remove(p);
-        while(!waiting.isEmpty()){
-            Player rem = waiting.remove(0);
-            b.viewers.add(rem);
-            gameWatched.put(rem, b);
+        
+        List<Player> newWatchers;
+        synchronized (waiting) {
+        	newWatchers = waiting;
+			waiting = new LinkedList<>();
+		}
+        for(Player wat : newWatchers) {
+        	gameWatched.put(wat, b);
+        	b.viewers.add(wat);
         }
 
         p.getInventory().clear();
