@@ -52,7 +52,7 @@ public class Board {
     private final Field[][] board;
     private final List<Point2D> bombList;
     private final Player player;
-    List<Player> viewers = new LinkedList<>();
+    final List<Player> viewers = new LinkedList<>();
     private long started;
     private boolean isGenerated;
     private boolean isFinished;
