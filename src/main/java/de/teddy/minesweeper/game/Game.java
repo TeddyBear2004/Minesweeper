@@ -31,7 +31,7 @@ public enum Game {
 
     private static final Map<Player, Board> gameWatched = new HashMap<>();
     private static final Map<Player, Board> runningGames = new HashMap<>();
-    private static final List<Player> waiting = new LinkedList<>();
+    //private static final List<Player> waiting = new LinkedList<>();
     
     private static final Map<Player, Game> playerLocation = new HashMap<>();
 
@@ -41,9 +41,9 @@ public enum Game {
     	if(b != null) {
     		Game.finishGame(p);
     	}
-    	if(playerLocation.put(p, g) == null) {
-    		Game.waiting.add(p);
-    	}
+    	playerLocation.put(p, g);
+        p.setAllowFlight(true);
+        p.setFlying(true);
         p.teleport(g.getViewingSpawn());
     }
     
@@ -52,7 +52,6 @@ public enum Game {
     	if(cur != b.map) {
     		switchToMap(p, b.map);
     	}
-    	Game.waiting.remove(p);
     	gameWatched.put(p, b);
     	b.viewers.add(p);
     }
@@ -73,17 +72,14 @@ public enum Game {
     	if(b != null) {
     		b.finish();
     		stopWatching(p, b);
-    		distributeViewers(b);
+    		b.viewers.clear();
     	} else {
     		stopWatching(p);
     	}
     }
     
 	private static void distributeViewers(Board b) {
-		b.viewers.removeIf(p -> {
-			Game.waiting.add(p);
-			return true;
-		});
+		
 	}
 
 	public static Game getGame(Player player) {
@@ -132,28 +128,25 @@ public enum Game {
     }
     
     public void startGame(Player p) {
-    	startGame(p, true);
-    }
-    
-    public void startGame(Player p, boolean shouldTeleport) {
     	stopGames(p);
         Board b = new Board(this, size, size, bombCount, locations.getA(), p);
         runningGames.put(p, b);
         startWatching(p, b);
-        synchronized (waiting) {
+        
+        
+        p.getInventory().clear();
+        p.getInventory().setContents(Inventories.gameInventory);
+    }
+    
+    @Deprecated
+    public void startGame(Player p, boolean shouldTeleport) {
+        /*synchronized (waiting) {
         	while(!waiting.isEmpty()) {
         		Player wat = waiting.get(0);
                 startWatching(wat, b);
             }
-        }
-
-        p.getInventory().clear();
-        p.getInventory().setContents(Inventories.gameInventory);
-        p.setAllowFlight(true);
-        if(shouldTeleport){
-            p.setFlying(true);
-            p.teleport(locations.getB());
-        }
+        }*/
+    	startGame(p);
     }
     
     public static void finishGame(Player p, boolean quit) {
