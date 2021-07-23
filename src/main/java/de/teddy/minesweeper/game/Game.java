@@ -41,7 +41,9 @@ public enum Game {
     	if(b != null) {
     		Game.finishGame(p);
     	}
-    	playerLocation.put(p, g);
+    	if(playerLocation.put(p, g) == null) {
+    		Game.waiting.add(p);
+    	}
         p.teleport(g.getViewingSpawn());
     }
     
