@@ -133,9 +133,11 @@ public enum Game {
         runningGames.put(p, b);
         startWatching(p, b);
         
-        
         p.getInventory().clear();
         p.getInventory().setContents(Inventories.gameInventory);
+        p.setAllowFlight(true);
+        p.setFlying(true);
+        p.teleport(this.getViewingSpawn());
     }
     
     @Deprecated
