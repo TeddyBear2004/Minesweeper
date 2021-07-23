@@ -128,6 +128,17 @@ public enum Game {
     }
     
     public void startGame(Player p) {
+    	startGame(p, true);
+    }
+    
+    @Deprecated
+    public void startGame(Player p, boolean shouldTeleport) {
+        /*synchronized (waiting) {
+        	while(!waiting.isEmpty()) {
+        		Player wat = waiting.get(0);
+                startWatching(wat, b);
+            }
+        }*/
     	stopGames(p);
         Board b = new Board(this, size, size, bombCount, locations.getA(), p);
         runningGames.put(p, b);
@@ -141,19 +152,10 @@ public enum Game {
         p.getInventory().clear();
         p.getInventory().setContents(Inventories.gameInventory);
         p.setAllowFlight(true);
-        p.setFlying(true);
-        p.teleport(this.getViewingSpawn());
-    }
-    
-    @Deprecated
-    public void startGame(Player p, boolean shouldTeleport) {
-        /*synchronized (waiting) {
-        	while(!waiting.isEmpty()) {
-        		Player wat = waiting.get(0);
-                startWatching(wat, b);
-            }
-        }*/
-    	startGame(p);
+        if(shouldTeleport) {
+        	p.setFlying(true);
+        	p.teleport(this.getViewingSpawn());
+        }
     }
     
     public static void finishGame(Player p, boolean quit) {
