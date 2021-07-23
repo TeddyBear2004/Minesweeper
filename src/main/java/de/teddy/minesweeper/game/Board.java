@@ -1,6 +1,7 @@
 package de.teddy.minesweeper.game;
 
 import com.comphenix.protocol.wrappers.BlockPosition;
+import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
 import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
@@ -289,16 +290,18 @@ public class Board {
 
 
             Bukkit.getScheduler().runTaskLater(Minesweeper.INSTANCE, () -> {
-                for(Player p : viewers)
+                for(Player p : viewers){
                     PacketUtil.sendBlockChange(p, new BlockPosition(clone.toVector()), WrappedBlockData.createData(Material.COAL_BLOCK));
-                Objects.requireNonNull(clone.getWorld()).playSound(clone, Sound.BLOCK_STONE_PLACE, 0.5F, 0);//todo send only to client
+                    PacketUtil.sendSoundEffect(p, Sound.BLOCK_STONE_PLACE, EnumWrappers.SoundCategory.PLAYERS, 1f, clone);
+                }
             }, (long)(20 * explodeDuration));
 
             explodeDuration *= 0.7;
         }
         Bukkit.getScheduler().runTaskLater(Minesweeper.INSTANCE, () ->
                 clones.forEach(clone -> {
-                    PacketUtil.sendExplosion(player, clone.getX(), clone.getY(), clone.getZ(), 1);
+                    for(Player p : viewers)
+                        PacketUtil.sendSoundEffect(p, Sound.ENTITY_GENERIC_EXPLODE, EnumWrappers.SoundCategory.PLAYERS, 0.4f, clone);
                 }), 20);
     }
 
