@@ -133,7 +133,7 @@ public enum Game {
         runningGames.put(p, b);
         startWatching(p, b);
         Bukkit.getOnlinePlayers().forEach(onPlayer -> {
-        	if(gameWatched.get(onPlayer) == null) {
+        	if(gameWatched.get(onPlayer) == null && b.map == playerLocation.get(onPlayer)) {
         		startWatching(onPlayer, b);
         	}
         });
@@ -169,7 +169,7 @@ public enum Game {
     	Board b = getRunningGame();
     	if(b != null) {
 	        Bukkit.getOnlinePlayers().forEach(onPlayer -> {
-	        	if(gameWatched.get(onPlayer) == null) {
+	        	if(gameWatched.get(onPlayer) == null && b.map == playerLocation.get(onPlayer)) {
 	        		startWatching(onPlayer, b);
 	        	}
 	        });
