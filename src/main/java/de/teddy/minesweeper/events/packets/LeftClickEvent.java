@@ -60,9 +60,6 @@ public class LeftClickEvent implements PacketListener {
             return;
         }
 
-        if(board.isFinished())
-            return;
-
         Board.Field field = board.getField(location.getBlockX(), location.getBlockZ());
 
         EnumWrappers.PlayerDigType digType = packet.getPlayerDigTypes().read(0);
@@ -72,6 +69,9 @@ public class LeftClickEvent implements PacketListener {
             PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(materials[game.getFieldHeight() - location.getBlockY()]));
             return;
         }
+
+        if(board.isFinished())
+            return;
 
         if(digType != EnumWrappers.PlayerDigType.START_DESTROY_BLOCK)
             return;
