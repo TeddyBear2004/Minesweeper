@@ -268,13 +268,14 @@ public class Board {
         player.sendMessage("Du hast das Spiel gewonnen!");
         player.sendMessage("Größe: " + width + "x" + height + " (" + bombCount + " Bomben)");
         player.sendMessage("Benötigte Zeit: " + getActualTimeNeededString());
+
+        player.sendTitle(ChatColor.DARK_GREEN + "Du hast gewonnen", ChatColor.GREEN + "Benötigte Zeit: " + getActualTimeNeededString(), 10, 70, 20);
     }
 
     public void checkIfWon(){
         if(Arrays.stream(this.board).flatMap(Arrays::stream).anyMatch(field -> field.isCovered() && !field.isBomb())){
             return;
         }
-
         win();
     }
 
@@ -285,12 +286,10 @@ public class Board {
     public void lose(){
         isFinished = true;
         double explodeDuration = 0.5d;
-        List<Location> clones = new ArrayList<>();
 
         for(Point2D point2D : this.bombList){
             Location clone = this.corner.clone();
 
-            clones.add(clone);
             clone.setX(this.corner.getBlockX() + point2D.getX());
             clone.setZ(this.corner.getBlockZ() + point2D.getY());
 
