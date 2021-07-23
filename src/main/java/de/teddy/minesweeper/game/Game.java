@@ -98,6 +98,9 @@ public enum Game {
             gameWatched.get(p).viewers.remove(p);
         }
         Board b = new Board(this, size, size, bombCount, locations.getA(), p);
+        for(Game map : Game.values()) {
+        	map.waiting.remove(p);
+        }
         runningGames.put(p, b);
         gameWatched.put(p, b);
         synchronized (waiting) {
