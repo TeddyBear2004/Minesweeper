@@ -51,7 +51,9 @@ public class RightClickEvent implements PacketListener {
                 Board.Field field = watching.getField(location.getBlockX(), location.getBlockZ());
                 Material[] materials = new Material[]{field.getActualMaterial(), field.getMark()};
 
-                PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(materials[location.getBlockY() - watching.getHeight()]));
+                try{
+                    PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(materials[location.getBlockY() - watching.getHeight()]));
+                }catch(ArrayIndexOutOfBoundsException ignore){}
                 player.getInventory().setContents(Inventories.viewerInventory);
                 event.setCancelled(true);
             }

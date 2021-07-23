@@ -270,6 +270,7 @@ public class Board {
         player.sendMessage("Benötigte Zeit: " + getActualTimeNeededString());
 
         player.sendTitle(ChatColor.DARK_GREEN + "Du hast gewonnen", ChatColor.GREEN + "Benötigte Zeit: " + getActualTimeNeededString(), 10, 70, 20);
+        PacketUtil.sendSoundEffect(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 1f, player.getLocation());
     }
 
     public void checkIfWon(){
@@ -297,7 +298,7 @@ public class Board {
             Bukkit.getScheduler().runTaskLater(Minesweeper.INSTANCE, () -> {
                 for(Player p : viewers){
                     PacketUtil.sendBlockChange(p, new BlockPosition(clone.toVector()), WrappedBlockData.createData(Material.COAL_BLOCK));
-                    PacketUtil.sendSoundEffect(p, Sound.BLOCK_STONE_PLACE, EnumWrappers.SoundCategory.PLAYERS, 1f, clone);
+                    PacketUtil.sendSoundEffect(p, Sound.BLOCK_STONE_PLACE, 1f, clone);
                 }
             }, (long)(20 * explodeDuration));
 
@@ -306,7 +307,7 @@ public class Board {
         Bukkit.getScheduler().runTaskLater(Minesweeper.INSTANCE, () -> {
 
             for(Player p : viewers){
-                PacketUtil.sendSoundEffect(p, Sound.ENTITY_GENERIC_EXPLODE, EnumWrappers.SoundCategory.PLAYERS, 0.4f, p.getLocation());
+                PacketUtil.sendSoundEffect(p, Sound.ENTITY_GENERIC_EXPLODE, 0.4f, p.getLocation());
                 PacketUtil.sendParticleEffect(p, corner.clone().add(((double)width) / 2, 1, (double)height / 2), 5, WrappedParticle.create(Particle.EXPLOSION_HUGE, null), (float)width / 2, (float)height / 2);
             }
         }, 20);

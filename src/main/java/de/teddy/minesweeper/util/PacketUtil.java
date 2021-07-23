@@ -59,29 +59,8 @@ public class PacketUtil {
 
     }
 
-    public static void sendSoundEffect(Player player, Sound sound, EnumWrappers.SoundCategory soundCategory, float volume, Location blockPosition){
-        ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
-        PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.NAMED_SOUND_EFFECT, true);
-
-        packet.getSoundEffects()
-                .write(0, sound);
-
-        packet.getSoundCategories()
-                .write(0, soundCategory);
-
-        packet.getIntegers()
-                .write(0, blockPosition.getBlockX() * 8)
-                .write(1, blockPosition.getBlockY() * 8)
-                .write(2, blockPosition.getBlockZ() * 8);
-
-        packet.getFloat()
-                .write(0, volume);
-
-        try{
-            protocolManager.sendServerPacket(player, packet);
-        }catch(InvocationTargetException e){
-            e.printStackTrace();
-        }
+    public static void sendSoundEffect(Player player, Sound sound, float volume, Location blockPosition){
+        player.playSound(blockPosition, sound,volume,1f);
     }
 
     public static void sendBlockChange(Player player, BlockPosition blockPosition, WrappedBlockData wrappedBlockData){
