@@ -2,7 +2,6 @@ package de.teddy.minesweeper;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
-import de.teddy.minesweeper.commands.ScoreTest;
 import de.teddy.minesweeper.commands.StartCommand;
 import de.teddy.minesweeper.events.GenericEvents;
 import de.teddy.minesweeper.events.GenericRightClickEvent;
@@ -27,7 +26,6 @@ public final class Minesweeper extends JavaPlugin {
 
         WORLD = new WorldCreator("MineSweeper").createWorld();
         Objects.requireNonNull(this.getCommand("start")).setExecutor(new StartCommand());
-        Objects.requireNonNull(this.getCommand("score")).setExecutor(new ScoreTest());
 
         getServer().getPluginManager().registerEvents(new GenericEvents(), this);
         getServer().getPluginManager().registerEvents(new OnInventory(), this);
