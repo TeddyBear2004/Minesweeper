@@ -36,29 +36,29 @@ public class GenericEvents implements Listener {
         event.getPlayer().getInventory().setContents(Inventories.viewerInventory);
         event.getPlayer().setAllowFlight(true);
         boolean watching = false;
-        for(Game map : Game.values()) {
-        	Board runningGame = map.getRunningGame();
-        	if(runningGame != null) {
-        		map.startViewing(event.getPlayer(), runningGame);
-        		watching = true;
-        		break;
-        	}
+        for(Game map : Game.values()){
+            Board runningGame = map.getRunningGame();
+            if(runningGame != null){
+                map.startViewing(event.getPlayer(), runningGame);
+                watching = true;
+                break;
+            }
         }
-        if(!watching) {
-        	Game.MAP10X10.startViewing(event.getPlayer(), null);
+        if(!watching){
+            Game.MAP10X10.startViewing(event.getPlayer(), null);
         }
     }
 
     @EventHandler
     public void onPlayerQuitEvent(PlayerQuitEvent event){
+        event.setQuitMessage("");
         Game game = Game.getGame(event.getPlayer());
         if(game != null){
             Game.finishGame(event.getPlayer(), true);
             Board board = Game.getBoard(event.getPlayer());
-            board.breakGame();
+            if(board != null)
+                board.breakGame();
         }
-
-        event.setQuitMessage("");
     }
 
     @EventHandler
@@ -76,8 +76,8 @@ public class GenericEvents implements Listener {
     @EventHandler
     public void onInventoryInteractEvent(InventoryInteractEvent event){
         if(event.getWhoClicked() instanceof Player)
-        if(!event.getWhoClicked().isOp() || Game.getGame((Player)event.getWhoClicked()) != null)
-            event.setCancelled(true);
+            if(!event.getWhoClicked().isOp() || Game.getGame((Player)event.getWhoClicked()) != null)
+                event.setCancelled(true);
     }
 
     @EventHandler
