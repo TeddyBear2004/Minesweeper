@@ -55,7 +55,7 @@ public class Board {
     private long started;
     private boolean isGenerated;
     private boolean isFinished;
-    private final Game map;
+    public final Game map;
 
     public Board(Game map, int width, int height, int bombCount, Location corner, Player player){
         this.map = map;
