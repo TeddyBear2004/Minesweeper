@@ -79,6 +79,7 @@ public enum Game {
     	} else {
     		stopWatching(p);
     	}
+    	runningGames.remove(p);
     }
 
 	public static Game getGame(Player player) {
