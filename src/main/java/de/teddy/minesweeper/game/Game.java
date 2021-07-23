@@ -11,16 +11,16 @@ import org.bukkit.entity.Player;
 import java.util.*;
 
 public enum Game {
-    MAP10X10(new Tuple2<>(new Location(Minesweeper.WORLD, 53, 17, -328), new Location(Minesweeper.WORLD, 58, 20, -315.5)),
+    MAP10X10(new Tuple2<>(new Location(Minesweeper.WORLD, 53, 17, -331), new Location(Minesweeper.WORLD, 58, 20, -318.5)),
             10, 10),
 
     MAP18X18(new Tuple2<>(new Location(Minesweeper.WORLD, 49, 16, -198), new Location(Minesweeper.WORLD, 57, 20, -177.5)),
             18, 40),
 
-    MAP24X24(new Tuple2<>(new Location(Minesweeper.WORLD, 47, 15, -67), new Location(Minesweeper.WORLD, 58, 20, -40.5)),
+    MAP24X24(new Tuple2<>(new Location(Minesweeper.WORLD, 49, 14, -63), new Location(Minesweeper.WORLD, 61, 18, -37.5)),
             24, 99),
 
-    MAP_SPECIAL(new Tuple2<>(new Location(Minesweeper.WORLD, 47, 15, -67), new Location(Minesweeper.WORLD, 58, 20, -40.5)),
+    MAP_SPECIAL(new Tuple2<>(new Location(Minesweeper.WORLD, 49, 14, -63), new Location(Minesweeper.WORLD, 61, 18, -37.5)),
             24, 70);
 
     static{
