@@ -72,6 +72,7 @@ public enum Game {
     public static void stopGames(Player p) {
     	Board b = runningGames.get(p);
     	if(b != null) {
+            b.drawBlancField();
     		b.finish();
     		stopWatching(p, b);
     		b.viewers.clear();
