@@ -35,7 +35,7 @@ public enum Game {
 
     private static final Map<Player, Board> gameWatched = new HashMap<>();
     private static final Map<Player, Board> runningGames = new HashMap<>();
-    private List<Player> waiting;
+    private final List<Player> waiting;
 
     Game(Tuple2<Location, Location> location, int size, int bombCount){
         this.waiting = new LinkedList<>();
@@ -100,15 +100,12 @@ public enum Game {
         Board b = new Board(this, size, size, bombCount, locations.getA(), p);
         runningGames.put(p, b);
         gameWatched.put(p, b);
-
-        List<Player> newWatchers;
         synchronized (waiting) {
-            newWatchers = waiting;
-            waiting = new LinkedList<>();
-        }
-        for(Player wat : newWatchers) {
-            gameWatched.put(wat, b);
-            b.viewers.add(wat);
+        	while(!waiting.isEmpty()) {
+        		Player wat = waiting.remove(0);
+                gameWatched.put(wat, b);
+                b.viewers.add(wat);
+            }
         }
 
         p.getInventory().clear();
