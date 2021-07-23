@@ -8,6 +8,7 @@ import de.teddy.minesweeper.events.GenericRightClickEvent;
 import de.teddy.minesweeper.events.OnInventory;
 import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.events.packets.RightClickEvent;
+import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.Inventories;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -31,7 +32,10 @@ public final class Minesweeper extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new OnInventory(), this);
         getServer().getPluginManager().registerEvents(new GenericRightClickEvent(), this);
 
-        Bukkit.getOnlinePlayers().forEach(player -> player.getInventory().setContents(Inventories.viewerInventory));
+        Bukkit.getOnlinePlayers().forEach(player -> {
+        	player.getInventory().setContents(Inventories.viewerInventory);
+        	Game.MAP10X10.startViewing(player, null);
+        });
 
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         protocolManager.addPacketListener(new RightClickEvent());
