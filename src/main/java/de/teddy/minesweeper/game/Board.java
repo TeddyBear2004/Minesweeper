@@ -305,13 +305,13 @@ public class Board {
 
             explodeDuration *= 0.7;
         }
-        Bukkit.getScheduler().runTaskLater(Minesweeper.INSTANCE, () ->
-                clones.forEach(clone -> {
-                    for(Player p : viewers){
-                        PacketUtil.sendSoundEffect(p, Sound.ENTITY_GENERIC_EXPLODE, EnumWrappers.SoundCategory.PLAYERS, 0.4f, clone);
-                        PacketUtil.sendParticleEffect(p, clone.clone().add(0.5, 1, 0.5), 10, WrappedParticle.create(Particle.EXPLOSION_NORMAL, null));
-                    }
-                }), 20);
+        Bukkit.getScheduler().runTaskLater(Minesweeper.INSTANCE, () -> {
+
+            for(Player p : viewers){
+                PacketUtil.sendSoundEffect(p, Sound.ENTITY_GENERIC_EXPLODE, EnumWrappers.SoundCategory.PLAYERS, 0.4f, p.getLocation());
+                PacketUtil.sendParticleEffect(p, corner.clone().add(((double)width) / 2, 1, (double)height / 2), 5, WrappedParticle.create(Particle.EXPLOSION_HUGE, null), (float)width / 2, (float)height / 2);
+            }
+        }, 20);
     }
 
     private void generateBoard(int x, int y){

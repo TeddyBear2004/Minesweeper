@@ -28,28 +28,7 @@ public class PacketUtil {
         }
     }
 
-    public static void sendExplosion(Player player, double x, double y, double z, float strength){
-        ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
-        PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.EXPLOSION, true);
-
-        packet.getDoubles()
-                .write(0, x)
-                .write(1, y)
-                .write(2, z);
-        packet.getFloat()
-                .write(0, strength)
-                .write(1, (float)0)
-                .write(1, (float)0)
-                .write(1, (float)0);
-
-        try{
-            protocolManager.sendServerPacket(player, packet);
-        }catch(InvocationTargetException e){
-            e.printStackTrace();
-        }
-    }
-
-    public static void sendParticleEffect(Player player, Location location, int size, WrappedParticle<?> wrappedParticle){
+    public static void sendParticleEffect(Player player, Location location, int size, WrappedParticle<?> wrappedParticle, float xDifference, float zDifference){
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.WORLD_PARTICLES, true);
 
@@ -62,9 +41,9 @@ public class PacketUtil {
                 .write(2, location.getZ());
 
         packet.getFloat()
-                .write(0, 0f)
+                .write(0, xDifference)
                 .write(1, 0f)
-                .write(2, 0f);
+                .write(2, zDifference);
 
         packet.getIntegers()
                 .write(0, size);
