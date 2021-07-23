@@ -62,7 +62,16 @@ public enum Game {
     public static boolean isBlockInsideGameField(Block block){
         return Arrays.stream(values())
                 .anyMatch(game -> IsBetween.isBetween2D(game.locations.getA(), game.size, game.size, block)
-                        && (game.locations.getA().getBlockY() == block.getY() || game.locations.getA().getBlockY() + 1 == block.getY()));
+                        && IsBetween.isBetween(game.locations.getA().getBlockY(), game.locations.getA().getBlockY() + 1, block.getY()));
+    }
+
+    public boolean isBlockInsideGame(Block block){
+        return IsBetween.isBetween2D(locations.getA(), size, size, block)
+                && IsBetween.isBetween(locations.getA().getBlockY(), locations.getA().getBlockY() + 1, block.getY());
+    }
+
+    public Location getCorner(){
+        return locations.getA();
     }
 
     public int getFieldHeight(){
@@ -102,8 +111,8 @@ public enum Game {
         Board b = new Board(size, size, bombCount, locations.getA(), p);
         runningGames.put(p, b);
         Board prevWatch = gameWatched.get(p);
-        if(prevWatch != null) {
-        	prevWatch.viewers.remove(p);
+        if(prevWatch != null){
+            prevWatch.viewers.remove(p);
         }
         gameWatched.put(p, b);
         waiting.remove(p);
@@ -126,32 +135,32 @@ public enum Game {
         Board board = runningGames.remove(p);
 
         if(board == null && !quit)
-        	throw new IllegalStateException("The player is not playing any game");
+            throw new IllegalStateException("The player is not playing any game");
         Board toWatch = getRunningGame();
-        if(board != null) {
+        if(board != null){
             board.finish();
-        	if(toWatch == null){
-            	board.drawBlancField();
-            	board.viewers.forEach(pl -> {
-                	gameWatched.remove(pl);
-                	waiting.add(pl);
-            	});
-        	}else{
-            	board.viewers.forEach(pl -> {
-                	gameWatched.put(pl, toWatch);
-                	toWatch.viewers.add(pl);
-            	});
-        	}
-        } else {
-        	gameWatched.remove(p);
-        	waiting.remove(p);
+            if(toWatch == null){
+                board.drawBlancField();
+                board.viewers.forEach(pl -> {
+                    gameWatched.remove(pl);
+                    waiting.add(pl);
+                });
+            }else{
+                board.viewers.forEach(pl -> {
+                    gameWatched.put(pl, toWatch);
+                    toWatch.viewers.add(pl);
+                });
+            }
+        }else{
+            gameWatched.remove(p);
+            waiting.remove(p);
         }
     }
-    
-    public void finishGame(Player p) {
-    	finishGame(p, false);
+
+    public void finishGame(Player p){
+        finishGame(p, false);
     }
-    
+
     public void startViewing(Player player, Board runningGame){
         if(runningGame == null || !runningGames.containsValue(runningGame)){
             this.waiting.add(player);

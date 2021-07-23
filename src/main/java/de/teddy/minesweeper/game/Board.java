@@ -255,7 +255,7 @@ public class Board {
         return dateTimeFormatter.format(new Date(getActualTimeNeeded()));
     }
 
-    public void win(Player player){
+    public void win(){
         isFinished = true;
 
         player.sendMessage("Du hast das Spiel gewonnen!");
@@ -263,12 +263,12 @@ public class Board {
         player.sendMessage("Benötigte Zeit: " + getActualTimeNeededString());
     }
 
-    public void checkIfWon(Player player){
+    public void checkIfWon(){
         if(Arrays.stream(this.board).flatMap(Arrays::stream).anyMatch(field -> field.isCovered() && !field.isBomb())){
             return;
         }
 
-        win(player);
+        win();
     }
 
     public void breakGame(){
@@ -298,8 +298,7 @@ public class Board {
         }
         Bukkit.getScheduler().runTaskLater(Minesweeper.INSTANCE, () ->
                 clones.forEach(clone -> {
-                    Objects.requireNonNull(clone.getWorld()).spawnParticle(Particle.EXPLOSION_NORMAL, clone, 100);
-                    Objects.requireNonNull(clone.getWorld()).playSound(clone, Sound.ENTITY_GENERIC_EXPLODE, 0.25F, 0);
+                    PacketUtil.sendExplosion(player, clone.getX(), clone.getY(), clone.getZ(), 1);
                 }), 20);
     }
 

@@ -30,28 +30,22 @@ public class PacketUtil {
         }
     }
 
-    public static void sendSoundEffect(Player player, Sound sound, EnumWrappers.SoundCategory soundCategory, BlockPosition blockPosition, float volume, float pitch){
+    public static void sendExplosion(Player player, double x, double y, double z, float strength){
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
-        PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.NAMED_SOUND_EFFECT, true);
+        PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.EXPLOSION, true);
 
-        packet.getSoundEffects()
-                .write(0, sound);
-
-        packet.getIntegers()
-                .write(0,blockPosition.getX())
-                .write(1,blockPosition.getY())
-                .write(2,blockPosition.getZ());
-
+        packet.getDoubles()
+                .write(0, x)
+                .write(1, y)
+                .write(2, z);
         packet.getFloat()
-                .write(0, volume);
-        packet.getFloat()
-                .write(1, pitch);
-
-        packet.getSoundCategories()
-                .write(0, soundCategory);
+                .write(0, strength)
+                .write(1, (float)0)
+                .write(1, (float)0)
+                .write(1, (float)0);
 
         try{
-            protocolManager.sendServerPacket(player, packet);
+            protocolManager.sendServerPacket(player,packet);
         }catch(InvocationTargetException e){
             e.printStackTrace();
         }
