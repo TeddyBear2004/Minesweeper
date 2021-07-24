@@ -134,8 +134,8 @@ public enum Game {
         }*/
     	stopGames(p);
         Board b = new Board(this, size, size, bombCount, locations.getA(), p);
-        runningGames.put(p, b);
         startWatching(p, b);
+        runningGames.put(p, b);
         Bukkit.getOnlinePlayers().forEach(onPlayer -> {
         	if(gameWatched.get(onPlayer) == null && b.map == playerLocation.get(onPlayer)) {
         		startWatching(onPlayer, b);
