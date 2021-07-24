@@ -87,16 +87,6 @@ public class Board {
         return Math.abs(x + y) % 2 == 0;
     }
 
-    public static Material[][] getBlancField(int width, int height){
-        Material[][] board = new Material[width][height];
-
-        for(int i = 0; i < board.length; i++)
-            for(int j = 0; j < board[i].length; j++)
-                board[i][j] = isLightField(i, j) ? LIGHT_DEFAULT : DARK_DEFAULT;
-
-        return board;
-    }
-
     public void finish(){
         isFinished = true;
     }
