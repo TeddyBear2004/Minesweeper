@@ -109,10 +109,6 @@ public class Board {
         return board;
     }
 
-    public int getHeight(){
-        return height;
-    }
-
     public void drawBlancField(){
         Map<Tuple3<Integer, Integer, Integer>, Tuple2<List<Short>, List<WrappedBlockData>>> subChunkMap = new HashMap<>();
 
