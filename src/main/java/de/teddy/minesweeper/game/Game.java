@@ -96,9 +96,9 @@ public enum Game {
         this.bombCount = bombCount;
     }
 
-    public boolean isBlockInsideGame(Block block){
-        return IsBetween.isBetween2D(locations.getA(), size, size, block)
-                && IsBetween.isBetween(locations.getA().getBlockY(), locations.getA().getBlockY() + 1, block.getY());
+    public boolean isBlockOutsideGame(Block block){
+        return !IsBetween.isBetween2D(locations.getA(), size, size, block)
+                || !IsBetween.isBetween(locations.getA().getBlockY(), locations.getA().getBlockY() + 1, block.getY());
     }
 
     public int getFieldHeight(){

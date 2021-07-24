@@ -41,7 +41,7 @@ public class LeftClickEvent implements PacketListener {
         BlockPosition blockPosition = packet.getBlockPositionModifier().read(0);
         Location location = blockPosition.toLocation(player.getWorld());
 
-        if(!game.isBlockInsideGame(location.getBlock()))
+        if(game.isBlockOutsideGame(location.getBlock()))
             return;
 
         event.setCancelled(true);

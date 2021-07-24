@@ -39,7 +39,7 @@ public class RightClickEvent implements PacketListener {
         BlockPosition blockPosition = packet.getMovingBlockPositions().read(0).getBlockPosition();
         Location location = blockPosition.toLocation(player.getWorld());
 
-        if(!game.isBlockInsideGame(location.getBlock()))
+        if(game.isBlockOutsideGame(location.getBlock()))
             return;
 
         Board board = Game.getBoard(player);
