@@ -96,12 +96,6 @@ public enum Game {
         this.bombCount = bombCount;
     }
 
-    public static boolean isBlockInsideGameField(Block block){
-        return Arrays.stream(values())
-                .anyMatch(game -> IsBetween.isBetween2D(game.locations.getA(), game.size, game.size, block)
-                        && IsBetween.isBetween(game.locations.getA().getBlockY(), game.locations.getA().getBlockY() + 1, block.getY()));
-    }
-
     public boolean isBlockInsideGame(Block block){
         return IsBetween.isBetween2D(locations.getA(), size, size, block)
                 && IsBetween.isBetween(locations.getA().getBlockY(), locations.getA().getBlockY() + 1, block.getY());
