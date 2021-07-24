@@ -125,7 +125,6 @@ public enum Game {
     	startGame(p, true);
     }
     
-    @Deprecated
     public void startGame(Player p, boolean shouldTeleport) {
         /*synchronized (waiting) {
         	while(!waiting.isEmpty()) {
