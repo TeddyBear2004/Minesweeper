@@ -29,7 +29,7 @@ public class PacketUtil {
         }
     }
 
-    public static void sendParticleEffect(Player player, Location location, int size, Particle particle, float xDifference, float zDifference, int count){
+    public static void sendParticleEffect(Player player, Location location, Particle particle, float xDifference, float zDifference, int count){
         player.spawnParticle(particle, location.getX(), location.getY(), location.getZ(), count, xDifference, 0, zDifference);
     }
 

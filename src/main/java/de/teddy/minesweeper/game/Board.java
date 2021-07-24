@@ -270,7 +270,7 @@ public class Board {
         player.sendMessage("Benötigte Zeit: " + getActualTimeNeededString());
 
         player.sendTitle(ChatColor.DARK_GREEN + "Du hast gewonnen", ChatColor.GREEN + "Benötigte Zeit: " + getActualTimeNeededString(), 10, 70, 20);
-        PacketUtil.sendSoundEffect(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 1f, player.getLocation());
+        PacketUtil.sendSoundEffect(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, .5f, player.getLocation());
     }
 
     public void checkIfWon(){
@@ -310,10 +310,9 @@ public class Board {
                 PacketUtil.sendSoundEffect(p, Sound.ENTITY_GENERIC_EXPLODE, 0.4f, p.getLocation());
                 PacketUtil.sendParticleEffect(p,
                         corner.clone().add(((double)width) / 2, 1, (double)height / 2),
-                        5,
-                        Particle.EXPLOSION_HUGE,
-                        (float)width / 2,
-                        (float)height / 2,
+                        Particle.EXPLOSION_LARGE,
+                        (float)width / 5,
+                        (float)height / 5,
                         width * height);
             }
         }, 20);
