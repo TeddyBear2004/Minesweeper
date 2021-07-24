@@ -109,14 +109,6 @@ public class Board {
         return board;
     }
 
-    public Location getCorner(){
-        return corner;
-    }
-
-    public int getWidth(){
-        return width;
-    }
-
     public int getHeight(){
         return height;
     }
