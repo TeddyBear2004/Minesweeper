@@ -6,6 +6,7 @@ import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.*;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
@@ -28,39 +29,12 @@ public class PacketUtil {
         }
     }
 
-    public static void sendParticleEffect(Player player, Location location, int size, WrappedParticle<?> wrappedParticle, float xDifference, float zDifference){
-        ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
-        PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.WORLD_PARTICLES, true);
-
-        packet.getBooleans()
-                .write(0, false);
-
-        packet.getDoubles()
-                .write(0, location.getX())
-                .write(1, location.getY())
-                .write(2, location.getZ());
-
-        packet.getFloat()
-                .write(0, xDifference)
-                .write(1, 0f)
-                .write(2, zDifference);
-
-        packet.getIntegers()
-                .write(0, size);
-
-        packet.getNewParticles()
-                .write(0, wrappedParticle);
-
-        try{
-            protocolManager.sendServerPacket(player, packet);
-        }catch(InvocationTargetException e){
-            e.printStackTrace();
-        }
-
+    public static void sendParticleEffect(Player player, Location location, int size, Particle particle, float xDifference, float zDifference, int count){
+        player.spawnParticle(particle, location.getX(), location.getY(), location.getZ(), count, xDifference, 0, zDifference);
     }
 
     public static void sendSoundEffect(Player player, Sound sound, float volume, Location blockPosition){
-        player.playSound(blockPosition, sound,volume,1f);
+        player.playSound(blockPosition, sound, volume, 1f);
     }
 
     public static void sendBlockChange(Player player, BlockPosition blockPosition, WrappedBlockData wrappedBlockData){

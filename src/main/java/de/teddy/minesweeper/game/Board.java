@@ -308,7 +308,13 @@ public class Board {
 
             for(Player p : viewers){
                 PacketUtil.sendSoundEffect(p, Sound.ENTITY_GENERIC_EXPLODE, 0.4f, p.getLocation());
-                PacketUtil.sendParticleEffect(p, corner.clone().add(((double)width) / 2, 1, (double)height / 2), 5, WrappedParticle.create(Particle.EXPLOSION_HUGE, null), (float)width / 2, (float)height / 2);
+                PacketUtil.sendParticleEffect(p,
+                        corner.clone().add(((double)width) / 2, 1, (double)height / 2),
+                        5,
+                        Particle.EXPLOSION_HUGE,
+                        (float)width / 2,
+                        (float)height / 2,
+                        width * height);
             }
         }, 20);
     }
