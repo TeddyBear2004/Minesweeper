@@ -50,7 +50,7 @@ public class Board {
     private final int bombCount;
     private final Location corner;
     private final Field[][] board;
-    private final List<Point2D> bombList;
+    private final Point2D[] bombList;
     private final Player player;
     final List<Player> viewers = new LinkedList<>();
     private long started;
@@ -65,7 +65,7 @@ public class Board {
             throw new IllegalArgumentException("bombCount cannot be bigger than width * height");
 
         this.isFinished = this.isGenerated = false;
-        this.bombList = new ArrayList<>();
+        this.bombList = new Point2D[bombCount];
         this.corner = corner;
         this.width = width;
         this.height = height;
@@ -202,15 +202,20 @@ public class Board {
         });
     }
 
-    public Field getField(int x, int y){
-        x = Math.abs(corner.getBlockX() - x);
-        y = Math.abs(corner.getBlockZ() - y);
 
+    public Field getField(int x, int y){
         try{
             return board[x][y];
         }catch(ArrayIndexOutOfBoundsException e){
             return null;
         }
+    }
+
+    public Field getField(Location location){
+        int x = Math.abs(corner.getBlockX() - location.getBlockX());
+        int y = Math.abs(corner.getBlockZ() - location.getBlockZ());
+
+        return getField(x, y);
     }
 
     public void checkField(int x, int y) throws BombExplodeException{
@@ -305,6 +310,7 @@ public class Board {
 
         Random random = new Random();
         boolean[][] cache = new boolean[this.height][this.width];
+        int[][] ints = new int[this.height][this.width];
 
         for(int i = 0; i < bombCount; i++){
             int randWidth, randHeight;
@@ -315,13 +321,25 @@ public class Board {
             }while(cache[randWidth][randHeight] || couldBombSpawn(x, y, randWidth, randHeight));
 
             cache[randWidth][randHeight] = true;
+            this.bombList[i] = new Point(randWidth, randHeight);
+        }
+
+        for(Point2D point2D : this.bombList){
+            for(int j = -1; j < 2; j++){
+                for(int k = -1; k < 2; k++){
+                    if(!(j == 0 && k == 0)){
+                        try{
+                            ints[(int)(point2D.getX() + j)][(int)(point2D.getY() + k)]++;
+                        }catch(ArrayIndexOutOfBoundsException ignore){
+                        }
+                    }
+                }
+            }
         }
 
         for(int i = 0; i < cache.length; i++)
             for(int j = 0; j < cache[i].length; j++){
-                if(cache[i][j])
-                    this.bombList.add(new Point(i, j));
-                this.board[i][j] = new Field(this, i, j, cache[i][j]);
+                this.board[i][j] = new Field(i, j, cache[i][j], ints[i][j]);
             }
     }
 
@@ -334,39 +352,25 @@ public class Board {
         return false;
     }
 
-    public int countNeighborBombs(int x, int y){
-        int c = 0;
-        for(int i = -1; i < 2; i++)
-            for(int j = -1; j < 2; j++)
-                if(!(i == 0 && j == 0))
-                    try{
-                        if(this.board[x + i][y + j].isBomb)
-                            c++;
-                    }catch(ArrayIndexOutOfBoundsException ignore){
-                    }
-
-        return c;
-    }
-
     public static class Field {
         private final boolean isBomb;
-        private final Board board;
+        private final int bombCount;
         private final int x;
         private final int y;
         private boolean isCovered;
         private boolean isMarked;
 
-        public Field(Board board, int x, int y, boolean isBomb){
-            this.board = board;
+        public Field(int x, int y, boolean isBomb, int bombCount){
             this.x = x;
             this.y = y;
             this.isCovered = true;
             this.isMarked = false;
             this.isBomb = isBomb;
+            this.bombCount = bombCount;
         }
 
         public int getNeighborCount(){
-            return this.board.countNeighborBombs(x, y);
+            return bombCount;
         }
 
         public void setUncover(){

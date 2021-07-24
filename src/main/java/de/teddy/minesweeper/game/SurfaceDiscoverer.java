@@ -53,12 +53,13 @@ public class SurfaceDiscoverer {
         if(board.getBoard().length <= width || board.getBoard()[0].length <= height)
             throw new IllegalArgumentException();
 
-        board.getBoard()[width][height].setUncover();
+        Board.Field field = board.getField(width, height);
+        field.setUncover();
 
-        if(board.getBoard()[width][height].isBomb())
+        if(field.isBomb())
             throw new BombExplodeException("Bomb at " + width + " and " + height + " is exploded.");
 
-        if(board.countNeighborBombs(width, height) == 0){
+        if(field.getNeighborCount() == 0){
             for(int i = -1; i < 2; i++){
                 for(int j = -1; j < 2; j++){
                     if(!(i == 0 && j == 0)){

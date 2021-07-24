@@ -52,7 +52,7 @@ public class LeftClickEvent implements PacketListener {
             Board watching = Game.getGameWatched(player);
 
             if(watching != null){
-                Board.Field field = watching.getField(location.getBlockX(), location.getBlockZ());
+                Board.Field field = watching.getField(location);
                 Material[] materials = new Material[]{field.getActualMaterial(), field.getMark()};
 
                 PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(materials[game.getFieldHeight() - location.getBlockY()]));
@@ -60,7 +60,7 @@ public class LeftClickEvent implements PacketListener {
             return;
         }
 
-        Board.Field field = board.getField(location.getBlockX(), location.getBlockZ());
+        Board.Field field = board.getField(location);
 
         EnumWrappers.PlayerDigType digType = packet.getPlayerDigTypes().read(0);
 
