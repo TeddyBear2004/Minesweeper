@@ -2,6 +2,12 @@ name: Minesweeper
 version: ${project.version}
 main: de.teddy.minesweeper.Minesweeper
 api-version: 1.16
+authors:
+  - TeddyBear_2004
+  - Wetterquarz
+database: false
+website: https://github.com/TeddyBear2004/Minesweeper
+description: Play Minesweeper in Minecraft
 depend:
   - ProtocolLib
 
