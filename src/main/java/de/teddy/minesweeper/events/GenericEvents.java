@@ -32,9 +32,10 @@ public class GenericEvents implements Listener {
 
     @EventHandler
     public void onPlayerJoinEvent(PlayerJoinEvent event){
-        event.setJoinMessage("");
         event.getPlayer().getInventory().setContents(Inventories.viewerInventory);
         event.getPlayer().setAllowFlight(true);
+        event.getPlayer().setResourcePack("https://cdn.discordapp.com/attachments/676083915382849576/875365210997784587/teddy.zip");
+
         boolean watching = false;
         for(Game map : Game.values()){
             Board runningGame = map.getRunningGame();
