@@ -53,6 +53,8 @@ public class LeftClickEvent implements PacketListener {
 
             if(watching != null){
                 Board.Field field = watching.getField(location);
+                if(field == null)
+                    return;
                 Material[] materials = new Material[]{field.getActualMaterial(), field.getMark()};
 
                 PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(materials[game.getFieldHeight() - location.getBlockY()]));
@@ -83,7 +85,11 @@ public class LeftClickEvent implements PacketListener {
 
         try{
             if(field == null){
-                board.checkField(location.getBlockX(), location.getBlockZ());
+                try{
+                    board.checkField(location.getBlockX(), location.getBlockZ());
+                }catch(IllegalArgumentException ignore){
+                }
+
                 board.draw();
                 return;
             }
