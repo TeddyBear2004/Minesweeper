@@ -57,6 +57,8 @@ public class LeftClickEvent implements PacketListener {
                     return;
                 Material[] materials = new Material[]{field.getActualMaterial(), field.getMark()};
 
+                if(game.getFieldHeight() - location.getBlockY() < 0)
+                    return;
                 PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(materials[game.getFieldHeight() - location.getBlockY()]));
             }
             return;
