@@ -45,12 +45,14 @@ public class RightClickEvent implements PacketListener {
         Board board = Game.getBoard(player);
 
         if(board == null){
-            Board watching = Game.getGameWatched(player);
+            Board watching = Game.getBoardWatched(player);
 
             if(watching != null){
                 Board.Field field = watching.getField(location);
-                Material[] materials = new Material[]{field.getActualMaterial(), field.getMark()};
-                PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(materials[location.getBlockY() - game.getFieldHeight()]));
+                if(field != null){
+                    Material[] materials = new Material[]{field.getActualMaterial(), field.getMark()};
+                    PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(materials[location.getBlockY() - game.getFieldHeight()]));
+                }
                 player.getInventory().setContents(Inventories.viewerInventory);
                 event.setCancelled(true);
             }
