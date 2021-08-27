@@ -64,17 +64,13 @@ public enum Game {
     		b.viewers.remove(p);
     	}
     }
-    private static void stopWatching(Player p, Board b) {
-    	b.viewers.remove(p);
-    	gameWatched.remove(p);
-    }
     
     public static void stopGames(Player p) {
     	Board b = runningGames.get(p);
     	if(b != null) {
             b.drawBlancField();
     		b.finish();
-    		stopWatching(p, b);
+    		b.viewers.forEach(viewer -> gameWatched.remove(viewer));
     		b.viewers.clear();
     	} else {
     		stopWatching(p);
