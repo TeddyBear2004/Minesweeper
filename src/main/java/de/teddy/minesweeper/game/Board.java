@@ -102,6 +102,9 @@ public class Board {
     }
 
     public void drawBlancField(){
+     drawBlancField(viewers);
+    }
+    public void drawBlancField(List<Player> players){
         if(!notTest)
             return;
         Map<Tuple3<Integer, Integer, Integer>, Tuple2<List<Short>, List<WrappedBlockData>>> subChunkMap = new HashMap<>();
@@ -136,7 +139,7 @@ public class Board {
         }
 
         subChunkMap.forEach((xyz, listListTuple2) -> {
-            for(Player p : viewers)
+            for(Player p : players)
                 PacketUtil.sendMultiBlockChange(
                         p,
                         ArrayUtils.toPrimitive(listListTuple2.getA().toArray(new Short[0])),

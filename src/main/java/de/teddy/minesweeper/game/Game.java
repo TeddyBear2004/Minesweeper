@@ -131,6 +131,7 @@ public enum Game {
         }*/
     	stopGames(p);
         Board b = new Board(this, size, size, bombCount, locations.getA(), p);
+		b.drawBlancField(Collections.singletonList(p));
         startWatching(p, b);
         runningGames.put(p, b);
         Bukkit.getOnlinePlayers().forEach(onPlayer -> {
