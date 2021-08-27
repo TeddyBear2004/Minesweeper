@@ -244,7 +244,7 @@ public class Board {
     }
 
     public void win(){
-        isFinished = true;
+        finish();
 
         player.sendMessage("Du hast das Spiel gewonnen!");
         player.sendMessage("Größe: " + width + "x" + height + " (" + bombCount + " Bomben)");
@@ -252,6 +252,7 @@ public class Board {
 
         player.sendTitle(ChatColor.DARK_GREEN + "Du hast gewonnen", ChatColor.GREEN + "Benötigte Zeit: " + getActualTimeNeededString(), 10, 70, 20);
         PacketUtil.sendSoundEffect(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, .5f, player.getLocation());
+        PacketUtil.sendActionBar(player, getActualTimeNeededString());
     }
 
     public void checkIfWon(){
@@ -262,11 +263,11 @@ public class Board {
     }
 
     public void breakGame(){
-        isFinished = true;
+        finish();
     }
 
     public void lose(){
-        isFinished = true;
+        finish();
         double explodeDuration = 0.5d;
 
         for(Point2D point2D : this.bombList){
