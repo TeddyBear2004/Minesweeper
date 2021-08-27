@@ -52,7 +52,6 @@ public class GenericEvents implements Listener {
 
     @EventHandler
     public void onPlayerQuitEvent(PlayerQuitEvent event){
-        event.setQuitMessage("");
         Game game = Game.getGame(event.getPlayer());
         if(game != null){
             Game.finishGame(event.getPlayer(), true);
