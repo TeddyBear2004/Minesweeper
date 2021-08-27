@@ -21,24 +21,22 @@ import java.util.Base64;
 import java.util.UUID;
 
 public class Inventories {
-    public static final Inventory startCommandInventory;
+    public static Inventory startCommandInventory;
 
-    public static final ItemStack[] gameInventory;
-    public static final ItemStack[] viewerInventory;
-    public static final ItemStack compass;
-    public static final ItemStack book;
-    public static final ItemStack hourGlass;
-    public static final ItemStack redBanner;
-    public static final ItemStack barrier;
-    public static final ItemStack reload;
-    public static final ItemStack easyMode;
-    public static final ItemStack mediumMode;
-    public static final ItemStack hardMode;
+    public static ItemStack[] gameInventory;
+    public static ItemStack[] viewerInventory;
+    public static ItemStack compass;
+    public static ItemStack book;
+    public static ItemStack hourGlass;
+    public static ItemStack redBanner;
+    public static ItemStack barrier;
+    public static ItemStack reload;
+    public static ItemStack easyMode;
+    public static ItemStack mediumMode;
+    public static ItemStack hardMode;
     private static Method metaSetProfileMethod;
 
-    private static final String[] tutorialPages;
-
-    static{
+    public static void loadInventories(){
         gameInventory = new ItemStack[27];
         viewerInventory = new ItemStack[27];
         startCommandInventory = Bukkit.createInventory(null, 9, ChatColor.AQUA + "Minesweeper");
@@ -75,7 +73,7 @@ public class Inventories {
             compassMeta.setDisplayName(ChatColor.YELLOW + "Sieh anderen Spielern zu");
             compass.setItemMeta(compassMeta);
 
-            tutorialPages = new String[]{
+            String[] tutorialPages = new String[]{
                     "\u00A72\u00A7nMinesweeper\n" +
                             "\n" +
                             "\u00A7rDas Ziel ist es, alle Felder zu enthüllen. Dabei darfst du keine Bombe aktivieren.\n" +

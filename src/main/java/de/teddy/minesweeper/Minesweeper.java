@@ -27,6 +27,8 @@ public final class Minesweeper extends JavaPlugin {
     public void onEnable(){
         INSTANCE = this;
 
+        Inventories.loadInventories();
+
         WORLD = new WorldCreator("MineSweeper").createWorld();
         Objects.requireNonNull(this.getCommand("start")).setExecutor(new StartCommand());
         Objects.requireNonNull(this.getCommand("resetResourcePack")).setExecutor(new ResetResourcePack());
