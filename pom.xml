@@ -6,7 +6,7 @@
 
 	<groupId>de.teddy</groupId>
 	<artifactId>Minesweeper</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0</version>
 	<packaging>jar</packaging>
 
 	<name>Minesweeper</name>
