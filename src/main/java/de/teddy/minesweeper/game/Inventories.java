@@ -5,6 +5,7 @@ import com.mojang.authlib.properties.Property;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
@@ -15,10 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.UUID;
+import java.util.*;
 
 public class Inventories {
     public static Inventory startCommandInventory;
@@ -28,7 +26,6 @@ public class Inventories {
     public static ItemStack compass;
     public static ItemStack book;
     public static ItemStack hourGlass;
-    public static ItemStack redBanner;
     public static ItemStack barrier;
     public static ItemStack reload;
     public static ItemStack easyMode;
@@ -42,12 +39,6 @@ public class Inventories {
         startCommandInventory = Bukkit.createInventory(null, 9, ChatColor.AQUA + "Minesweeper");
         //GameInventory
         {
-            redBanner = new ItemStack(Material.RED_BANNER);
-            ItemMeta bannerMeta = redBanner.getItemMeta();
-            assert bannerMeta != null;
-            bannerMeta.setDisplayName(ChatColor.RED + "Flagge platzieren");
-            redBanner.setItemMeta(bannerMeta);
-
             barrier = new ItemStack(Material.BARRIER);
             ItemMeta barrierMeta = barrier.getItemMeta();
             assert barrierMeta != null;
@@ -61,7 +52,6 @@ public class Inventories {
             headMeta.setDisplayName(ChatColor.YELLOW + "Neustarten");
             reload.setItemMeta(headMeta);
 
-            //gameInventory[1] = redBanner;
             gameInventory[2] = reload;
             gameInventory[6] = barrier;
         }
@@ -70,7 +60,7 @@ public class Inventories {
             compass = new ItemStack(Material.COMPASS);
             ItemMeta compassMeta = compass.getItemMeta();
             assert compassMeta != null;
-            compassMeta.setDisplayName(ChatColor.YELLOW + "Sieh anderen Spielern zu");
+            compassMeta.setDisplayName(ChatColor.DARK_RED + "" + ChatColor.STRIKETHROUGH + "Sieh anderen Spielern zu");
             compass.setItemMeta(compassMeta);
 
             String[] tutorialPages = new String[]{
@@ -115,7 +105,7 @@ public class Inventories {
             timeMeta.setDisplayName(ChatColor.AQUA + "Starte ein Spiel");
             hourGlass.setItemMeta(timeMeta);
 
-            //viewerInventory[1] = compass;
+            viewerInventory[1] = compass;
             viewerInventory[4] = hourGlass;
             viewerInventory[7] = book;
         }
