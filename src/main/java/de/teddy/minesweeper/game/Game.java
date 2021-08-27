@@ -34,7 +34,7 @@ public enum Game {
     private static final Map<Player, Board> gameWatched = new HashMap<>();
     private static final Map<Player, Board> runningGames = new HashMap<>();
     //private static final List<Player> waiting = new LinkedList<>();
-    
+
     private static final Map<Player, Game> playerLocation = new HashMap<>();
 
     private static void switchToMap(Player p, Game g) {
@@ -48,29 +48,30 @@ public enum Game {
         p.setFlying(true);
         p.teleport(g.getViewingSpawn());
     }
-    
+
     private static void startWatching(Player p, Board b) {
     	Game cur = playerLocation.get(p);
     	if(cur != b.map) {
     		switchToMap(p, b.map);
     	}
+        b.draw(Collections.singletonList(p));
     	gameWatched.put(p, b);
     	b.viewers.add(p);
     }
-    
+
     private static void stopWatching(Player p) {
     	Board b = gameWatched.remove(p);
     	if(b != null) {
     		b.viewers.remove(p);
     	}
     }
-    
+
     public static void stopGames(Player p) {
     	Board b = runningGames.get(p);
     	if(b != null) {
             b.drawBlancField();
     		b.finish();
-    		b.viewers.forEach(viewer -> gameWatched.remove(viewer));
+    		b.viewers.forEach(gameWatched::remove);
     		b.viewers.clear();
     	} else {
     		stopWatching(p);
@@ -116,11 +117,11 @@ public enum Game {
     public Board getRunningGame(){
         return runningGames.values().stream().filter(b -> b.map == this).findFirst().orElse(null);
     }
-    
+
     public void startGame(Player p) {
     	startGame(p, true);
     }
-    
+
     public void startGame(Player p, boolean shouldTeleport) {
         /*synchronized (waiting) {
         	while(!waiting.isEmpty()) {
@@ -137,7 +138,7 @@ public enum Game {
         		startWatching(onPlayer, b);
         	}
         });
-        
+
         p.getInventory().clear();
         p.getInventory().setContents(Inventories.gameInventory);
         p.setAllowFlight(true);
@@ -146,15 +147,15 @@ public enum Game {
         	p.teleport(this.getViewingSpawn());
         }
     }
-    
+
     public static void finishGame(Player p, boolean quit) {
     	Game.getGame(p).finish(p);
     }
-    
+
     public static void finishGame(Player p) {
     	finishGame(p, false);
     }
-    
+
     private void finish(Player p){
     	stopGames(p);
     	Board b = getRunningGame();

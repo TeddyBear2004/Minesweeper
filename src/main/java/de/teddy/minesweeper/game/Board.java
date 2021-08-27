@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.*;
 
 public class Board {
-	public static boolean notTest = true;
-	
+    public static boolean notTest = true;
+
     public static final Material[] LIGHT_MATERIALS = {
             Material.WHITE_CONCRETE_POWDER,
             Material.LIME_TERRACOTTA,
@@ -57,7 +57,7 @@ public class Board {
     private boolean isGenerated;
     private boolean isFinished;
     public final Game map;
-    
+
     public Board(Game map, int width, int height, int bombCount, Location corner, Player player){
         this.map = map;
         this.player = player;
@@ -72,9 +72,9 @@ public class Board {
         this.bombCount = bombCount;
 
         this.board = new Field[width][height];
-        if(notTest) {
-        	new ActionBarScheduler(this).runTaskTimer(Minesweeper.INSTANCE, 0, 1);
-        	draw();
+        if(notTest){
+            new ActionBarScheduler(this).runTaskTimer(Minesweeper.INSTANCE, 0, 1);
+            draw();
         }
     }
 
@@ -102,7 +102,8 @@ public class Board {
     }
 
     public void drawBlancField(){
-    	if(!notTest) return;
+        if(!notTest)
+            return;
         Map<Tuple3<Integer, Integer, Integer>, Tuple2<List<Short>, List<WrappedBlockData>>> subChunkMap = new HashMap<>();
 
         for(int i = 0; i < width; i++){
@@ -145,7 +146,12 @@ public class Board {
         });
     }
 
+
     public void draw(){
+        draw(viewers);
+    }
+
+    public void draw(List<Player> players){
         Map<Tuple3<Integer, Integer, Integer>, Tuple2<List<Short>, List<WrappedBlockData>>> subChunkMap = new HashMap<>();
 
         for(int i = 0; i < width; i++){
@@ -195,7 +201,7 @@ public class Board {
         }
 
         subChunkMap.forEach((xyz, listListTuple2) -> {
-            for(Player p : viewers)
+            for(Player p : players)
                 PacketUtil.sendMultiBlockChange(
                         p,
                         ArrayUtils.toPrimitive(listListTuple2.getA().toArray(new Short[0])),
