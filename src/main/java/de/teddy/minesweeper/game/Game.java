@@ -106,7 +106,7 @@ public enum Game {
         return runningGames.get(Player);
     }
 
-    public static Board getGameWatched(Player player){
+    public static Board getBoardWatched(Player player){
         return gameWatched.get(player);
     }
 

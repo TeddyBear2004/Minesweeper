@@ -49,7 +49,7 @@ public class LeftClickEvent implements PacketListener {
         Board board = Game.getBoard(player);
 
         if(board == null){
-            Board watching = Game.getGameWatched(player);
+            Board watching = Game.getBoardWatched(player);
 
             if(watching != null){
                 Board.Field field = watching.getField(location);
