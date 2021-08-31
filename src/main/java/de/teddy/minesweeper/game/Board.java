@@ -150,6 +150,9 @@ public class Board {
         });
     }
 
+    public boolean isGenerated(){
+        return isGenerated;
+    }
 
     public void draw(){
         draw(viewers);
