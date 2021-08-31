@@ -1,5 +1,6 @@
 package de.teddy.minesweeper.events;
 
+import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.Inventories;
 import org.bukkit.Bukkit;
@@ -23,9 +24,12 @@ public class GenericRightClickEvent implements Listener {
 
         if(game != null){
             if(itemStack.equals(Inventories.reload)){
-                Game.finishGame(event.getPlayer());
-                game.startGame(event.getPlayer(), false);
-                event.setCancelled(true);
+                Board board = Game.getBoard(event.getPlayer());
+                if(board.isGenerated()){
+                    Game.finishGame(event.getPlayer());
+                    game.startGame(event.getPlayer(), false);
+                    event.setCancelled(true);
+                }
                 return;
             }else if(itemStack.equals(Inventories.barrier)){
                 Game.finishGame(event.getPlayer());
