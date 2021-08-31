@@ -102,8 +102,9 @@ public class Board {
     }
 
     public void drawBlancField(){
-     drawBlancField(viewers);
+        drawBlancField(viewers);
     }
+
     public void drawBlancField(List<Player> players){
         if(!notTest)
             return;
@@ -387,6 +388,7 @@ public class Board {
         }
 
         public void setUncover(){
+            this.isMarked = false;
             this.isCovered = false;
         }
 
