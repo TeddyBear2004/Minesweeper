@@ -1,0 +1,45 @@
+leave = "Leave"
+restart_pl = "Restart"
+watch_others = "Watch other players"
+minesweeper = "Minesweeper"
+minesweeper_goal = "The goal is to reveal all the squares. In doing so, you must not activate a bomb."
+book_page_1 = """
+§2§nMinesweeper
+
+§rThe goal is to uncover all the squares. You must not activate any bombs.
+
+The numbers show you how many bombs are in a 3x3 field."""
+book_page_2 = """
+§2§nUse:§r
+
+§9§oLeft click§r to reveal a field.
+
+§r§9§oRight click§r to place a flag.
+§8->Use this to mark
+   the bombs and
+   can not
+   activate them anymore.
+->Remove with
+   right click again."""
+book_page_3 = """
+§9§oDouble left click§r to
+reveal all surrounding fields.
+§8->Only possible if in the
+   environment already
+   the needed
+   bombs have been marked
+   have been marked."""
+book_tutorial = "Tutorial"
+book_title = "Minesweeper - Tutorial"
+hour_glass_display_name = "Start a game"
+difficulty_easy = "Easy"
+difficulty_normal = "Medium"
+difficulty_hard = "Hard"
+field_desc = "Size: {0}x{1} | Bombs: {2}"
+resource_pack_error = "An error occurred while downloading the texture pack, please re-enter the server."
+resource_pack_not_enabled = "Downloading the server texture pack is required to play this mini-game. Please allow this in the game options and re-enter the server."
+message_win = "You won the game!"
+message_time_needed = "Time required: {0}"
+title_win = "You have won!"
+error_already_generated = "The field has already been generated."
+error_bomb_exploded = "Bomb at {0} and {1} is exploded."
