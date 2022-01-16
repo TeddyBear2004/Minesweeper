@@ -12,17 +12,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum Game {
-    MAP10X10(new Location(Minesweeper.WORLD, 53, 17, -331), new Location(Minesweeper.WORLD, 58, 20, -318.5),
-            10, 10),
+    MAP10X10(new Location(Minesweeper.WORLD, 53, 17, -331),
+            new Location(Minesweeper.WORLD, 58, 20, -318.5),
+            10,
+            10),
 
-    MAP18X18(new Location(Minesweeper.WORLD, 49, 16, -198), new Location(Minesweeper.WORLD, 57, 20, -177.5),
-            18, 40),
+    MAP18X18(new Location(Minesweeper.WORLD, 49, 16, -198),
+            new Location(Minesweeper.WORLD, 57, 20, -177.5),
+            18,
+            40),
 
-    MAP24X24(new Location(Minesweeper.WORLD, 49, 14, -63), new Location(Minesweeper.WORLD, 61, 18, -37.5),
-            24, 99),
+    MAP24X24(new Location(Minesweeper.WORLD, 49, 14, -63),
+            new Location(Minesweeper.WORLD, 61, 18, -37.5),
+            24,
+            99),
 
-    MAP_SPECIAL(new Location(Minesweeper.WORLD, 49, 14, -63), new Location(Minesweeper.WORLD, 61, 18, -37.5),
-            24, 70);
+    MAP_SPECIAL(new Location(Minesweeper.WORLD, 49, 14, -63),
+            new Location(Minesweeper.WORLD, 61, 18, -37.5),
+            24,
+            70);
 
     static{
         for(Game value : values()){
