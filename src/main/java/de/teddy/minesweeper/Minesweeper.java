@@ -2,6 +2,7 @@ package de.teddy.minesweeper;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
+import com.moandjiezana.toml.Toml;
 import de.teddy.minesweeper.commands.ResetResourcePack;
 import de.teddy.minesweeper.commands.StartCommand;
 import de.teddy.minesweeper.events.GenericEvents;
@@ -12,6 +13,7 @@ import de.teddy.minesweeper.events.packets.OnResourcePackStatus;
 import de.teddy.minesweeper.events.packets.RightClickEvent;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.Inventories;
+import de.teddy.minesweeper.util.Language;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -29,9 +31,13 @@ import java.util.zip.ZipFile;
 public final class Minesweeper extends JavaPlugin {
     public static World WORLD;
     public static JavaPlugin INSTANCE;
+    public static Language language;
 
     @Override
     public void onEnable(){
+        saveDefaultConfig();
+        saveResource("lang\\de_DE.toml", false);
+        language = new Language(new Toml().read(new File(getDataFolder(), "lang/" + getConfig().getString("language") + ".toml")));
         INSTANCE = this;
 
         Inventories.loadInventories();

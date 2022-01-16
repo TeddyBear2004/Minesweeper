@@ -264,11 +264,11 @@ public class Board {
     public void win(){
         finish();
 
-        player.sendMessage("Du hast das Spiel gewonnen!");
-        player.sendMessage("Größe: " + width + "x" + height + " (" + bombCount + " Bomben)");
-        player.sendMessage("Benötigte Zeit: " + getActualTimeNeededString());
+        player.sendMessage(Minesweeper.language.getString("message_win"));
+        player.sendMessage(Minesweeper.language.getString("field_desc", String.valueOf(width), String.valueOf(height), String.valueOf(bombCount)));
+        player.sendMessage(Minesweeper.language.getString("message_time_needed", getActualTimeNeededString()));
 
-        player.sendTitle(ChatColor.DARK_GREEN + "Du hast gewonnen", ChatColor.GREEN + "Benötigte Zeit: " + getActualTimeNeededString(), 10, 70, 20);
+        player.sendTitle(ChatColor.DARK_GREEN + Minesweeper.language.getString("title_win"), ChatColor.GREEN + Minesweeper.language.getString("message_time_needed", getActualTimeNeededString()), 10, 70, 20);
         PacketUtil.sendSoundEffect(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, .5f, player.getLocation());
         PacketUtil.sendActionBar(player, getActualTimeNeededString());
     }
@@ -320,7 +320,7 @@ public class Board {
 
     private void generateBoard(int x, int y){
         if(isGenerated)
-            throw new RuntimeException("Board is already generated.");
+            throw new RuntimeException(Minesweeper.language.getString("error_already_generated"));
 
         started = System.currentTimeMillis();
         isGenerated = true;

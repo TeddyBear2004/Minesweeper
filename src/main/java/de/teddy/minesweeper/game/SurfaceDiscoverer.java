@@ -1,5 +1,6 @@
 package de.teddy.minesweeper.game;
 
+import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
 
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class SurfaceDiscoverer {
         field.setUncover();
 
         if(field.isBomb())
-            throw new BombExplodeException("Bomb at " + width + " and " + height + " is exploded.");
+            throw new BombExplodeException(Minesweeper.language.getString("error_bomb_exploded", String.valueOf(width), String.valueOf(height)));
 
         if(field.getNeighborCount() == 0){
             for(int i = -1; i < 2; i++){

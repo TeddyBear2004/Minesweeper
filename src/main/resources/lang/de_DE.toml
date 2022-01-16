@@ -1,0 +1,52 @@
+leave = "Verlassen"
+restart_pl = "Neustarten"
+watch_others = "Andere Spieler beobachten"
+minesweeper = "Minesweeper"
+minesweeper_goal = "Das Ziel ist es, alle Felder zu enthüllen. Dabei darfst du keine Bombe aktivieren."
+
+book_page_1 = """
+§2§nMinesweeper
+
+§rDas Ziel ist es, alle Felder zu enthüllen. Dabei darfst du keine Bombe aktivieren.
+
+Die Zahlen zeigen dir, wie viele Bomben in einem 3x3 Feld liegen."""
+book_page_2 = """
+§2§nBenutze:§r
+
+§9§oLinksklick§r, um ein Feld zu enthüllen.
+
+§r§9§oRechtsklick§r, um eine Flagge zu platzieren.
+§8->Damit markierst du
+   die Bomben und
+   kannst sie nicht
+   mehr aktivieren.
+->Entfernen mit
+   erneutem Rechtklick."""
+book_page_3 = """
+§9§oDoppel Linksklick§r, um
+alle umliegenden Felder aufzudecken.
+§8->Nur möglich, wenn im
+   Umfeld schon
+   die benötigten
+   Bomben markiert
+   wurden."""
+book_tutorial = "Tutorial"
+book_title = "Minesweeper - Tutorial"
+hour_glass_display_name = "Starte ein Spiel"
+
+difficulty_easy = "Einfach"
+difficulty_normal = "Mittel"
+difficulty_hard = "Schwer"
+
+field_desc = "Größe: {0}x{1} | Bomben: {2}"
+
+resource_pack_error = "Beim Herunterterladen des Texturenpacks ist ein Fehler aufgetreten, bitte betrete den Server neu."
+resource_pack_not_enabled = "Um dieses Minispiel zu spielen, ist das Herunterladen des Servertexturenpacks erforderlich. Bitte erlaube dies in den Optionen des Spiels und betrete den Server neu."
+
+message_win = "Du hast das Spiel gewonnen!"
+message_time_needed = "Benötigte Zeit: {0}"
+
+title_win = "Du hast gewonnen!"
+
+error_already_generated = "Das Spielfeld wurde bereits generiert."
+error_bomb_exploded = "Bomb at {0} and {1} is exploded."

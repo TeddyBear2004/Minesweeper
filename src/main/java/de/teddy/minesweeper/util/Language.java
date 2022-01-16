@@ -1,0 +1,23 @@
+package de.teddy.minesweeper.util;
+
+import com.moandjiezana.toml.Toml;
+
+public class Language {
+    private final Toml config;
+
+    public Language(Toml config) {
+        this.config = config;
+    }
+
+    public String getString(String key) {
+
+        return config.getString(key);
+    }
+
+    public String getString(String key, String... args) {
+        String string = config.getString(key);
+        for (int i = 0; i < args.length; i++)
+            string = string.replace("{" + i + "}", args[i]);
+        return string;
+    }
+}

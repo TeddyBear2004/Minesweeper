@@ -2,10 +2,10 @@ package de.teddy.minesweeper.game;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import de.teddy.minesweeper.Minesweeper;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
@@ -16,7 +16,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.UUID;
 
 public class Inventories {
     public static Inventory startCommandInventory;
@@ -42,14 +44,14 @@ public class Inventories {
             barrier = new ItemStack(Material.BARRIER);
             ItemMeta barrierMeta = barrier.getItemMeta();
             assert barrierMeta != null;
-            barrierMeta.setDisplayName(ChatColor.DARK_RED + "Verlassen");
+            barrierMeta.setDisplayName(ChatColor.DARK_RED + Minesweeper.language.getString("leave"));
             barrier.setItemMeta(barrierMeta);
 
             reload = getPlayerHead("http://textures.minecraft.net/texture/e887cc388c8dcfcf1ba8aa5c3c102dce9cf7b1b63e786b34d4f1c3796d3e9d61");
 
             SkullMeta headMeta = (SkullMeta)reload.getItemMeta();
             assert headMeta != null;
-            headMeta.setDisplayName(ChatColor.YELLOW + "Neustarten");
+            headMeta.setDisplayName(ChatColor.YELLOW + Minesweeper.language.getString("restart_pl"));
             reload.setItemMeta(headMeta);
 
             gameInventory[2] = reload;
@@ -60,41 +62,20 @@ public class Inventories {
             compass = new ItemStack(Material.COMPASS);
             ItemMeta compassMeta = compass.getItemMeta();
             assert compassMeta != null;
-            compassMeta.setDisplayName(ChatColor.DARK_RED + "" + ChatColor.STRIKETHROUGH + "Sieh anderen Spielern zu");
+            compassMeta.setDisplayName(ChatColor.DARK_RED + "" + ChatColor.STRIKETHROUGH + Minesweeper.language.getString("watch_others"));
             compass.setItemMeta(compassMeta);
 
             String[] tutorialPages = new String[]{
-                    "\u00A72\u00A7nMinesweeper\n" +
-                            "\n" +
-                            "\u00A7rDas Ziel ist es, alle Felder zu enthüllen. Dabei darfst du keine Bombe aktivieren.\n" +
-                            "\n" +
-                            "Die Zahlen zeigen dir, wie viele Bomben in einem 3x3 Feld liegen.",
-                    "\u00A72\u00A7nBenutze:\u00A7r\n" +
-                            "\n" +
-                            "\u00A79\u00A7oLinksklick\u00A7r, um ein Feld zu enthüllen.\n" +
-                            "\n" +
-                            "\u00A7r\u00A79\u00A7oRechtsklick\u00A7r, um eine Flagge zu platzieren.\n" +
-                            "\u00A78->Damit markierst du\n" +
-                            "   die Bomben und\n" +
-                            "   kannst sie nicht\n" +
-                            "   mehr aktivieren.\n" +
-                            "->Entfernen mit\n" +
-                            "   erneutem Rechtklick",
-                    "\u00A79\u00A7oDoppel Linksklick\u00A7r, um\n" +
-                            "alle umliegenden Felder aufzudecken.\n" +
-                            "\u00A78->Nur möglich, wenn im\n" +
-                            "   Umfeld schon\n" +
-                            "   die benötigten\n" +
-                            "   Bomben markiert\n" +
-                            "   wurden."
-            };
+                    Minesweeper.language.getString("book_page_1"),
+                    Minesweeper.language.getString("book_page_2"),
+                    Minesweeper.language.getString("book_page_3")};
 
             book = new ItemStack(Material.WRITTEN_BOOK);
             BookMeta bookMeta = (BookMeta)book.getItemMeta();
             assert bookMeta != null;
-            bookMeta.setDisplayName(ChatColor.YELLOW + "Tutorial");
+            bookMeta.setDisplayName(ChatColor.YELLOW + Minesweeper.language.getString("book_tutorial"));
             bookMeta.setAuthor(ChatColor.AQUA + "TeddyBear_2004");
-            bookMeta.setTitle("Minesweeper - Tutorial");
+            bookMeta.setTitle(Minesweeper.language.getString("book_title"));
             bookMeta.setPages(tutorialPages);
             book.setItemMeta(bookMeta);
 
@@ -102,7 +83,7 @@ public class Inventories {
 
             SkullMeta timeMeta = (SkullMeta)hourGlass.getItemMeta();
             assert timeMeta != null;
-            timeMeta.setDisplayName(ChatColor.AQUA + "Starte ein Spiel");
+            timeMeta.setDisplayName(ChatColor.AQUA + Minesweeper.language.getString("hour_glass_display_name"));
             hourGlass.setItemMeta(timeMeta);
 
             viewerInventory[1] = compass;
@@ -114,22 +95,22 @@ public class Inventories {
             easyMode = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
             ItemMeta easyMeta = easyMode.getItemMeta();
             assert easyMeta != null;
-            easyMeta.setDisplayName(ChatColor.GREEN + "Einfach");
-            easyMeta.setLore(Arrays.asList("Größe: 10x10", "Bomben: 10"));
+            easyMeta.setDisplayName(ChatColor.GREEN + Minesweeper.language.getString("difficulty_easy"));
+            easyMeta.setLore(Collections.singletonList(Minesweeper.language.getString("field_desc", "10", "10", "10")));
             easyMode.setItemMeta(easyMeta);
 
             mediumMode = new ItemStack(Material.YELLOW_STAINED_GLASS_PANE);
             ItemMeta mediumMeta = mediumMode.getItemMeta();
             assert mediumMeta != null;
-            mediumMeta.setDisplayName(ChatColor.YELLOW + "Mittel");
-            mediumMeta.setLore(Arrays.asList("Größe: 18x18", "Bomben: 40"));
+            mediumMeta.setDisplayName(ChatColor.YELLOW + Minesweeper.language.getString("difficulty_normal"));
+            mediumMeta.setLore(Collections.singletonList(Minesweeper.language.getString("field_desc", "18", "18", "24")));
             mediumMode.setItemMeta(mediumMeta);
 
             hardMode = new ItemStack(Material.RED_STAINED_GLASS_PANE);
             ItemMeta hardMeta = hardMode.getItemMeta();
             assert hardMeta != null;
-            hardMeta.setDisplayName(ChatColor.RED + "Schwer");
-            hardMeta.setLore(Arrays.asList("Größe: 24x24", "Bomben: 99"));
+            hardMeta.setDisplayName(ChatColor.RED + Minesweeper.language.getString("difficulty_hard"));
+            hardMeta.setLore(Collections.singletonList(Minesweeper.language.getString("field_desc", "24", "24", "99")));
             hardMode.setItemMeta(hardMeta);
 
             startCommandInventory.setItem(2, easyMode);
