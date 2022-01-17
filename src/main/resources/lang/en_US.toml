@@ -2,33 +2,33 @@ leave = "Leave"
 restart_pl = "Restart"
 watch_others = "Watch other players"
 minesweeper = "Minesweeper"
-minesweeper_goal = "The goal is to reveal all the squares. In doing so, you must not activate a bomb."
+
 book_page_1 = """
 §2§nMinesweeper
 
 §rThe goal is to uncover all the squares. You must not activate any bombs.
 
-The numbers show you how many bombs are in a 3x3 field."""
+The numbers show you how many bombs are in a 3x3 area."""
 book_page_2 = """
 §2§nUse:§r
 
 §9§oLeft click§r to reveal a field.
 
 §r§9§oRight click§r to place a flag.
-§8->Use this to mark
-   the bombs and
-   can not
-   activate them anymore.
-->Remove with
-   right click again."""
+§8-> With the flag you
+    mark the bombs
+    and cannot
+    activate them
+    anymore.
+-> Remove with
+    right click."""
 book_page_3 = """
 §9§oDouble left click§r to
 reveal all surrounding fields.
-§8->Only possible if in the
-   environment already
-   the needed
-   bombs have been marked
-   have been marked."""
+§8-> Only possible if in
+    the surounding
+    fields all bombs
+    are marked."""
 book_tutorial = "Tutorial"
 book_title = "Minesweeper - Tutorial"
 hour_glass_display_name = "Start a game"

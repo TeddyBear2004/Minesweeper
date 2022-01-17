@@ -37,7 +37,7 @@ public final class Minesweeper extends JavaPlugin {
     public void onEnable(){
         saveDefaultConfig();
 
-        saveResource("lang/" + getConfig().getString("language") + ".toml", false);
+        saveResource("lang/" + getConfig().getString("language") + ".toml", true);
         File file = new File(getDataFolder(), "lang/" + getConfig().getString("language") + ".toml");
         if(!file.exists()){
             getLogger().warning("Language file not found! Using default language file!");

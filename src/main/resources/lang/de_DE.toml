@@ -2,7 +2,6 @@ leave = "Verlassen"
 restart_pl = "Neustarten"
 watch_others = "Andere Spieler beobachten"
 minesweeper = "Minesweeper"
-minesweeper_goal = "Das Ziel ist es, alle Felder zu enthüllen. Dabei darfst du keine Bombe aktivieren."
 
 book_page_1 = """
 §2§nMinesweeper
