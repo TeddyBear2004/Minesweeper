@@ -46,7 +46,7 @@ public class GenericEvents implements Listener {
             }
         }
         if(!watching){
-            Game.MAP10X10.startViewing(event.getPlayer(), null);
+            Game.games.get(0).startViewing(event.getPlayer(), null);
         }
     }
 

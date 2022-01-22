@@ -4,208 +4,194 @@ import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.util.IsBetween;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-public enum Game {
-    MAP10X10(new Location(Minesweeper.WORLD, 53, 17, -331),
-            new Location(Minesweeper.WORLD, 58, 20, -318.5),
-            10,
-            10),
+public class Game {
+	public static List<Game> games = new ArrayList<>();
 
-    MAP18X18(new Location(Minesweeper.WORLD, 49, 16, -198),
-            new Location(Minesweeper.WORLD, 57, 20, -177.5),
-            18,
-            40),
+	public static List<Game> values(){
+		return Collections.unmodifiableList(games);
+	}
 
-    MAP24X24(new Location(Minesweeper.WORLD, 49, 14, -63),
-            new Location(Minesweeper.WORLD, 61, 18, -37.5),
-            24,
-            99),
+	static{
+		for(Game value : values()){
+			value.spawn.setYaw(-180);
+			value.spawn.setPitch(30);
+		}
+	}
 
-    MAP_SPECIAL(new Location(Minesweeper.WORLD, 49, 14, -63),
-            new Location(Minesweeper.WORLD, 61, 18, -37.5),
-            24,
-            70);
+	private static final Map<Player, Board> gameWatched = new HashMap<>();
+	private static final Map<Player, Board> runningGames = new HashMap<>();
 
-    static{
-        for(Game value : values()){
-            value.spawnPosition.setYaw(-180);
-            value.spawnPosition.setPitch(30);
-        }
-    }
+	private static final Map<Player, Game> playerLocation = new HashMap<>();
 
-    private static final Map<Player, Board> gameWatched = new HashMap<>();
-    private static final Map<Player, Board> runningGames = new HashMap<>();
-    //private static final List<Player> waiting = new LinkedList<>();
+	private static void switchToMap(Player p, Game g){
+		Game.stopWatching(p);
+		Board b = runningGames.get(p);
+		if(b != null){
+			Game.finishGame(p);
+		}
+		playerLocation.put(p, g);
+		p.setAllowFlight(true);
+		p.setFlying(true);
+		p.teleport(g.getViewingSpawn());
+	}
 
-    private static final Map<Player, Game> playerLocation = new HashMap<>();
+	private static void startWatching(Player p, Board b){
+		Game cur = playerLocation.get(p);
+		if(cur != b.map){
+			switchToMap(p, b.map);
+		}
+		b.draw(Collections.singletonList(p));
+		gameWatched.put(p, b);
+		b.viewers.add(p);
+	}
 
-    private static void switchToMap(Player p, Game g){
-        Game.stopWatching(p);
-        Board b = runningGames.get(p);
-        if(b != null){
-            Game.finishGame(p);
-        }
-        playerLocation.put(p, g);
-        p.setAllowFlight(true);
-        p.setFlying(true);
-        p.teleport(g.getViewingSpawn());
-    }
+	private static void stopWatching(Player p){
+		Board b = gameWatched.remove(p);
+		if(b != null){
+			b.viewers.remove(p);
+		}
+	}
 
-    private static void startWatching(Player p, Board b){
-        Game cur = playerLocation.get(p);
-        if(cur != b.map){
-            switchToMap(p, b.map);
-        }
-        b.draw(Collections.singletonList(p));
-        gameWatched.put(p, b);
-        b.viewers.add(p);
-    }
+	public static void stopGames(Player p){
+		Board b = runningGames.get(p);
+		if(b != null){
+			b.drawBlancField();
+			b.finish();
+			b.viewers.forEach(gameWatched::remove);
+			b.viewers.clear();
+		}else{
+			stopWatching(p);
+		}
+		runningGames.remove(p);
+	}
 
-    private static void stopWatching(Player p){
-        Board b = gameWatched.remove(p);
-        if(b != null){
-            b.viewers.remove(p);
-        }
-    }
-
-    public static void stopGames(Player p){
-        Board b = runningGames.get(p);
-        if(b != null){
-            b.drawBlancField();
-            b.finish();
-            b.viewers.forEach(gameWatched::remove);
-            b.viewers.clear();
-        }else{
-            stopWatching(p);
-        }
-        runningGames.remove(p);
-    }
-
-    public static Game getGame(Player player){
-        return playerLocation.get(player);
-    }
+	public static Game getGame(Player player){
+		return playerLocation.get(player);
+	}
 
 
-    private final Location corner;
-    private final Location spawnPosition;
-    private final int size;
-    private final int bombCount;
+	private final Location corner;
+	private final Location spawn;
+	private final int size;
+	private final int bombCount;
+	private final String difficulty;
+	private Material material;
+	private int inventoryPosition;
+	private ItemStack itemStack;
 
-    Game(Location corner, Location spawnPoint, int size, int bombCount){
-        this.corner = corner;
-        this.spawnPosition = spawnPoint;
-        this.size = size;
-        this.bombCount = bombCount;
-    }
+	public Game(Location corner, Location spawn, int borderSize, int bombCount, String difficulty, Material material, int inventoryPosition){
+		this.corner = corner;
+		this.spawn = spawn;
+		this.size = borderSize;
+		this.bombCount = bombCount;
+		this.difficulty = difficulty;
+		this.material = material;
+		this.inventoryPosition = inventoryPosition;
 
-    public boolean isBlockOutsideGame(Block block){
-        return !IsBetween.isBetween2D(corner, size, size, block)
-                || !IsBetween.isBetween(corner.getBlockY(), corner.getBlockY() + 1, block.getY());
-    }
+		this.itemStack = new ItemStack(material);
+		ItemMeta itemMeta = itemStack.getItemMeta();
+		assert itemMeta != null;
 
-    public int getFieldHeight(){
-        return corner.getBlockY();
-    }
+		itemMeta.setDisplayName(difficulty);
+		itemMeta.setLore(Collections.singletonList(Minesweeper.language.getString("field_desc", String.valueOf(size), String.valueOf(size), String.valueOf(bombCount))));
+		itemStack.setItemMeta(itemMeta);
+	}
 
-    public static Board getBoard(Player Player){
-        return runningGames.get(Player);
-    }
+	public boolean isBlockOutsideGame(Block block){
+		return !IsBetween.isBetween2D(corner, size, size, block)
+				|| !IsBetween.isBetween(corner.getBlockY(), corner.getBlockY() + 1, block.getY());
+	}
 
-    public static Board getBoardWatched(Player player){
-        return gameWatched.get(player);
-    }
+	public int getFieldHeight(){
+		return corner.getBlockY();
+	}
 
-    public Location getViewingSpawn(){
-        return spawnPosition;
-    }
+	public static Board getBoard(Player Player){
+		return runningGames.get(Player);
+	}
 
-    public Board getRunningGame(){
-        return runningGames.values().stream().filter(b -> b.map == this).findFirst().orElse(null);
-    }
+	public static Board getBoardWatched(Player player){
+		return gameWatched.get(player);
+	}
 
-    public void startGame(Player p){
-        startGame(p, true);
-    }
+	public Location getViewingSpawn(){
+		return spawn;
+	}
 
-    public void startGame(Player p, boolean shouldTeleport){
-        /*synchronized (waiting) {
-        	while(!waiting.isEmpty()) {
-        		Player wat = waiting.get(0);
-                startWatching(wat, b);
-            }
-        }*/
-        stopGames(p);
-        Board b = new Board(this, size, size, bombCount, corner, p);
-        b.drawBlancField(Collections.singletonList(p));
-        startWatching(p, b);
-        runningGames.put(p, b);
-        Bukkit.getOnlinePlayers().forEach(onPlayer -> {
-            if(gameWatched.get(onPlayer) == null && b.map == playerLocation.get(onPlayer)){
-                startWatching(onPlayer, b);
-            }
-        });
+	public int getInventoryPosition(){
+		return inventoryPosition;
+	}
 
-        p.getInventory().clear();
-        p.getInventory().setContents(Inventories.gameInventory);
-        p.setAllowFlight(true);
-        if(shouldTeleport){
-            p.setFlying(true);
-            p.teleport(this.getViewingSpawn());
-        }
-    }
+	public ItemStack getItemStack(){
+		return itemStack;
+	}
 
-    public static void finishGame(Player p, boolean quit){
-        Game.getGame(p).finish(p);
-    }
+	public String getDifficultyName(){
+		return difficulty;
+	}
 
-    public static void finishGame(Player p){
-        finishGame(p, false);
-    }
+	public Board getRunningGame(){
+		return runningGames.values().stream().filter(b -> b.map == this).findFirst().orElse(null);
+	}
 
-    private void finish(Player p){
-        stopGames(p);
-        Board b = getRunningGame();
-        if(b != null){
-            Bukkit.getOnlinePlayers().forEach(onPlayer -> {
-                if(gameWatched.get(onPlayer) == null && b.map == playerLocation.get(onPlayer)){
-                    startWatching(onPlayer, b);
-                }
-            });
-        }
-        /*Board board = runningGames.remove(p);
+	public void startGame(Player p){
+		startGame(p, true);
+	}
 
-        if(board == null)
-        	throw new IllegalStateException("The player is not playing any game");
-        
-        Board toWatch = getRunningGame();
-        board.finish();
-        if(toWatch == null){
-            board.drawBlancField();
-            while(!board.viewers.isEmpty()) {
-            	Player pl = board.viewers.remove(0);
-            	stopWatching(pl, board);
-                waiting.add(pl);
-            }
-        }else{
-            while(!board.viewers.isEmpty()) {
-            	Player pl = board.viewers.remove(0);
-            	stopWatching(pl, board);
-                toWatch.viewers.add(pl);
-            }
-        }*/
-    }
+	public void startGame(Player p, boolean shouldTeleport){
+		stopGames(p);
+		Board b = new Board(this, size, size, bombCount, corner, p);
+		b.drawBlancField(Collections.singletonList(p));
+		startWatching(p, b);
+		runningGames.put(p, b);
+		Bukkit.getOnlinePlayers().forEach(onPlayer -> {
+			if(gameWatched.get(onPlayer) == null && b.map == playerLocation.get(onPlayer)){
+				startWatching(onPlayer, b);
+			}
+		});
 
-    public void startViewing(Player player, Board runningGame){
-        if(runningGame == null){
-            Game.switchToMap(player, Game.MAP10X10);
-        }else{
-            Game.startWatching(player, runningGame);
-        }
-    }
+		p.getInventory().clear();
+		p.getInventory().setContents(Inventories.gameInventory);
+		p.setAllowFlight(true);
+		if(shouldTeleport){
+			p.setFlying(true);
+			p.teleport(this.getViewingSpawn());
+		}
+	}
+
+	public static void finishGame(Player p, boolean quit){
+		Game.getGame(p).finish(p);
+	}
+
+	public static void finishGame(Player p){
+		finishGame(p, false);
+	}
+
+	private void finish(Player p){
+		stopGames(p);
+		Board b = getRunningGame();
+		if(b != null){
+			Bukkit.getOnlinePlayers().forEach(onPlayer -> {
+				if(gameWatched.get(onPlayer) == null && b.map == playerLocation.get(onPlayer)){
+					startWatching(onPlayer, b);
+				}
+			});
+		}
+	}
+
+	public void startViewing(Player player, Board runningGame){
+		if(runningGame == null){
+			Game.switchToMap(player, games.get(0));
+		}else{
+			Game.startWatching(player, runningGame);
+		}
+	}
 }

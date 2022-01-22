@@ -1,6 +1,7 @@
 package de.teddy.minesweeper.util;
 
 import com.moandjiezana.toml.Toml;
+import org.bukkit.ChatColor;
 
 public class Language {
     private final Toml config;
@@ -18,6 +19,6 @@ public class Language {
         String string = config.getString(key);
         for (int i = 0; i < args.length; i++)
             string = string.replace("{" + i + "}", args[i]);
-        return string;
+        return ChatColor.translateAlternateColorCodes('§', string);
     }
 }
