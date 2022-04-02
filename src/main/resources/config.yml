@@ -1,7 +1,7 @@
 language: en_US
 use_default_map: true
 
-aviable_games_inventory_lines: 1
+available_games_inventory_lines: 1
 
 games:
   Map10x10:
