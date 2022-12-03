@@ -17,13 +17,11 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 public class Inventories {
 	public static Inventory startCommandInventory;
-
 	public static ItemStack[] gameInventory;
 	public static ItemStack[] viewerInventory;
 	public static ItemStack compass;
@@ -31,73 +29,71 @@ public class Inventories {
 	public static ItemStack hourGlass;
 	public static ItemStack barrier;
 	public static ItemStack reload;
-	public static ItemStack easyMode;
-	public static ItemStack mediumMode;
-	public static ItemStack hardMode;
 	private static Method metaSetProfileMethod;
 
 	public static void loadInventories(int inventoryLines, List<Game> games){
 		gameInventory = new ItemStack[27];
 		viewerInventory = new ItemStack[27];
-		startCommandInventory = Bukkit.createInventory(null, inventoryLines * 9, ChatColor.AQUA + Minesweeper.language.getString("minesweeper"));
-		//GameInventory
-		{
-			barrier = new ItemStack(Material.BARRIER);
-			ItemMeta barrierMeta = barrier.getItemMeta();
-			assert barrierMeta != null;
-			barrierMeta.setDisplayName(ChatColor.DARK_RED + Minesweeper.language.getString("leave"));
-			barrier.setItemMeta(barrierMeta);
+		startCommandInventory = Bukkit.createInventory(null, inventoryLines * 9, ChatColor.AQUA + Minesweeper.getLanguage().getString("minesweeper"));
 
-			reload = getPlayerHead("http://textures.minecraft.net/texture/e887cc388c8dcfcf1ba8aa5c3c102dce9cf7b1b63e786b34d4f1c3796d3e9d61");
+		loadGameInventory();
+		loadViewerInventory();
 
-			SkullMeta headMeta = (SkullMeta)reload.getItemMeta();
-			assert headMeta != null;
-			headMeta.setDisplayName(ChatColor.YELLOW + Minesweeper.language.getString("restart_pl"));
-			reload.setItemMeta(headMeta);
-
-			gameInventory[2] = reload;
-			gameInventory[6] = barrier;
-		}
-		//ViewerInventory
-		{
-			compass = new ItemStack(Material.COMPASS);
-			ItemMeta compassMeta = compass.getItemMeta();
-			assert compassMeta != null;
-			compassMeta.setDisplayName(ChatColor.DARK_RED + "" + ChatColor.STRIKETHROUGH + Minesweeper.language.getString("watch_others"));
-			compass.setItemMeta(compassMeta);
-
-			String[] tutorialPages = new String[]{
-					Minesweeper.language.getString("book_page_1"),
-					Minesweeper.language.getString("book_page_2"),
-					Minesweeper.language.getString("book_page_3")};
-
-			book = new ItemStack(Material.WRITTEN_BOOK);
-			BookMeta bookMeta = (BookMeta)book.getItemMeta();
-			assert bookMeta != null;
-			bookMeta.setDisplayName(ChatColor.YELLOW + Minesweeper.language.getString("book_tutorial"));
-			bookMeta.setAuthor(ChatColor.AQUA + "TeddyBear_2004");
-			bookMeta.setTitle(Minesweeper.language.getString("book_title"));
-			bookMeta.setPages(tutorialPages);
-			book.setItemMeta(bookMeta);
-
-			hourGlass = getPlayerHead("http://textures.minecraft.net/texture/b522cac48d1151b0a6eebb72fae26626c394fdc62d5b2064a69266e796a20268");
-
-			SkullMeta timeMeta = (SkullMeta)hourGlass.getItemMeta();
-			assert timeMeta != null;
-			timeMeta.setDisplayName(ChatColor.AQUA + Minesweeper.language.getString("hour_glass_display_name"));
-			hourGlass.setItemMeta(timeMeta);
-
-			viewerInventory[1] = compass;
-			viewerInventory[4] = hourGlass;
-			viewerInventory[7] = book;
-		}
-
-		{
-			games.forEach(game -> startCommandInventory.setItem(game.getInventoryPosition(), game.getItemStack()));
-		}
+		games.forEach(game -> startCommandInventory.setItem(game.getInventoryPosition(), game.getItemStack()));
 	}
 
-	private static GameProfile makeProfile(String b64){
+	private static void loadGameInventory() {
+		barrier = new ItemStack(Material.BARRIER);
+		ItemMeta barrierMeta = barrier.getItemMeta();
+		assert barrierMeta != null;
+		barrierMeta.setDisplayName(ChatColor.DARK_RED + Minesweeper.getLanguage().getString("leave"));
+		barrier.setItemMeta(barrierMeta);
+
+		reload = getPlayerHead("http://textures.minecraft.net/texture/e887cc388c8dcfcf1ba8aa5c3c102dce9cf7b1b63e786b34d4f1c3796d3e9d61");
+
+		SkullMeta headMeta = (SkullMeta) reload.getItemMeta();
+		assert headMeta != null;
+		headMeta.setDisplayName(ChatColor.YELLOW + Minesweeper.getLanguage().getString("restart_pl"));
+		reload.setItemMeta(headMeta);
+
+		gameInventory[2] = reload;
+		gameInventory[6] = barrier;
+	}
+
+	private static void loadViewerInventory() {
+		compass = new ItemStack(Material.COMPASS);
+		ItemMeta compassMeta = compass.getItemMeta();
+		assert compassMeta != null;
+		compassMeta.setDisplayName(ChatColor.DARK_RED + "" + ChatColor.STRIKETHROUGH + Minesweeper.getLanguage().getString("watch_others"));
+		compass.setItemMeta(compassMeta);
+
+		String[] tutorialPages = new String[]{
+				Minesweeper.getLanguage().getString("book_page_1"),
+				Minesweeper.getLanguage().getString("book_page_2"),
+				Minesweeper.getLanguage().getString("book_page_3")};
+
+		book = new ItemStack(Material.WRITTEN_BOOK);
+		BookMeta bookMeta = (BookMeta) book.getItemMeta();
+		assert bookMeta != null;
+		bookMeta.setDisplayName(ChatColor.YELLOW + Minesweeper.getLanguage().getString("book_tutorial"));
+		bookMeta.setAuthor(ChatColor.AQUA + "TeddyBear_2004");
+		bookMeta.setTitle(Minesweeper.getLanguage().getString("book_title"));
+		bookMeta.setPages(tutorialPages);
+		book.setItemMeta(bookMeta);
+
+		hourGlass = getPlayerHead("http://textures.minecraft.net/texture/b522cac48d1151b0a6eebb72fae26626c394fdc62d5b2064a69266e796a20268");
+
+		SkullMeta timeMeta = (SkullMeta) hourGlass.getItemMeta();
+		assert timeMeta != null;
+		timeMeta.setDisplayName(ChatColor.AQUA + Minesweeper.getLanguage().getString("hour_glass_display_name"));
+		hourGlass.setItemMeta(timeMeta);
+
+		viewerInventory[1] = compass;
+		viewerInventory[4] = hourGlass;
+		viewerInventory[7] = book;
+	}
+
+	private static GameProfile makeProfile(String b64) {
 		UUID id = new UUID(
 				b64.substring(b64.length() - 20).hashCode(),
 				b64.substring(b64.length() - 10).hashCode()
@@ -107,7 +103,7 @@ public class Inventories {
 		return profile;
 	}
 
-	private static String urlToBase64(String url){
+	private static String urlToBase64(String url) {
 
 		URI actualUrl;
 		try{

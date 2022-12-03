@@ -1,5 +1,6 @@
 package de.teddy.minesweeper.events;
 
+import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.Inventories;
@@ -46,7 +47,7 @@ public class GenericEvents implements Listener {
             }
         }
         if(!watching){
-            Game.games.get(0).startViewing(event.getPlayer(), null);
+            Minesweeper.getGames().get(0).startViewing(event.getPlayer(), null);
         }
     }
 

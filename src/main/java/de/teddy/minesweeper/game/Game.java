@@ -13,10 +13,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.*;
 
 public class Game {
-	public static List<Game> games = new ArrayList<>();
 
 	public static List<Game> values(){
-		return Collections.unmodifiableList(games);
+		return Collections.unmodifiableList(Minesweeper.getGames());
 	}
 
 	static{
@@ -83,9 +82,8 @@ public class Game {
 	private final int size;
 	private final int bombCount;
 	private final String difficulty;
-	private Material material;
-	private int inventoryPosition;
-	private ItemStack itemStack;
+	private final int inventoryPosition;
+	private final ItemStack itemStack;
 
 	public Game(Location corner, Location spawn, int borderSize, int bombCount, String difficulty, Material material, int inventoryPosition){
 		this.corner = corner;
@@ -93,7 +91,6 @@ public class Game {
 		this.size = borderSize;
 		this.bombCount = bombCount;
 		this.difficulty = difficulty;
-		this.material = material;
 		this.inventoryPosition = inventoryPosition;
 
 		this.itemStack = new ItemStack(material);
@@ -101,7 +98,7 @@ public class Game {
 		assert itemMeta != null;
 
 		itemMeta.setDisplayName(difficulty);
-		itemMeta.setLore(Collections.singletonList(Minesweeper.language.getString("field_desc", String.valueOf(size), String.valueOf(size), String.valueOf(bombCount))));
+		itemMeta.setLore(Collections.singletonList(Minesweeper.getLanguage().getString("field_desc", String.valueOf(size), String.valueOf(size), String.valueOf(bombCount))));
 		itemStack.setItemMeta(itemMeta);
 	}
 
@@ -189,7 +186,7 @@ public class Game {
 
 	public void startViewing(Player player, Board runningGame){
 		if(runningGame == null){
-			Game.switchToMap(player, games.get(0));
+			Game.switchToMap(player, Minesweeper.getGames().get(0));
 		}else{
 			Game.startWatching(player, runningGame);
 		}

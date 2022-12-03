@@ -96,6 +96,6 @@ public class RightClickEvent implements PacketListener {
 
     @Override
     public Plugin getPlugin(){
-        return Minesweeper.INSTANCE;
+        return Minesweeper.getPlugin();
     }
 }

@@ -3,6 +3,15 @@ use_default_map: true
 
 available_games_inventory_lines: 1
 
+texture_pack_link: https://cdn.discordapp.com/attachments/676083915382849576/875365210997784587/teddy.zip
+
+teleport_on_join: true
+cancel_damage: true
+cancel_food_change: true
+cancel_block_changes: true
+cancel_inventory_changes: true
+
+
 games:
   Map10x10:
     corner:

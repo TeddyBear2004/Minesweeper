@@ -7,7 +7,7 @@ import de.teddy.minesweeper.game.exceptions.BombExplodeException;
 import de.teddy.minesweeper.util.PacketUtil;
 import de.teddy.minesweeper.util.Tuple2;
 import de.teddy.minesweeper.util.Tuple3;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -73,7 +73,7 @@ public class Board {
 
         this.board = new Field[width][height];
         if(notTest){
-            new ActionBarScheduler(this).runTaskTimer(Minesweeper.INSTANCE, 0, 1);
+            new ActionBarScheduler(this).runTaskTimer(Minesweeper.getPlugin(), 0, 1);
             draw();
         }
     }
@@ -264,11 +264,11 @@ public class Board {
     public void win(){
         finish();
 
-        player.sendMessage(Minesweeper.language.getString("message_win"));
-        player.sendMessage(Minesweeper.language.getString("field_desc", String.valueOf(width), String.valueOf(height), String.valueOf(bombCount)));
-        player.sendMessage(Minesweeper.language.getString("message_time_needed", getActualTimeNeededString()));
+        player.sendMessage(Minesweeper.getLanguage().getString("message_win"));
+        player.sendMessage(Minesweeper.getLanguage().getString("field_desc", String.valueOf(width), String.valueOf(height), String.valueOf(bombCount)));
+        player.sendMessage(Minesweeper.getLanguage().getString("message_time_needed", getActualTimeNeededString()));
 
-        player.sendTitle(ChatColor.DARK_GREEN + Minesweeper.language.getString("title_win"), ChatColor.GREEN + Minesweeper.language.getString("message_time_needed", getActualTimeNeededString()), 10, 70, 20);
+        player.sendTitle(ChatColor.DARK_GREEN + Minesweeper.getLanguage().getString("title_win"), ChatColor.GREEN + Minesweeper.getLanguage().getString("message_time_needed", getActualTimeNeededString()), 10, 70, 20);
         PacketUtil.sendSoundEffect(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, .5f, player.getLocation());
         PacketUtil.sendActionBar(player, getActualTimeNeededString());
     }
@@ -295,7 +295,7 @@ public class Board {
             clone.setZ(this.corner.getBlockZ() + point2D.getY());
 
 
-            Bukkit.getScheduler().runTaskLater(Minesweeper.INSTANCE, () -> {
+            Bukkit.getScheduler().runTaskLater(Minesweeper.getPlugin(), () -> {
                 for(Player p : viewers){
                     PacketUtil.sendBlockChange(p, new BlockPosition(clone.toVector()), WrappedBlockData.createData(Material.COAL_BLOCK));
                     PacketUtil.sendSoundEffect(p, Sound.BLOCK_STONE_PLACE, 1f, clone);
@@ -304,7 +304,7 @@ public class Board {
 
             explodeDuration *= 0.7;
         }
-        Bukkit.getScheduler().runTaskLater(Minesweeper.INSTANCE, () -> {
+        Bukkit.getScheduler().runTaskLater(Minesweeper.getPlugin(), () -> {
 
             for(Player p : viewers){
                 PacketUtil.sendSoundEffect(p, Sound.ENTITY_GENERIC_EXPLODE, 0.4f, p.getLocation());
@@ -320,7 +320,7 @@ public class Board {
 
     private void generateBoard(int x, int y){
         if(isGenerated)
-            throw new RuntimeException(Minesweeper.language.getString("error_already_generated"));
+            throw new RuntimeException(Minesweeper.getLanguage().getString("error_already_generated"));
 
         started = System.currentTimeMillis();
         isGenerated = true;

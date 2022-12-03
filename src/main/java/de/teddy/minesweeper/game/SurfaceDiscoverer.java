@@ -58,7 +58,7 @@ public class SurfaceDiscoverer {
         field.setUncover();
 
         if(field.isBomb())
-            throw new BombExplodeException(Minesweeper.language.getString("error_bomb_exploded", String.valueOf(width), String.valueOf(height)));
+            throw new BombExplodeException(Minesweeper.getLanguage().getString("error_bomb_exploded", String.valueOf(width), String.valueOf(height)));
 
         if(field.getNeighborCount() == 0){
             for(int i = -1; i < 2; i++){

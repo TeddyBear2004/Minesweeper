@@ -27,12 +27,12 @@ public class OnResourcePackStatus implements PacketListener {
             return;
 
         if(read == EnumWrappers.ResourcePackStatus.FAILED_DOWNLOAD){
-            player.sendMessage(ChatColor.DARK_RED + Minesweeper.language.getString("resource_pack_error"));
+            player.sendMessage(ChatColor.DARK_RED + Minesweeper.getLanguage().getString("resource_pack_error"));
             return;
         }
 
         if(read == EnumWrappers.ResourcePackStatus.DECLINED){
-            player.sendMessage(ChatColor.DARK_RED + Minesweeper.language.getString("resource_pack_not_enabled"));
+            player.sendMessage(ChatColor.DARK_RED + Minesweeper.getLanguage().getString("resource_pack_not_enabled"));
         }
     }
 
@@ -53,6 +53,6 @@ public class OnResourcePackStatus implements PacketListener {
 
     @Override
     public Plugin getPlugin(){
-        return Minesweeper.INSTANCE;
+        return Minesweeper.getPlugin();
     }
 }
