@@ -16,38 +16,49 @@ import de.teddy.minesweeper.game.Inventories;
 import de.teddy.minesweeper.util.Language;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 public final class Minesweeper extends JavaPlugin {
 
     private static List<Game> games = new ArrayList<>();
     private static JavaPlugin plugin;
     private static Language language;
-    private static World world;
+    private final String langPath = "lang/" + getConfig().getString("language") + ".toml";
+
+    public static JavaPlugin getPlugin() {
+        return plugin;
+    }
+
+    public static List<Game> getGames() {
+        return games;
+    }
+
+    public static Language getLanguage() {
+        return language;
+    }
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        saveResource("lang/" + getConfig().getString("language") + ".toml", false);
+        saveResource(langPath, false);
 
-        Inventories.loadInventories(getConfig().getInt("available_games_inventory_lines"), games);
 
         Minesweeper.plugin = this;
         Minesweeper.language = loadLanguage();
+        loadWorld();
         Minesweeper.games = loadGames();
-        Minesweeper.world = loadWorld();
+
+
+        Inventories.loadInventories(getConfig().getInt("available_games_inventory_lines"), games);
 
         Objects.requireNonNull(this.getCommand("start")).setExecutor(new StartCommand());
         Objects.requireNonNull(this.getCommand("resetResourcePack")).setExecutor(new ResetResourcePack());
@@ -63,12 +74,13 @@ public final class Minesweeper extends JavaPlugin {
 
         Bukkit.getOnlinePlayers().forEach(player -> {
             player.getInventory().setContents(Inventories.viewerInventory);
-            games.get(0).startViewing(player, null);
+            if (Minesweeper.getGames().size() != 0)
+                games.get(0).startViewing(player, null);
         });
     }
 
     private Language loadLanguage() {
-        File file = new File(getDataFolder(), "lang/" + getConfig().getString("language") + ".toml");
+        File file = new File(getDataFolder(), langPath);
         if (!file.exists()) {
             getLogger().warning("Language file not found! Using default language file!");
             saveResource("lang/en_US", false);
@@ -78,52 +90,52 @@ public final class Minesweeper extends JavaPlugin {
         return new Language(new Toml().read(file));
     }
 
-    private World loadWorld() {
+    private void loadWorld() {
         if (!getConfig().getBoolean("use_default_map"))
-            return null;
+            return;
 
         File minesweeper = new File("MineSweeper");
-        if (minesweeper.exists())
-            return WorldCreator.name("MineSweeper").createWorld();
+        File[] files = minesweeper.listFiles();
+        if (minesweeper.exists()
+                && minesweeper.isDirectory()
+                && files != null
+                && files.length != 0) {
+            WorldCreator.name("MineSweeper").type(WorldType.FLAT).createWorld();
+            return;
+        }
 
-        saveResource("MineSweeper.zip", true);
-        File zippedFile = new File(getDataFolder(), "MineSweeper.zip");
-        try{
-            ZipFile zipFile = new ZipFile(zippedFile);
-            Enumeration<? extends ZipEntry> entries = zipFile.entries();
-            int i = 0;
-            int entriesCount = zipFile.size();
-            while (entries.hasMoreElements()) {
-                ZipEntry entry = entries.nextElement();
-                i++;
-                getLogger().info("Extracting world file: " + entry.getName() + " (" + i + "/" + entriesCount + ")");
-                if (entry.isDirectory())
-                    new File(entry.getName()).mkdirs();
-                else{
-                    InputStream inputStream = zipFile.getInputStream(entry);
-                    File file = new File(entry.getName());
-                    if (!file.exists()) {
-                        file.getParentFile().mkdirs();
-                        file.createNewFile();
+        try(ZipInputStream zis = new ZipInputStream(Objects.requireNonNull(getResource("MineSweeper.zip")))){
+            ZipEntry zipEntry;
+            byte[] buffer = new byte[1024];
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                File newFile = new File(".", zipEntry.getName());
+                if (zipEntry.isDirectory()) {
+                    if (!newFile.exists() && !newFile.isDirectory() && !newFile.mkdirs()) {
+                        throw new IOException("Failed to create directory " + newFile);
                     }
-                    FileOutputStream fileOutputStream = new FileOutputStream(file);
-                    byte[] buffer = new byte[1024];
-                    int length;
-                    while ((length = inputStream.read(buffer)) > 0)
-                        fileOutputStream.write(buffer, 0, length);
-                    fileOutputStream.close();
+                } else {
+                    File parent = newFile.getParentFile();
+                    if (!parent.exists() && !parent.isDirectory() && !parent.mkdirs()) {
+                        throw new IOException("Failed to create directory " + parent);
+                    }
+
+                    if (!newFile.isDirectory() && !newFile.exists())
+                        newFile.createNewFile();
+
+                    try(FileOutputStream fos = new FileOutputStream(newFile)){
+                        int len;
+                        while ((len = zis.read(buffer)) > 0) {
+                            fos.write(buffer, 0, len);
+                        }
+                    }
                 }
+
             }
-            zipFile.close();
         }catch(IOException e){
             e.printStackTrace();
         }
-        zippedFile.delete();
 
-        if (Objects.requireNonNull(zippedFile.getParentFile().listFiles()).length == 0)
-            zippedFile.getParentFile().delete();
-
-        return WorldCreator.name("MineSweeper").createWorld();
+        WorldCreator.name("MineSweeper").type(WorldType.FLAT).createWorld();
     }
 
     private List<Game> loadGames() {
@@ -155,16 +167,5 @@ public final class Minesweeper extends JavaPlugin {
         return gameList;
     }
 
-    public static JavaPlugin getPlugin() {
-        return plugin;
-    }
-
-    public static List<Game> getGames() {
-        return games;
-    }
-
-    public static Language getLanguage() {
-        return language;
-    }
 
 }
