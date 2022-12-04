@@ -8,6 +8,8 @@ import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -17,19 +19,7 @@ import java.lang.reflect.InvocationTargetException;
 
 public class PacketUtil {
     public static void sendActionBar(Player player, String message){
-        ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
-        PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.CHAT, true);
-
-        packet.getChatComponents()
-                .write(0, WrappedChatComponent.fromLegacyText(message));
-
-        packet.getChatTypes()
-                .write(0, EnumWrappers.ChatType.GAME_INFO);
-        try{
-            protocolManager.sendServerPacket(player, packet);
-        }catch(InvocationTargetException e){
-            e.printStackTrace();
-        }
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
     }
 
     public static void sendParticleEffect(Player player, Location location, Particle particle, float xDifference, float zDifference, int count){
