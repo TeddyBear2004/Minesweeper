@@ -1,6 +1,7 @@
 package de.teddy.minesweeper.game;
 
 import de.teddy.minesweeper.Minesweeper;
+import de.teddy.minesweeper.game.painter.BlockPainter;
 import de.teddy.minesweeper.util.IsBetween;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -145,7 +146,7 @@ public class Game {
 
 	public void startGame(Player p, boolean shouldTeleport){
 		stopGames(p);
-		Board b = new Board(this, size, size, bombCount, corner, p);
+		Board b = new Board(this, size, size, bombCount, corner, p, new BlockPainter());
 		b.drawBlancField(Collections.singletonList(p));
 		startWatching(p, b);
 		runningGames.put(p, b);
