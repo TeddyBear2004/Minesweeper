@@ -47,7 +47,8 @@ public class GenericEvents implements Listener {
             }
         }
         if(!watching){
-            Minesweeper.getGames().get(0).startViewing(event.getPlayer(), null);
+            if (Minesweeper.getGames().size() != 0)
+                Minesweeper.getGames().get(0).startViewing(event.getPlayer(), null);
         }
     }
 
