@@ -1,12 +1,19 @@
 package de.teddy.minesweeper.game.painter;
 
+import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.BlockPosition;
+import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
 import de.teddy.minesweeper.Minesweeper;
+import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.game.Board;
+import de.teddy.minesweeper.game.Game;
+import de.teddy.minesweeper.game.Inventories;
+import de.teddy.minesweeper.game.exceptions.BombExplodeException;
 import de.teddy.minesweeper.util.PacketUtil;
 import de.teddy.minesweeper.util.Tuple2;
 import org.apache.commons.lang3.ArrayUtils;
@@ -193,6 +200,148 @@ public class BlockPainter implements Painter {
             return Material.COAL_BLOCK;
         else
             return (lightField ? LIGHT_MATERIALS : DARK_MATERIALS)[field.getNeighborCount()];
+    }
+
+    @Override
+    public PacketType getRightClickPacketType() {
+        return PacketType.Play.Client.USE_ITEM;
+    }
+
+    @Override
+    public PacketType getLeftClickPacketType() {
+        return PacketType.Play.Client.BLOCK_DIG;
+    }
+
+    @Override
+    public void onRightClick(Player player, PacketEvent event, Game game, PacketContainer packet) {
+        BlockPosition blockPosition = packet.getMovingBlockPositions().read(0).getBlockPosition();
+        Location location = blockPosition.toLocation(player.getWorld());
+
+        if (game.isBlockOutsideGame(location.getBlock()))
+            return;
+
+        Board board = Game.getBoard(player);
+
+        if (board == null) {
+            Board watching = Game.getBoardWatched(player);
+
+            if (watching != null) {
+                Board.Field field = watching.getField(location);
+                if (field != null) {
+                    Material[] materials = new Material[]{getActualMaterial(field), field.getMark()};
+                    PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(materials[location.getBlockY() - game.getFieldHeight()]));
+                }
+                player.getInventory().setContents(Inventories.viewerInventory);
+                event.setCancelled(true);
+            }
+            return;
+        }
+
+        Board.Field field = board.getField(location);
+
+        if (field == null)
+            return;
+
+        event.setCancelled(true);
+        player.getInventory().setContents(Inventories.gameInventory);
+
+        if (board.isFinished() || packet.getHands().read(0) == EnumWrappers.Hand.OFF_HAND)
+            return;
+
+        if (field.isCovered())
+            field.reverseMark();
+
+        board.draw();
+    }
+
+    @Override
+    public void onLeftClick(Player player, PacketEvent event, Game game, PacketContainer packet) {
+        BlockPosition blockPosition = packet.getBlockPositionModifier().read(0);
+        Location location = blockPosition.toLocation(player.getWorld());
+
+        if (game.isBlockOutsideGame(location.getBlock()))
+            return;
+
+        Board board = Game.getBoard(player);
+
+        if (board == null) {
+            Board watching = Game.getBoardWatched(player);
+
+            if (watching != null) {
+                Board.Field field = watching.getField(location);
+                if (field == null)
+                    return;
+                Material[] materials = new Material[]{getActualMaterial(field), field.getMark()};
+
+                if (game.getFieldHeight() - location.getBlockY() < 0)
+                    return;
+
+                PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(materials[game.getFieldHeight() - location.getBlockY()]));
+            }
+            return;
+        }
+
+        Board.Field field = board.getField(location);
+
+        if (!board.isFinished()) {
+            EnumWrappers.PlayerDigType digType = packet.getPlayerDigTypes().read(0);
+            if (field != null && digType == EnumWrappers.PlayerDigType.START_DESTROY_BLOCK) {
+                if (location.getBlockY() - game.getFieldHeight() == 0) {
+                    board.draw();
+                    event.setCancelled(true);
+                } else if (location.getBlockY() - game.getFieldHeight() == 1) {
+                    PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(field.getMark()));
+                }
+            }
+
+            if (digType == EnumWrappers.PlayerDigType.STOP_DESTROY_BLOCK && field != null) {
+                board.draw();
+                return;
+            }
+
+            if (digType != EnumWrappers.PlayerDigType.START_DESTROY_BLOCK)
+                return;
+        }
+
+
+        if (board.isFinished())
+            return;
+
+        try{
+            if (field == null) {
+                try{
+                    board.checkField(location.getBlockX(), location.getBlockZ());
+                }catch(IllegalArgumentException ignore){
+                }
+
+                board.draw();
+                return;
+            }
+
+            if (field.isMarked()) {
+                if (location.getBlockY() - game.getFieldHeight() == 1)
+                    PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(field.getMark()));
+
+                return;
+            }
+
+            if (field.isCovered()) {
+                board.checkField(location.getBlockX(), location.getBlockZ());
+            } else if (System.currentTimeMillis() - LeftClickEvent.LAST_CLICKED.getOrDefault(player, (long) -1000) <= 350) {
+                try{
+                    board.checkNumber(location.getBlockX(), location.getBlockZ());
+                }catch(ArrayIndexOutOfBoundsException ignore){
+                }
+            }
+
+            LeftClickEvent.LAST_CLICKED.put(player, System.currentTimeMillis());
+        }catch(BombExplodeException e){
+            board.lose();
+        }
+
+        board.draw();
+        board.checkIfWon();
+
     }
 
 }

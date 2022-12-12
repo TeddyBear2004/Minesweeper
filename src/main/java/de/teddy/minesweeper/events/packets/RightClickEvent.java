@@ -22,6 +22,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class RightClickEvent implements PacketListener {
 
     @Override
@@ -40,70 +43,8 @@ public class RightClickEvent implements PacketListener {
         if (game == null || painter == null)
             return;
 
-        BlockPosition blockPosition;
-        Location location;
-        boolean useArmorStandPainter = false;
-
-        if (packet.getType() == PacketType.Play.Client.USE_ENTITY) {
-            WrappedEnumEntityUseAction read = event.getPacket().getEnumEntityUseActions().read(0);
-
-            if (read.getAction() == EnumWrappers.EntityUseAction.ATTACK) {
-                return;
-            }
-
-            Integer entityId = event.getPacket().getIntegers().read(0);
-
-            if (!(painter instanceof ArmorStandPainter armorStandPainter)) return;
-
-            useArmorStandPainter = true;
-            Board cache = Game.getBoard(player);
-            if (cache == null) return;
-            location = armorStandPainter.getLocation(cache, entityId);
-            if (location == null)
-                return;
-
-            blockPosition = new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ());
-
-        } else {
-            blockPosition = packet.getMovingBlockPositions().read(0).getBlockPosition();
-            location = blockPosition.toLocation(player.getWorld());
-        }
-
-        if (game.isBlockOutsideGame(location.getBlock()))
-            return;
-
-        Board board = Game.getBoard(player);
-
-        if (board == null) {
-            Board watching = Game.getBoardWatched(player);
-
-            if (watching != null) {
-                Board.Field field = watching.getField(location);
-                if (field != null) {
-                    Material[] materials = new Material[]{field.getActualMaterial(painter), field.getMark()};
-                    PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(materials[location.getBlockY() - game.getFieldHeight()]));
-                }
-                player.getInventory().setContents(Inventories.viewerInventory);
-                event.setCancelled(true);
-            }
-            return;
-        }
-
-        Board.Field field = board.getField(location);
-
-        if (field == null)
-            return;
-
-        event.setCancelled(true);
-        player.getInventory().setContents(Inventories.gameInventory);
-
-        if (board.isFinished() || (!useArmorStandPainter && packet.getHands().read(0) == EnumWrappers.Hand.OFF_HAND))
-            return;
-
-        if (field.isCovered())
-            field.reverseMark();
-
-        board.draw();
+        if(painter.getRightClickPacketType() == packet.getType())
+            painter.onRightClick(player, event, game, packet);
     }
 
     @Override
@@ -113,10 +54,14 @@ public class RightClickEvent implements PacketListener {
 
     @Override
     public ListeningWhitelist getReceivingWhitelist() {
+        Set<PacketType> types = new HashSet<>();
+
+        Game.PAINTER_MAP.values().forEach(painter -> types.add(painter.getRightClickPacketType()));
+
         return ListeningWhitelist
                 .newBuilder()
                 .gamePhase(GamePhase.PLAYING)
-                .types(PacketType.Play.Client.USE_ITEM, PacketType.Play.Client.USE_ENTITY)
+                .types(types.toArray(new PacketType[0]))
                 .high()
                 .build();
     }

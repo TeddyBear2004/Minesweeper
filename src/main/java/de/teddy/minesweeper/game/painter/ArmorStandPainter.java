@@ -1,10 +1,20 @@
 package de.teddy.minesweeper.game.painter;
 
+import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.wrappers.BlockPosition;
+import com.comphenix.protocol.wrappers.EnumWrappers;
+import com.comphenix.protocol.wrappers.WrappedBlockData;
+import com.comphenix.protocol.wrappers.WrappedEnumEntityUseAction;
 import de.teddy.minesweeper.Minesweeper;
+import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.game.Board;
+import de.teddy.minesweeper.game.Game;
+import de.teddy.minesweeper.game.Inventories;
+import de.teddy.minesweeper.game.exceptions.BombExplodeException;
 import de.teddy.minesweeper.util.Base64Head;
 import de.teddy.minesweeper.util.PacketUtil;
 import org.bukkit.Bukkit;
@@ -205,6 +215,109 @@ public class ArmorStandPainter implements Painter {
     @Override
     public Material getActualMaterial(Board.Field field) {
         return getActualItemStack(field).getType();
+    }
+
+    @Override
+    public PacketType getRightClickPacketType() {
+        return PacketType.Play.Client.USE_ENTITY;
+    }
+
+    @Override
+    public PacketType getLeftClickPacketType() {
+        return PacketType.Play.Client.USE_ENTITY;
+    }
+
+    @Override
+    public void onRightClick(Player player, PacketEvent event, Game game, PacketContainer packet) {
+        WrappedEnumEntityUseAction read = event.getPacket().getEnumEntityUseActions().read(0);
+
+        if (read.getAction() == EnumWrappers.EntityUseAction.ATTACK)
+            return;
+
+        Integer entityId = event.getPacket().getIntegers().read(0);
+
+        Board board = Game.getBoard(player);
+        if (board == null) return;
+
+        Location location = getLocation(board, entityId);
+        if (location == null || game.isBlockOutsideGame(location.getBlock()))
+            return;
+
+        Board.Field field = board.getField(location);
+        if (field == null)
+            return;
+
+        event.setCancelled(true);
+        player.getInventory().setContents(Inventories.gameInventory);
+
+        if (board.isFinished())
+            return;
+
+        if (field.isCovered())
+            field.reverseMark();
+
+        board.draw();
+    }
+
+    @Override
+    public void onLeftClick(Player player, PacketEvent event, Game game, PacketContainer packet) {
+        WrappedEnumEntityUseAction read = event.getPacket().getEnumEntityUseActions().read(0);
+
+        if (read.getAction() != EnumWrappers.EntityUseAction.ATTACK)
+            return;
+
+        Integer entityId = event.getPacket().getIntegers().read(0);
+        Board board = Game.getBoard(player);
+
+        if (board == null)
+            return;
+        Location location = getLocation(board, entityId);
+
+        if (location == null)
+            return;
+
+        BlockPosition blockPosition = new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+
+        if (game.isBlockOutsideGame(location.getBlock()))
+            return;
+
+        Board.Field field = board.getField(location);
+
+
+        if (board.isFinished())
+            return;
+
+        try{
+            if (field == null) {
+                try{
+                    board.checkField(location.getBlockX(), location.getBlockZ());
+                }catch(IllegalArgumentException ignore){
+                }
+
+                board.draw();
+                return;
+            }
+
+            if (field.isMarked()) {
+                if (location.getBlockY() - game.getFieldHeight() == 1)
+                    PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(field.getMark()));
+
+                return;
+            }
+
+            if (field.isCovered()) {
+                board.checkField(location.getBlockX(), location.getBlockZ());
+            } else if (System.currentTimeMillis() - LeftClickEvent.LAST_CLICKED.getOrDefault(player, (long) -1000) <= 350) {
+                board.checkNumber(location.getBlockX(), location.getBlockZ());
+            }
+
+            LeftClickEvent.LAST_CLICKED.put(player, System.currentTimeMillis());
+        }catch(BombExplodeException e){
+            board.lose();
+        }
+
+        board.draw();
+        board.checkIfWon();
     }
 
     public Location getLocation(Board board, int entityId) {
