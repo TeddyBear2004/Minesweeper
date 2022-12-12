@@ -10,14 +10,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
 
-public class Base64Head {
+public class HeadGenerator {
 
-    public static ItemStack getBase64Head(String url) {
-        ItemStack itemStack = new ItemStack(Material.PLAYER_HEAD);
-
-        SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
-        assert meta != null;
-
+    public static ItemStack getHeadFromUrl(String url) {
         PlayerProfile playerProfile = Bukkit.getServer().createPlayerProfile(UUID.randomUUID());
 
         try{
@@ -26,11 +21,22 @@ public class Base64Head {
             throw new RuntimeException(e);
         }
 
-        meta.setOwnerProfile(playerProfile);
+        return getHeadFromPlayerProfile(playerProfile);
+    }
+
+    public static ItemStack getHeadFromPlayerProfile(PlayerProfile playerProfile) {
+        ItemStack itemStack = new ItemStack(Material.PLAYER_HEAD);
+
+        SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
+
+        if (meta != null) {
+            meta.setOwnerProfile(playerProfile);
+        }
 
         itemStack.setItemMeta(meta);
 
         return itemStack;
     }
+
 
 }

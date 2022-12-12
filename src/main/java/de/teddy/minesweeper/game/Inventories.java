@@ -1,8 +1,7 @@
 package de.teddy.minesweeper.game;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import de.teddy.minesweeper.Minesweeper;
+import de.teddy.minesweeper.util.HeadGenerator;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -12,13 +11,8 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Base64;
 import java.util.List;
-import java.util.UUID;
 
 public class Inventories {
 
@@ -50,7 +44,7 @@ public class Inventories {
             barrierMeta.setDisplayName(ChatColor.DARK_RED + Minesweeper.getLanguage().getString("leave"));
         barrier.setItemMeta(barrierMeta);
 
-        reload = getPlayerHead("http://textures.minecraft.net/texture/e887cc388c8dcfcf1ba8aa5c3c102dce9cf7b1b63e786b34d4f1c3796d3e9d61");
+        reload = HeadGenerator.getHeadFromUrl("http://textures.minecraft.net/texture/e887cc388c8dcfcf1ba8aa5c3c102dce9cf7b1b63e786b34d4f1c3796d3e9d61");
 
         SkullMeta headMeta = (SkullMeta) reload.getItemMeta();
         if (headMeta != null)
@@ -83,7 +77,7 @@ public class Inventories {
         }
         book.setItemMeta(bookMeta);
 
-        hourGlass = getPlayerHead("http://textures.minecraft.net/texture/b522cac48d1151b0a6eebb72fae26626c394fdc62d5b2064a69266e796a20268");
+        hourGlass = HeadGenerator.getHeadFromUrl("http://textures.minecraft.net/texture/b522cac48d1151b0a6eebb72fae26626c394fdc62d5b2064a69266e796a20268");
 
         SkullMeta timeMeta = (SkullMeta) hourGlass.getItemMeta();
         if (timeMeta != null)
@@ -94,47 +88,4 @@ public class Inventories {
         viewerInventory[4] = hourGlass;
         viewerInventory[7] = book;
     }
-
-    private static GameProfile makeProfile(String b64) {
-        UUID id = new UUID(
-                b64.substring(b64.length() - 20).hashCode(),
-                b64.substring(b64.length() - 10).hashCode()
-        );
-        GameProfile profile = new GameProfile(id, "Player");
-        profile.getProperties().put("textures", new Property("textures", b64));
-        return profile;
-    }
-
-    private static String urlToBase64(String url) {
-
-        URI actualUrl;
-        try{
-            actualUrl = new URI(url);
-        }catch(URISyntaxException e){
-            throw new RuntimeException(e);
-        }
-        String toEncode = "{\"textures\":{\"SKIN\":{\"url\":\"" + actualUrl + "\"}}}";
-        return Base64.getEncoder().encodeToString(toEncode.getBytes());
-    }
-
-    public static ItemStack getPlayerHead(String url) {
-        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-        SkullMeta itemMeta = (SkullMeta) head.getItemMeta();
-        assert itemMeta != null;
-
-        try{
-            if (metaSetProfileMethod == null) {
-                metaSetProfileMethod = itemMeta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
-                metaSetProfileMethod.setAccessible(true);
-            }
-
-            metaSetProfileMethod.invoke(itemMeta, makeProfile(urlToBase64(url)));
-        }catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException e){
-            e.printStackTrace();
-        }
-
-        head.setItemMeta(itemMeta);
-        return head;
-    }
-
 }
