@@ -18,3 +18,4 @@ commands:
   resetResourcePack:
     usage: /resetResourcePack
     description: Setzt dein aktuelles Server-Resource-Pack zurück.
+  test:

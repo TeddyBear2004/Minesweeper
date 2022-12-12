@@ -1,6 +1,7 @@
 package de.teddy.minesweeper.events;
 
 import de.teddy.minesweeper.Minesweeper;
+import de.teddy.minesweeper.game.Game;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -24,11 +25,19 @@ public class OnInventory implements Listener {
 
 			String displayName = itemMeta.getDisplayName();
 
-			Minesweeper.getGames()
-					.stream()
-					.filter(game -> displayName.equals(game.getDifficultyName()))
-					.findFirst()
-					.ifPresent(game -> game.startGame(((Player)event.getWhoClicked())));
+			// Find the Minesweeper game with the matching difficulty name, if any
+			Game game = findMinesweeperGameByDifficultyName(displayName);
+			if (game != null) {
+				game.startGame(((Player)event.getWhoClicked()));
+			}
 		}
+	}
+
+	private Game findMinesweeperGameByDifficultyName(String difficultyName) {
+		return Minesweeper.getGames()
+				.stream()
+				.filter(game -> difficultyName.equals(game.getDifficultyName()))
+				.findFirst()
+				.orElse(null);
 	}
 }

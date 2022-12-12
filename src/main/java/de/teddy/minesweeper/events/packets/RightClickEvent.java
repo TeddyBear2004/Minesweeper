@@ -9,93 +9,66 @@ import com.comphenix.protocol.injector.GamePhase;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
+import com.comphenix.protocol.wrappers.WrappedEnumEntityUseAction;
 import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.Inventories;
+import de.teddy.minesweeper.game.painter.ArmorStandPainter;
+import de.teddy.minesweeper.game.painter.Painter;
 import de.teddy.minesweeper.util.PacketUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class RightClickEvent implements PacketListener {
-    @Override
-    public void onPacketSending(PacketEvent event){}
 
     @Override
-    public void onPacketReceiving(PacketEvent event){
+    public void onPacketSending(PacketEvent event) { }
+
+    @Override
+    public void onPacketReceiving(PacketEvent event) {
         Player player = event.getPlayer();
         PacketContainer packet = event.getPacket();
 
-        if(player.getInventory().getItemInMainHand().getType() != Material.AIR)
+        if (player.getInventory().getItemInMainHand().getType() != Material.AIR)
             return;
 
         Game game = Game.getGame(player);
-
-        if(game == null)
+        Painter painter = Game.PAINTER_MAP.get(Game.PLAYER_PAINTER_MAP.get(player));
+        if (game == null || painter == null)
             return;
 
-        BlockPosition blockPosition = packet.getMovingBlockPositions().read(0).getBlockPosition();
-        Location location = blockPosition.toLocation(player.getWorld());
-
-        if(game.isBlockOutsideGame(location.getBlock()))
-            return;
-
-        Board board = Game.getBoard(player);
-
-        if(board == null){
-            Board watching = Game.getBoardWatched(player);
-
-            if(watching != null){
-                Board.Field field = watching.getField(location);
-                if(field != null){
-                    Material[] materials = new Material[]{field.getActualMaterial(), field.getMark()};
-                    PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(materials[location.getBlockY() - game.getFieldHeight()]));
-                }
-                player.getInventory().setContents(Inventories.viewerInventory);
-                event.setCancelled(true);
-            }
-            return;
-        }
-
-        Board.Field field = board.getField(location);
-
-        if(field == null)
-            return;
-
-        player.getInventory().setContents(Inventories.gameInventory);
-        event.setCancelled(true);
-
-        if(board.isFinished())
-            return;
-
-        if(packet.getHands().read(0) == EnumWrappers.Hand.OFF_HAND)
-            return;
-
-        if(field.isCovered())
-            field.reverseMark();
-
-        board.draw();
+        if(painter.getRightClickPacketType() == packet.getType())
+            painter.onRightClick(player, event, game, packet);
     }
 
     @Override
-    public ListeningWhitelist getSendingWhitelist(){
+    public ListeningWhitelist getSendingWhitelist() {
         return ListeningWhitelist.EMPTY_WHITELIST;
     }
 
     @Override
-    public ListeningWhitelist getReceivingWhitelist(){
+    public ListeningWhitelist getReceivingWhitelist() {
+        Set<PacketType> types = new HashSet<>();
+
+        Game.PAINTER_MAP.values().forEach(painter -> types.add(painter.getRightClickPacketType()));
+
         return ListeningWhitelist
                 .newBuilder()
                 .gamePhase(GamePhase.PLAYING)
-                .types(PacketType.Play.Client.USE_ITEM)
+                .types(types.toArray(new PacketType[0]))
                 .high()
                 .build();
     }
 
     @Override
-    public Plugin getPlugin(){
+    public Plugin getPlugin() {
         return Minesweeper.getPlugin();
     }
+
 }
