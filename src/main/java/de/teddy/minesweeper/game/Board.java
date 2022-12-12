@@ -1,7 +1,5 @@
 package de.teddy.minesweeper.game;
 
-import com.comphenix.protocol.wrappers.BlockPosition;
-import com.comphenix.protocol.wrappers.WrappedBlockData;
 import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
 import de.teddy.minesweeper.game.painter.Painter;
@@ -18,28 +16,6 @@ import java.util.*;
 
 public class Board {
 
-    public static final Material[] LIGHT_MATERIALS = {
-            Material.WHITE_CONCRETE_POWDER,
-            Material.LIME_TERRACOTTA,
-            Material.GREEN_CONCRETE,
-            Material.YELLOW_TERRACOTTA,
-            Material.ORANGE_TERRACOTTA,
-            Material.MAGENTA_TERRACOTTA,
-            Material.PINK_TERRACOTTA,
-            Material.PURPLE_TERRACOTTA,
-            Material.RED_TERRACOTTA};
-    public static final Material[] DARK_MATERIALS = {
-            Material.LIGHT_GRAY_CONCRETE_POWDER,
-            Material.TERRACOTTA,
-            Material.GREEN_TERRACOTTA,
-            Material.BROWN_TERRACOTTA,
-            Material.BLUE_TERRACOTTA,
-            Material.CYAN_TERRACOTTA,
-            Material.LIGHT_GRAY_TERRACOTTA,
-            Material.GRAY_TERRACOTTA,
-            Material.LIGHT_BLUE_TERRACOTTA};
-    public static final Material LIGHT_DEFAULT = Material.LIME_CONCRETE_POWDER;
-    public static final Material DARK_DEFAULT = Material.GREEN_CONCRETE_POWDER;
     public static boolean notTest = true;
     public final Game map;
     final List<Player> viewers = new LinkedList<>();
@@ -50,16 +26,13 @@ public class Board {
     private final Field[][] board;
     private final Point2D[] bombList;
     private final Player player;
-    private final Painter painter;
     private long started;
     private boolean isGenerated;
     private boolean isFinished;
 
-    public Board(Game map, int width, int height, int bombCount, Location corner, Player player, Painter painter) {
+    public Board(Game map, int width, int height, int bombCount, Location corner, Player player) {
         this.map = map;
         this.player = player;
-        this.painter = painter;
-        this.painter.applyBoard(this);
         if (width * height - 9 <= bombCount || width * height <= bombCount)
             throw new IllegalArgumentException("bombCount cannot be bigger than width * height");
 
@@ -69,7 +42,6 @@ public class Board {
         this.width = width;
         this.height = height;
         this.bombCount = bombCount;
-
         this.board = new Field[width][height];
         if (notTest) {
             new ActionBarScheduler(this).runTaskTimer(Minesweeper.getPlugin(), 0, 1);
@@ -78,9 +50,9 @@ public class Board {
     }
 
     public static short convertToLocal(int x, int y, int z) {
-        x = x & 0xF;
-        y = y & 0xF;
-        z = z & 0xF;
+        x &= 0xF;
+        y &= 0xF;
+        z &= 0xF;
         return (short) (x << 8 | z << 4 | y);
     }
 
@@ -89,72 +61,72 @@ public class Board {
     }
 
     public void finish() {
-        isFinished = true;
+        this.isFinished = true;
     }
 
     public boolean isFinished() {
-        return isFinished;
+        return this.isFinished;
     }
 
     public Field[][] getBoard() {
-        return board;
+        return this.board;
     }
 
     public void drawBlancField() {
-        drawBlancField(viewers);
+        this.drawBlancField(viewers);
     }
 
     public void drawBlancField(List<Player> players) {
-        this.painter.drawBlancField(players);
+        getCurrentPlayerPainters(players).forEach((painter, players2) -> painter.drawBlancField(this, players2));
     }
 
     public boolean isGenerated() {
-        return isGenerated;
+        return this.isGenerated;
     }
 
     public void draw() {
-        draw(viewers);
+        this.draw(this.viewers);
     }
 
     public void draw(List<Player> players) {
-        this.painter.drawField(players);
+        getCurrentPlayerPainters(players).forEach((painter, players2) -> painter.drawField(this, players2));
     }
 
 
     public Field getField(int x, int y) {
         try{
-            return board[x][y];
+            return this.board[x][y];
         }catch(ArrayIndexOutOfBoundsException e){
             return null;
         }
     }
 
     public Field getField(Location location) {
-        int x = Math.abs(corner.getBlockX() - location.getBlockX());
-        int y = Math.abs(corner.getBlockZ() - location.getBlockZ());
+        int x = Math.abs(this.corner.getBlockX() - location.getBlockX());
+        int y = Math.abs(this.corner.getBlockZ() - location.getBlockZ());
 
-        return getField(x, y);
+        return this.getField(x, y);
     }
 
     public void checkField(int x, int y) throws BombExplodeException {
-        x = Math.abs(corner.getBlockX() - x);
-        y = Math.abs(corner.getBlockZ() - y);
+        x = Math.abs(this.corner.getBlockX() - x);
+        y = Math.abs(this.corner.getBlockZ() - y);
 
-        if (!isGenerated)
+        if (!this.isGenerated)
             generateBoard(x, y);
 
         SurfaceDiscoverer.uncoverFields(this, x, y);
     }
 
     public void checkNumber(int x, int y) throws BombExplodeException {
-        x = Math.abs(corner.getBlockX() - x);
-        y = Math.abs(corner.getBlockZ() - y);
+        x = Math.abs(this.corner.getBlockX() - x);
+        y = Math.abs(this.corner.getBlockZ() - y);
 
         SurfaceDiscoverer.uncoverFieldsNextToNumber(this, x, y);
     }
 
     private long getActualTimeNeeded() {
-        return started == 0 ? 0 : System.currentTimeMillis() - started;
+        return this.started == 0 ? 0 : System.currentTimeMillis() - this.started;
     }
 
     private String getActualTimeNeededString() {
@@ -164,27 +136,55 @@ public class Board {
     }
 
     public int getWidth() {
-        return width;
+        return this.width;
     }
 
     public int getHeight() {
-        return height;
+        return this.height;
     }
 
     public Location getCorner() {
-        return corner;
+        return this.corner;
+    }
+
+    public Point2D[] getBombList() {
+        return bombList;
+    }
+
+    public Map<Painter, List<Player>> getCurrentPlayerPainters(List<Player> viewers) {
+        Map<Class<? extends Painter>, List<Player>> map1 = new HashMap<>();
+        viewers.forEach(player1 -> {
+            Class<? extends Painter> aClass = Game.PLAYER_PAINTER_MAP.get(player1);
+
+            List<Player> orDefault = map1.getOrDefault(aClass, new ArrayList<>());
+            orDefault.add(player1);
+            map1.put(aClass, orDefault);
+        });
+
+        Class<? extends Painter> aClass = Game.PLAYER_PAINTER_MAP.get(player);
+        List<Player> orDefault = map1.getOrDefault(aClass, new ArrayList<>());
+        orDefault.add(player);
+        map1.put(aClass, orDefault);
+
+        Map<Painter, List<Player>> map2 = new HashMap<>();
+        map1.forEach((aClass2, players) -> map2.put(Game.PAINTER_MAP.get(aClass2), players));
+        return map2;
+    }
+
+    public Map<Painter, List<Player>> getCurrentPlayerPainters() {
+        return getCurrentPlayerPainters(this.viewers);
     }
 
     public void win() {
-        finish();
+        this.finish();
 
-        player.sendMessage(Minesweeper.getLanguage().getString("message_win"));
-        player.sendMessage(Minesweeper.getLanguage().getString("field_desc", String.valueOf(width), String.valueOf(height), String.valueOf(bombCount)));
-        player.sendMessage(Minesweeper.getLanguage().getString("message_time_needed", getActualTimeNeededString()));
+        this.player.sendMessage(Minesweeper.getLanguage().getString("message_win"));
+        this.player.sendMessage(Minesweeper.getLanguage().getString("field_desc", String.valueOf(this.width), String.valueOf(this.height), String.valueOf(this.bombCount)));
+        this.player.sendMessage(Minesweeper.getLanguage().getString("message_time_needed", getActualTimeNeededString()));
 
-        player.sendTitle(ChatColor.DARK_GREEN + Minesweeper.getLanguage().getString("title_win"), ChatColor.GREEN + Minesweeper.getLanguage().getString("message_time_needed", getActualTimeNeededString()), 10, 70, 20);
-        PacketUtil.sendSoundEffect(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, .5f, player.getLocation());
-        PacketUtil.sendActionBar(player, getActualTimeNeededString());
+        this.player.sendTitle(ChatColor.DARK_GREEN + Minesweeper.getLanguage().getString("title_win"), ChatColor.GREEN + Minesweeper.getLanguage().getString("message_time_needed", getActualTimeNeededString()), 10, 70, 20);
+        PacketUtil.sendSoundEffect(this.player, Sound.UI_TOAST_CHALLENGE_COMPLETE, .5f, this.player.getLocation());
+        PacketUtil.sendActionBar(this.player, getActualTimeNeededString());
     }
 
     public void checkIfWon() {
@@ -200,50 +200,35 @@ public class Board {
 
     public void lose() {
         finish();
-        double explodeDuration = 0.5d;
 
-        for (Point2D point2D : this.bombList) {
-            Location clone = this.corner.clone();
+        getCurrentPlayerPainters().forEach((painter, players) -> painter.drawBombs(this, players));
 
-            clone.setX(this.corner.getBlockX() + point2D.getX());
-            clone.setZ(this.corner.getBlockZ() + point2D.getY());
-
-
-            Bukkit.getScheduler().runTaskLater(Minesweeper.getPlugin(), () -> {
-                for (Player p : viewers) {
-                    PacketUtil.sendBlockChange(p, new BlockPosition(clone.toVector()), WrappedBlockData.createData(Material.COAL_BLOCK));
-                    PacketUtil.sendSoundEffect(p, Sound.BLOCK_STONE_PLACE, 1f, clone);
-                }
-            }, (long) (20 * explodeDuration));
-
-            explodeDuration *= 0.7;
-        }
         Bukkit.getScheduler().runTaskLater(Minesweeper.getPlugin(), () -> {
 
-            for (Player p : viewers) {
+            for (Player p : this.viewers) {
                 PacketUtil.sendSoundEffect(p, Sound.ENTITY_GENERIC_EXPLODE, 0.4f, p.getLocation());
                 PacketUtil.sendParticleEffect(p,
-                                              corner.clone().add(((double) width) / 2, 1, (double) height / 2),
+                                              corner.clone().add(((double) this.width) / 2, 1, (double) this.height / 2),
                                               Particle.EXPLOSION_LARGE,
-                                              (float) width / 5,
-                                              (float) height / 5,
-                                              width * height);
+                                              (float) this.width / 5,
+                                              (float) this.height / 5,
+                                              this.width * this.height);
             }
         }, 20);
     }
 
     private void generateBoard(int x, int y) {
-        if (isGenerated)
+        if (this.isGenerated)
             throw new RuntimeException(Minesweeper.getLanguage().getString("error_already_generated"));
 
-        started = System.currentTimeMillis();
-        isGenerated = true;
+        this.started = System.currentTimeMillis();
+        this.isGenerated = true;
 
         Random random = new Random();
         boolean[][] cache = new boolean[this.height][this.width];
         int[][] ints = new int[this.height][this.width];
 
-        for (int i = 0; i < bombCount; i++) {
+        for (int i = 0; i < this.bombCount; i++) {
             int randWidth, randHeight;
 
             do{
@@ -282,7 +267,6 @@ public class Board {
 
         return false;
     }
-
     public static class Field {
 
         private final boolean isBomb;
@@ -322,15 +306,8 @@ public class Board {
             this.isMarked = !this.isMarked();
         }
 
-        public Material getActualMaterial() {
-            boolean lightField = isLightField(x, y);
-            if (isCovered)
-                return lightField ? LIGHT_DEFAULT : DARK_DEFAULT;
-
-            if (isBomb)
-                return Material.COAL_BLOCK;
-            else
-                return (lightField ? LIGHT_MATERIALS : DARK_MATERIALS)[getNeighborCount()];
+        public Material getActualMaterial(Painter painter) {
+            return painter.getActualMaterial(this);
         }
 
         public Material getMark() {
@@ -341,6 +318,13 @@ public class Board {
             return isCovered;
         }
 
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
     }
 
     private static class ActionBarScheduler extends BukkitRunnable {
