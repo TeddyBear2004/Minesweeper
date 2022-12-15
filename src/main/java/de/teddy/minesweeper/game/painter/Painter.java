@@ -23,8 +23,8 @@ public interface Painter {
 
     Material getActualMaterial(Board.Field field);
 
-    PacketType getRightClickPacketType();
-    PacketType getLeftClickPacketType();
+    List<PacketType> getRightClickPacketType();
+    List<PacketType> getLeftClickPacketType();
 
     void onRightClick(Player player, PacketEvent event,Game game, PacketContainer packet);
     void onLeftClick(Player player, PacketEvent event, Game game, PacketContainer packet);

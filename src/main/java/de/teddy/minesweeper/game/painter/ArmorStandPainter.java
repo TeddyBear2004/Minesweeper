@@ -13,8 +13,8 @@ import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
-import de.teddy.minesweeper.game.Inventories;
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
+import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.util.HeadGenerator;
 import de.teddy.minesweeper.util.PacketUtil;
 import org.bukkit.Bukkit;
@@ -218,17 +218,22 @@ public class ArmorStandPainter implements Painter {
     }
 
     @Override
-    public PacketType getRightClickPacketType() {
-        return PacketType.Play.Client.USE_ENTITY;
+    public List<PacketType> getRightClickPacketType() {
+        return List.of(PacketType.Play.Client.USE_ENTITY, PacketType.Play.Client.USE_ITEM);
     }
 
     @Override
-    public PacketType getLeftClickPacketType() {
-        return PacketType.Play.Client.USE_ENTITY;
+    public List<PacketType> getLeftClickPacketType() {
+        return List.of(PacketType.Play.Client.USE_ENTITY, PacketType.Play.Client.BLOCK_DIG);
     }
 
     @Override
     public void onRightClick(Player player, PacketEvent event, Game game, PacketContainer packet) {
+        if(packet.getType() == PacketType.Play.Client.USE_ITEM){
+            Game.PAINTER_MAP.get(BlockPainter.class).onRightClick(player, event, game, packet);
+            return;
+        }
+
         WrappedEnumEntityUseAction read = event.getPacket().getEnumEntityUseActions().read(0);
 
         if (read.getAction() == EnumWrappers.EntityUseAction.ATTACK)
@@ -248,7 +253,7 @@ public class ArmorStandPainter implements Painter {
             return;
 
         event.setCancelled(true);
-        player.getInventory().setContents(Inventories.gameInventory);
+        player.getInventory().setContents(Inventories.GAME_INVENTORY);
 
         if (board.isFinished())
             return;
@@ -261,6 +266,11 @@ public class ArmorStandPainter implements Painter {
 
     @Override
     public void onLeftClick(Player player, PacketEvent event, Game game, PacketContainer packet) {
+        if(packet.getType() == PacketType.Play.Client.BLOCK_DIG){
+            Game.PAINTER_MAP.get(BlockPainter.class).onLeftClick(player, event, game, packet);
+            return;
+        }
+
         WrappedEnumEntityUseAction read = event.getPacket().getEnumEntityUseActions().read(0);
 
         if (read.getAction() != EnumWrappers.EntityUseAction.ATTACK)
