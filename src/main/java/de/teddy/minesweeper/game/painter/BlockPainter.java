@@ -12,8 +12,8 @@ import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
-import de.teddy.minesweeper.game.Inventories;
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
+import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.util.PacketUtil;
 import de.teddy.minesweeper.util.Tuple2;
 import org.apache.commons.lang3.ArrayUtils;
@@ -26,10 +26,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.awt.geom.Point2D;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BlockPainter implements Painter {
 
@@ -203,13 +200,13 @@ public class BlockPainter implements Painter {
     }
 
     @Override
-    public PacketType getRightClickPacketType() {
-        return PacketType.Play.Client.USE_ITEM;
+    public List<PacketType> getRightClickPacketType() {
+        return Collections.singletonList(PacketType.Play.Client.USE_ITEM);
     }
 
     @Override
-    public PacketType getLeftClickPacketType() {
-        return PacketType.Play.Client.BLOCK_DIG;
+    public List<PacketType> getLeftClickPacketType() {
+        return Collections.singletonList(PacketType.Play.Client.BLOCK_DIG);
     }
 
     @Override
@@ -231,7 +228,7 @@ public class BlockPainter implements Painter {
                     Material[] materials = new Material[]{getActualMaterial(field), field.getMark()};
                     PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(materials[location.getBlockY() - game.getFieldHeight()]));
                 }
-                player.getInventory().setContents(Inventories.viewerInventory);
+                player.getInventory().setContents(Inventories.VIEWER_INVENTORY);
                 event.setCancelled(true);
             }
             return;
@@ -243,7 +240,7 @@ public class BlockPainter implements Painter {
             return;
 
         event.setCancelled(true);
-        player.getInventory().setContents(Inventories.gameInventory);
+        player.getInventory().setContents(Inventories.GAME_INVENTORY);
 
         if (board.isFinished() || packet.getHands().read(0) == EnumWrappers.Hand.OFF_HAND)
             return;

@@ -13,9 +13,9 @@ import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
-import de.teddy.minesweeper.game.Inventories;
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
-import de.teddy.minesweeper.util.Base64Head;
+import de.teddy.minesweeper.game.inventory.Inventories;
+import de.teddy.minesweeper.util.HeadGenerator;
 import de.teddy.minesweeper.util.PacketUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -32,14 +32,14 @@ public class ArmorStandPainter implements Painter {
 
     public static final ItemStack[] ITEM_STACKS = {
             new ItemStack(Material.AIR),
-            Base64Head.getBase64Head("http://textures.minecraft.net/texture/301d0496e606b74327f03259c7f6e32ba76862d8dda5b639b229d2e6781ff143"),
-            Base64Head.getBase64Head("http://textures.minecraft.net/texture/cb08394f844dc8eeeaadf05d8bdaa045dbcc0db932cfb8d0daeabafcee995f15"),
-            Base64Head.getBase64Head("http://textures.minecraft.net/texture/858b9d62566a0e08f47d849f7d21e3adb9c99ab36d45d54aee987c68dcd2b313"),
-            Base64Head.getBase64Head("http://textures.minecraft.net/texture/4ffb37d1eb6a453fea35eb6d6a71d3bdbd68ef1f59f96be26317ce2ef57170f7"),
-            Base64Head.getBase64Head("http://textures.minecraft.net/texture/d5b6f519bd847dec7aaf003852c60055ff10bd55b1df7666ac90f700513fdd49"),
-            Base64Head.getBase64Head("http://textures.minecraft.net/texture/976ead580e797d6cba3f98ca7f7be1bb642da5485e6afb0ce641a4ac3d37a408"),
-            Base64Head.getBase64Head("http://textures.minecraft.net/texture/581559800cf78b5324519d939f69c83d4a41a00b1bd770cf425fb9a65e3d1d45"),
-            Base64Head.getBase64Head("http://textures.minecraft.net/texture/aae59430f811d4037d548e3891f03667393aee15d0ded4da64ca84973b0d60db")
+            HeadGenerator.getHeadFromUrl("http://textures.minecraft.net/texture/301d0496e606b74327f03259c7f6e32ba76862d8dda5b639b229d2e6781ff143"),
+            HeadGenerator.getHeadFromUrl("http://textures.minecraft.net/texture/cb08394f844dc8eeeaadf05d8bdaa045dbcc0db932cfb8d0daeabafcee995f15"),
+            HeadGenerator.getHeadFromUrl("http://textures.minecraft.net/texture/858b9d62566a0e08f47d849f7d21e3adb9c99ab36d45d54aee987c68dcd2b313"),
+            HeadGenerator.getHeadFromUrl("http://textures.minecraft.net/texture/4ffb37d1eb6a453fea35eb6d6a71d3bdbd68ef1f59f96be26317ce2ef57170f7"),
+            HeadGenerator.getHeadFromUrl("http://textures.minecraft.net/texture/d5b6f519bd847dec7aaf003852c60055ff10bd55b1df7666ac90f700513fdd49"),
+            HeadGenerator.getHeadFromUrl("http://textures.minecraft.net/texture/976ead580e797d6cba3f98ca7f7be1bb642da5485e6afb0ce641a4ac3d37a408"),
+            HeadGenerator.getHeadFromUrl("http://textures.minecraft.net/texture/581559800cf78b5324519d939f69c83d4a41a00b1bd770cf425fb9a65e3d1d45"),
+            HeadGenerator.getHeadFromUrl("http://textures.minecraft.net/texture/aae59430f811d4037d548e3891f03667393aee15d0ded4da64ca84973b0d60db")
     };
 
     public static final Material LIGHT_DEFAULT = Material.LIME_CONCRETE_POWDER;
@@ -218,17 +218,22 @@ public class ArmorStandPainter implements Painter {
     }
 
     @Override
-    public PacketType getRightClickPacketType() {
-        return PacketType.Play.Client.USE_ENTITY;
+    public List<PacketType> getRightClickPacketType() {
+        return List.of(PacketType.Play.Client.USE_ENTITY, PacketType.Play.Client.USE_ITEM);
     }
 
     @Override
-    public PacketType getLeftClickPacketType() {
-        return PacketType.Play.Client.USE_ENTITY;
+    public List<PacketType> getLeftClickPacketType() {
+        return List.of(PacketType.Play.Client.USE_ENTITY, PacketType.Play.Client.BLOCK_DIG);
     }
 
     @Override
     public void onRightClick(Player player, PacketEvent event, Game game, PacketContainer packet) {
+        if(packet.getType() == PacketType.Play.Client.USE_ITEM){
+            Game.PAINTER_MAP.get(BlockPainter.class).onRightClick(player, event, game, packet);
+            return;
+        }
+
         WrappedEnumEntityUseAction read = event.getPacket().getEnumEntityUseActions().read(0);
 
         if (read.getAction() == EnumWrappers.EntityUseAction.ATTACK)
@@ -248,7 +253,7 @@ public class ArmorStandPainter implements Painter {
             return;
 
         event.setCancelled(true);
-        player.getInventory().setContents(Inventories.gameInventory);
+        player.getInventory().setContents(Inventories.GAME_INVENTORY);
 
         if (board.isFinished())
             return;
@@ -261,6 +266,11 @@ public class ArmorStandPainter implements Painter {
 
     @Override
     public void onLeftClick(Player player, PacketEvent event, Game game, PacketContainer packet) {
+        if(packet.getType() == PacketType.Play.Client.BLOCK_DIG){
+            Game.PAINTER_MAP.get(BlockPainter.class).onLeftClick(player, event, game, packet);
+            return;
+        }
+
         WrappedEnumEntityUseAction read = event.getPacket().getEnumEntityUseActions().read(0);
 
         if (read.getAction() != EnumWrappers.EntityUseAction.ATTACK)

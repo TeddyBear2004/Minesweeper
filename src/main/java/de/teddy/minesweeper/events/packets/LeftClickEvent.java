@@ -34,7 +34,7 @@ public class LeftClickEvent implements PacketListener {
         if (game == null || painter == null)
             return;
 
-        if(painter.getLeftClickPacketType() == packet.getType())
+        if(painter.getLeftClickPacketType().contains(packet.getType()))
             painter.onLeftClick(player, event, game, packet);
     }
 
@@ -47,7 +47,7 @@ public class LeftClickEvent implements PacketListener {
     public ListeningWhitelist getReceivingWhitelist() {
         Set<PacketType> types = new HashSet<>();
 
-        Game.PAINTER_MAP.values().forEach(painter -> types.add(painter.getLeftClickPacketType()));
+        Game.PAINTER_MAP.values().forEach(painter -> types.addAll(painter.getLeftClickPacketType()));
 
         return ListeningWhitelist
                 .newBuilder()

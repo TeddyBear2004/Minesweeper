@@ -6,18 +6,9 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.injector.GamePhase;
-import com.comphenix.protocol.wrappers.BlockPosition;
-import com.comphenix.protocol.wrappers.EnumWrappers;
-import com.comphenix.protocol.wrappers.WrappedBlockData;
-import com.comphenix.protocol.wrappers.WrappedEnumEntityUseAction;
 import de.teddy.minesweeper.Minesweeper;
-import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
-import de.teddy.minesweeper.game.Inventories;
-import de.teddy.minesweeper.game.painter.ArmorStandPainter;
 import de.teddy.minesweeper.game.painter.Painter;
-import de.teddy.minesweeper.util.PacketUtil;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -43,7 +34,7 @@ public class RightClickEvent implements PacketListener {
         if (game == null || painter == null)
             return;
 
-        if(painter.getRightClickPacketType() == packet.getType())
+        if(painter.getRightClickPacketType().contains(packet.getType()))
             painter.onRightClick(player, event, game, packet);
     }
 
@@ -56,7 +47,7 @@ public class RightClickEvent implements PacketListener {
     public ListeningWhitelist getReceivingWhitelist() {
         Set<PacketType> types = new HashSet<>();
 
-        Game.PAINTER_MAP.values().forEach(painter -> types.add(painter.getRightClickPacketType()));
+        Game.PAINTER_MAP.values().forEach(painter -> types.addAll(painter.getRightClickPacketType()));
 
         return ListeningWhitelist
                 .newBuilder()
