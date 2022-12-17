@@ -72,12 +72,19 @@ public class Board {
         return this.board;
     }
 
+    public Player getPlayer() {
+        return player;
+    }
+
     public void drawBlancField() {
         this.drawBlancField(viewers);
     }
 
     public void drawBlancField(List<Player> players) {
-        getCurrentPlayerPainters(players).forEach((painter, players2) -> painter.drawBlancField(this, players2));
+        getCurrentPlayerPainters(players).forEach((painter, players2) -> {
+            if(painter != null)
+                painter.drawBlancField(this, players2);
+        });
     }
 
     public boolean isGenerated() {
@@ -89,7 +96,10 @@ public class Board {
     }
 
     public void draw(List<Player> players) {
-        getCurrentPlayerPainters(players).forEach((painter, players2) -> painter.drawField(this, players2));
+        getCurrentPlayerPainters(players).forEach((painter, players2) -> {
+            if(painter != null)
+                painter.drawField(this, players2);
+        });
     }
 
 
@@ -201,7 +211,10 @@ public class Board {
     public void lose() {
         finish();
 
-        getCurrentPlayerPainters().forEach((painter, players) -> painter.drawBombs(this, players));
+        getCurrentPlayerPainters().forEach((painter, players) -> {
+            if(painter != null)
+                painter.drawBombs(this, players);
+        });
 
         Bukkit.getScheduler().runTaskLater(Minesweeper.getPlugin(), () -> {
 

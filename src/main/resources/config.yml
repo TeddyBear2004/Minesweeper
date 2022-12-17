@@ -50,7 +50,7 @@ games:
     bomb_count: 40
     difficulty_lang_path: difficulty_normal
     inventory_material: YELLOW_STAINED_GLASS_PANE
-    inventory_position: 2
+    inventory_position: 4
 
   Map24x24:
     corner:
@@ -69,4 +69,4 @@ games:
     bomb_count: 99
     difficulty_lang_path: difficulty_hard
     inventory_material: RED_STAINED_GLASS_PANE
-    inventory_position: 2
+    inventory_position: 6

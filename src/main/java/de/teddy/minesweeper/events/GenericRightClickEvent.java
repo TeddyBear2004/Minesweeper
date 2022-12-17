@@ -2,8 +2,7 @@ package de.teddy.minesweeper.events;
 
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
-import de.teddy.minesweeper.game.Inventories;
-import org.bukkit.Bukkit;
+import de.teddy.minesweeper.game.inventory.Inventories;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -33,18 +32,17 @@ public class GenericRightClickEvent implements Listener {
                 return;
             }else if(itemStack.equals(Inventories.barrier)){
                 Game.finishGame(event.getPlayer());
-                event.getPlayer().getInventory().setContents(Inventories.viewerInventory);
+                event.getPlayer().getInventory().setContents(Inventories.VIEWER_INVENTORY);
                 event.setCancelled(true);
                 return;
             }
         }
 
         if(itemStack.equals(Inventories.compass)){
-            event.getPlayer().openInventory(Bukkit.createInventory(null, 54));
-            //todo inv mit allen laufenden spielen
+            event.getPlayer().openInventory(Inventories.VIEW_GAMES.getInventory());
             event.setCancelled(true);
         }else if(itemStack.equals(Inventories.hourGlass)){
-            event.getPlayer().openInventory(Inventories.startCommandInventory);
+            event.getPlayer().openInventory(Inventories.CHOOSE_GAME.getInventory());
             event.setCancelled(true);
         }
     }
