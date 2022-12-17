@@ -18,4 +18,8 @@ commands:
   resetResourcePack:
     usage: /resetResourcePack
     description: Setzt dein aktuelles Server-Resource-Pack zurück.
-  test:
+  bypassEventCancellation:
+    usage: /bypassEventCancellation
+    description: "Bypasses the cancellation of the cancelled events in order to change blocks. 
+    Note: This will not work if a game is running."
+    permission: minesweeper.bypass.events

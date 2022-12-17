@@ -9,27 +9,12 @@ import de.teddy.minesweeper.game.painter.BlockPainter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.inventory.InventoryInteractEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerResourcePackStatusEvent;
 
 public class GenericEvents implements Listener {
-
-    @EventHandler
-    public void onEntityDamageEvent(EntityDamageEvent event) {
-        event.getEntity().setInvulnerable(true);
-        event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onFoodLevelChangeEvent(FoodLevelChangeEvent event) {
-        event.setFoodLevel(20);
-        event.setCancelled(true);
-    }
 
     @EventHandler
     public void onPlayerJoinEvent(PlayerJoinEvent event) {
@@ -50,41 +35,10 @@ public class GenericEvents implements Listener {
     }
 
     @EventHandler
-    public void onBlockPlaceEvent(BlockPlaceEvent event) {
-        if (event.getPlayer().isOp() && Game.getGame(event.getPlayer()) == null)
-            event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onBlockBreakEvent(BlockBreakEvent event) {
-        if (event.getPlayer().isOp() && Game.getGame(event.getPlayer()) == null)
-            event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onInventoryInteractEvent(InventoryInteractEvent event) {
-        if (event.getWhoClicked() instanceof Player)
-            if (!event.getWhoClicked().isOp() || Game.getGame((Player) event.getWhoClicked()) != null)
-                event.setCancelled(true);
-    }
-
-    @EventHandler
     public void onPlayerGameModeChangeEvent(PlayerGameModeChangeEvent event) {
         event.getPlayer().setAllowFlight(true);
     }
 
-    @EventHandler
-    public void onPlayerDropItemEvent(PlayerDropItemEvent event) {
-        if (event.getPlayer().isOp() && Game.getGame(event.getPlayer()) == null)
-            event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onEntityPickupItemEvent(EntityPickupItemEvent event) {
-        if (event.getEntity() instanceof Player)
-            if (event.getEntity().isOp() && Game.getGame((Player) event.getEntity()) == null)
-                event.setCancelled(true);
-    }
 
     @EventHandler
     public void onResourcePack(PlayerResourcePackStatusEvent event) {
@@ -108,7 +62,5 @@ public class GenericEvents implements Listener {
             if (Minesweeper.getGames().size() != 0)
                 Minesweeper.getGames().get(0).startViewing(event.getPlayer(), null);
         }
-
     }
-
 }
