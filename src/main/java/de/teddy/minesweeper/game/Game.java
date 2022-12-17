@@ -1,6 +1,7 @@
 package de.teddy.minesweeper.game;
 
 import de.teddy.minesweeper.Minesweeper;
+import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.game.painter.ArmorStandPainter;
 import de.teddy.minesweeper.game.painter.BlockPainter;
 import de.teddy.minesweeper.game.painter.Painter;
@@ -118,6 +119,10 @@ public class Game {
         Game.getGame(p).finish(p);
     }
 
+    public static Map<Player, Board> getRunningGames() {
+        return runningGames;
+    }
+
     public boolean isBlockOutsideGame(Block block) {
         return !IsBetween.isBetween2D(corner, size, size, block)
                 || !IsBetween.isBetween(corner.getBlockY(), corner.getBlockY() + 1, block.getY());
@@ -144,7 +149,10 @@ public class Game {
     }
 
     public Board getRunningGame() {
-        return runningGames.values().stream().filter(b -> b.map == this).findFirst().orElse(null);
+        for (Board b : runningGames.values())
+            if (b.map == this)
+                return b;
+        return null;
     }
 
     public void startGame(Player p) {
@@ -165,7 +173,7 @@ public class Game {
         });
 
         p.getInventory().clear();
-        p.getInventory().setContents(Inventories.gameInventory);
+        p.getInventory().setContents(Inventories.GAME_INVENTORY);
         p.setAllowFlight(true);
         if (shouldTeleport) {
             p.setFlying(true);

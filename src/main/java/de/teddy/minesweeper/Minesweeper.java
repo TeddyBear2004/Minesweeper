@@ -7,11 +7,11 @@ import de.teddy.minesweeper.commands.ResetResourcePack;
 import de.teddy.minesweeper.commands.StartCommand;
 import de.teddy.minesweeper.events.GenericEvents;
 import de.teddy.minesweeper.events.GenericRightClickEvent;
-import de.teddy.minesweeper.events.OnInventory;
+import de.teddy.minesweeper.events.InventoryClickEvents;
 import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.events.packets.RightClickEvent;
 import de.teddy.minesweeper.game.Game;
-import de.teddy.minesweeper.game.Inventories;
+import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.util.Language;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
@@ -55,23 +55,22 @@ public final class Minesweeper extends JavaPlugin {
         Minesweeper.language = loadLanguage();
         loadWorld();
         Minesweeper.games = loadGames();
+        Inventories.initialise();
 
-
-        Inventories.loadInventories(getConfig().getInt("available_games_inventory_lines"), games);
 
         Objects.requireNonNull(this.getCommand("start")).setExecutor(new StartCommand());
         Objects.requireNonNull(this.getCommand("resetResourcePack")).setExecutor(new ResetResourcePack());
 
         getServer().getPluginManager().registerEvents(new GenericEvents(), this);
-        getServer().getPluginManager().registerEvents(new OnInventory(), this);
         getServer().getPluginManager().registerEvents(new GenericRightClickEvent(), this);
+        getServer().getPluginManager().registerEvents(new InventoryClickEvents(), this);
 
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         protocolManager.addPacketListener(new RightClickEvent());
         protocolManager.addPacketListener(new LeftClickEvent());
 
         Bukkit.getOnlinePlayers().forEach(player -> {
-            player.getInventory().setContents(Inventories.viewerInventory);
+            player.getInventory().setContents(Inventories.VIEWER_INVENTORY);
             if (Minesweeper.getGames().size() != 0)
                 games.get(0).startViewing(player, null);
         });

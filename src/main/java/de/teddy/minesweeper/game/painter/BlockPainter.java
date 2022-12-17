@@ -53,6 +53,24 @@ public class BlockPainter implements Painter {
     public static final Material LIGHT_DEFAULT = Material.LIME_CONCRETE_POWDER;
     public static final Material DARK_DEFAULT = Material.GREEN_CONCRETE_POWDER;
 
+    private static void sendMultiBlockChange(List<Player> players, Map<BlockPosition, Tuple2<List<Short>, List<WrappedBlockData>>> subChunkMap) {
+        ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
+        subChunkMap.forEach((blockPosition, listListTuple) -> {
+            PacketContainer multiBlockChange = PacketUtil.getMultiBlockChange(
+                    ArrayUtils.toPrimitive(listListTuple.getA().toArray(new Short[0])),
+                    blockPosition,
+                    listListTuple.getB().toArray(new WrappedBlockData[0]),
+                    true);
+            for (Player p : players) {
+                try{
+                    protocolManager.sendServerPacket(p, multiBlockChange);
+                }catch(InvocationTargetException e){
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+    }
+
     @Override
     public void drawBlancField(Board board, List<Player> players) {
         if (board == null || !Board.notTest)
@@ -89,24 +107,6 @@ public class BlockPainter implements Painter {
         }
 
         sendMultiBlockChange(players, subChunkMap);
-    }
-
-    private static void sendMultiBlockChange(List<Player> players, Map<BlockPosition, Tuple2<List<Short>, List<WrappedBlockData>>> subChunkMap) {
-        ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
-        subChunkMap.forEach((blockPosition, listListTuple) -> {
-            PacketContainer multiBlockChange = PacketUtil.getMultiBlockChange(
-                    ArrayUtils.toPrimitive(listListTuple.getA().toArray(new Short[0])),
-                    blockPosition,
-                    listListTuple.getB().toArray(new WrappedBlockData[0]),
-                    true);
-            for (Player p : players) {
-                try{
-                    protocolManager.sendServerPacket(p, multiBlockChange);
-                }catch(InvocationTargetException e){
-                    throw new RuntimeException(e);
-                }
-            }
-        });
     }
 
     @Override
@@ -260,6 +260,8 @@ public class BlockPainter implements Painter {
             return;
 
         Board board = Game.getBoard(player);
+        if (board == null)
+            board = Game.getBoardWatched(player);
 
         if (board == null) {
             Board watching = Game.getBoardWatched(player);
@@ -280,25 +282,23 @@ public class BlockPainter implements Painter {
 
         Board.Field field = board.getField(location);
 
-        if (!board.isFinished()) {
-            EnumWrappers.PlayerDigType digType = packet.getPlayerDigTypes().read(0);
-            if (field != null && digType == EnumWrappers.PlayerDigType.START_DESTROY_BLOCK) {
-                if (location.getBlockY() - game.getFieldHeight() == 0) {
-                    board.draw();
-                    event.setCancelled(true);
-                } else if (location.getBlockY() - game.getFieldHeight() == 1) {
-                    PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(field.getMark()));
-                }
-            }
-
-            if (digType == EnumWrappers.PlayerDigType.STOP_DESTROY_BLOCK && field != null) {
+        EnumWrappers.PlayerDigType digType = packet.getPlayerDigTypes().read(0);
+        if (field != null && digType == EnumWrappers.PlayerDigType.START_DESTROY_BLOCK) {
+            if (location.getBlockY() - game.getFieldHeight() == 0) {
                 board.draw();
-                return;
+                event.setCancelled(true);
+            } else if (location.getBlockY() - game.getFieldHeight() == 1) {
+                PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(field.getMark()));
             }
-
-            if (digType != EnumWrappers.PlayerDigType.START_DESTROY_BLOCK)
-                return;
         }
+
+        if (digType == EnumWrappers.PlayerDigType.STOP_DESTROY_BLOCK && field != null) {
+            board.draw();
+            return;
+        }
+
+        if (digType != EnumWrappers.PlayerDigType.START_DESTROY_BLOCK)
+            return;
 
 
         if (board.isFinished())
