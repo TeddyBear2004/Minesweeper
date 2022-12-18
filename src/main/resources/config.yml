@@ -65,8 +65,8 @@ games:
   Map24x24:
     corner:
       x: 49
-      y: 16
-      z: -198
+      y: 14
+      z: -63
       world: MineSweeper
     spawn:
       x: 61
