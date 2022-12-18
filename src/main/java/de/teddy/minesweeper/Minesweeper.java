@@ -4,8 +4,6 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.moandjiezana.toml.Toml;
 import de.teddy.minesweeper.commands.BypassEventCommand;
-import de.teddy.minesweeper.commands.ResetResourcePack;
-import de.teddy.minesweeper.commands.StartCommand;
 import de.teddy.minesweeper.events.CancelableEvents;
 import de.teddy.minesweeper.events.GenericEvents;
 import de.teddy.minesweeper.events.GenericRightClickEvent;
@@ -81,8 +79,6 @@ public final class Minesweeper extends JavaPlugin {
         Inventories.initialise();
 
 
-        Objects.requireNonNull(this.getCommand("start")).setExecutor(new StartCommand());
-        Objects.requireNonNull(this.getCommand("resetResourcePack")).setExecutor(new ResetResourcePack());
         Objects.requireNonNull(this.getCommand("bypassEventCancellation")).setExecutor(new BypassEventCommand());
 
         getServer().getPluginManager().registerEvents(new CancelableEvents(getConfig().getConfigurationSection("events")), this);
