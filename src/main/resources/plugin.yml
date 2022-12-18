@@ -11,6 +11,9 @@ description: Play Minesweeper in Minecraft
 depend:
   - ProtocolLib
 
+libraries:
+  - "com.moandjiezana.toml:toml4j:0.7.2"
+
 commands:
   start:
     usage: /start
