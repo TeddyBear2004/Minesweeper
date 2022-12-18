@@ -3,7 +3,15 @@ use_default_map: true
 
 available_games_inventory_lines: 1
 
-texture_pack_link: https://cdn.discordapp.com/attachments/676083915382849576/875365210997784587/teddy.zip
+resource_pack:
+  internal_web_server:
+    enable: false
+    domain: localhost
+    port: 27565
+    name: pack.zip
+  external_web_server:
+    enable: true
+    link: https://cdn.discordapp.com/attachments/676083915382849576/875365210997784587/teddy.zip
 
 events:
   cancelEntityDamage: true

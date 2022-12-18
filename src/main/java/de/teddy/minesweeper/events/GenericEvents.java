@@ -20,7 +20,7 @@ public class GenericEvents implements Listener {
     public void onPlayerJoinEvent(PlayerJoinEvent event) {
         event.getPlayer().getInventory().setContents(Inventories.VIEWER_INVENTORY);
         event.getPlayer().setAllowFlight(true);
-        event.getPlayer().setResourcePack("https://cdn.discordapp.com/attachments/676083915382849576/875365210997784587/teddy.zip");
+        Minesweeper.getTexturePackHandler().apply(event.getPlayer());
     }
 
     @EventHandler

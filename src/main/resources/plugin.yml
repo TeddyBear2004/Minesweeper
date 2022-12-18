@@ -11,13 +11,10 @@ description: Play Minesweeper in Minecraft
 depend:
   - ProtocolLib
 
+libraries:
+  - "com.moandjiezana.toml:toml4j:0.7.2"
+
 commands:
-  start:
-    usage: /start
-    description: Starte ein Spiel
-  resetResourcePack:
-    usage: /resetResourcePack
-    description: Setzt dein aktuelles Server-Resource-Pack zurück.
   bypassEventCancellation:
     usage: /bypassEventCancellation
     description: "Bypasses the cancellation of the cancelled events in order to change blocks. 

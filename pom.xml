@@ -40,7 +40,6 @@
 						</goals>
 						<configuration>
 							<createDependencyReducedPom>false</createDependencyReducedPom>
-							<outputFile>server/plugins/${project.name}-${project.version}.jar</outputFile>
 						</configuration>
 					</execution>
 				</executions>
@@ -77,12 +76,6 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.mojang</groupId>
-			<artifactId>authlib</artifactId>
-			<version>1.5.21</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.comphenix.protocol</groupId>
 			<artifactId>ProtocolLib</artifactId>
 			<version>4.7.0</version>
@@ -92,12 +85,12 @@
 			<groupId>com.moandjiezana.toml</groupId>
 			<artifactId>toml4j</artifactId>
 			<version>0.7.2</version>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
-			<version>5.8.1</version>
+			<version>5.9.0</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
