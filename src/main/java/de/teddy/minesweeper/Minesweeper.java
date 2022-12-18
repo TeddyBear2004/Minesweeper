@@ -14,12 +14,17 @@ import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.events.packets.RightClickEvent;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.inventory.Inventories;
+import de.teddy.minesweeper.game.texture.pack.DisableResourceHandler;
+import de.teddy.minesweeper.game.texture.pack.ExternalWebServerHandler;
+import de.teddy.minesweeper.game.texture.pack.InternalWebServerHandler;
+import de.teddy.minesweeper.game.texture.pack.ResourcePackHandler;
 import de.teddy.minesweeper.util.Language;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,6 +38,7 @@ public final class Minesweeper extends JavaPlugin {
     private static List<Game> games = new ArrayList<>();
     private static JavaPlugin plugin;
     private static Language language;
+    private static ResourcePackHandler resourcePackHandler;
     private final String langPath = "lang/" + getConfig().getString("language") + ".toml";
 
     public static JavaPlugin getPlugin() {
@@ -47,6 +53,10 @@ public final class Minesweeper extends JavaPlugin {
         return language;
     }
 
+    public static ResourcePackHandler getTexturePackHandler() {
+        return resourcePackHandler;
+    }
+
     @Override
     public void onEnable() {
         saveDefaultConfig();
@@ -57,6 +67,17 @@ public final class Minesweeper extends JavaPlugin {
         Minesweeper.language = loadLanguage();
         loadWorld();
         Minesweeper.games = loadGames();
+        try{
+            Minesweeper.resourcePackHandler = loadTexturePackHandler(getConfig().getConfigurationSection("resource_pack"));
+        }catch(FileNotFoundException e){
+            getLogger().severe("Could not find the corresponding resource pack file. Please check the config.");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }catch(IOException e){
+            getLogger().severe("Could not start the internal web server. Please check the config.");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
         Inventories.initialise();
 
 
@@ -78,6 +99,15 @@ public final class Minesweeper extends JavaPlugin {
             if (Minesweeper.getGames().size() != 0)
                 games.get(0).startViewing(player, null);
         });
+    }
+
+    @Override
+    public void onDisable() {
+        try{
+            resourcePackHandler.close();
+        }catch(IOException e){
+            throw new RuntimeException(e);
+        }
     }
 
     private Language loadLanguage() {
@@ -168,5 +198,27 @@ public final class Minesweeper extends JavaPlugin {
         return gameList;
     }
 
+    private ResourcePackHandler loadTexturePackHandler(ConfigurationSection section) throws IOException {
+        if (section == null)
+            return new DisableResourceHandler();
+
+        ConfigurationSection internalWebServer = section.getConfigurationSection("internal_web_server");
+        if (internalWebServer != null && internalWebServer.getBoolean("enable", false)) {
+            InternalWebServerHandler internalWebServerHandler = new InternalWebServerHandler(internalWebServer.getString("domain", "localhost"),
+                                                                                             internalWebServer.getInt("port", 27565),
+                                                                                             new File(getDataFolder(), internalWebServer.getString("name", "pack.zip")));
+
+            internalWebServerHandler.start();
+
+            return internalWebServerHandler;
+        }
+
+        ConfigurationSection externalWebServer = section.getConfigurationSection("external_web_server");
+        if (externalWebServer != null && externalWebServer.getBoolean("enable", false)) {
+            return new ExternalWebServerHandler(externalWebServer.getString("link"));
+        }
+
+        return new DisableResourceHandler();
+    }
 
 }
