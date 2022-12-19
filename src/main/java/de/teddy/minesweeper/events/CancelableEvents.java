@@ -15,34 +15,28 @@ import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class CancelableEvents implements Listener {
 
     public static final NamespacedKey BYPASS_EVENTS = new NamespacedKey(Minesweeper.getPlugin(), "bypass_events");
-    private final boolean cancelEntityDamage;
-    private final boolean cancelFoodChange;
-    private final boolean cancelBlockPlace;
-    private final boolean cancelBlockBreak;
-    private final boolean cancelInventoryInteract;
-    private final boolean cancelDropItem;
-    private final boolean cancelPickupItem;
+    private final Map<CancelableEvent, Boolean> cancelableEventBooleanMap = new HashMap<>();
 
     public CancelableEvents(ConfigurationSection section) {
-        if (section == null) {
-            cancelEntityDamage = true;
-            cancelFoodChange = true;
-            cancelBlockPlace = true;
-            cancelBlockBreak = true;
-            cancelInventoryInteract = true;
-            cancelDropItem = true;
-            cancelPickupItem = true;
-        } else {
-            cancelEntityDamage = section.getBoolean("cancelEntityDamage", true);
-            cancelFoodChange = section.getBoolean("cancelFoodChange", true);
-            cancelBlockPlace = section.getBoolean("cancelBlockPlace", true);
-            cancelBlockBreak = section.getBoolean("cancelBlockBreak", true);
-            cancelInventoryInteract = section.getBoolean("cancelInventoryInteract", true);
-            cancelDropItem = section.getBoolean("cancelDropItem", true);
-            cancelPickupItem = section.getBoolean("cancelPickupItem", true);
+        if (section != null) {
+            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_ENTITY_DAMAGE, section.getBoolean("cancelEntityDamage", true));
+            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_FOOD_CHANGE, section.getBoolean("cancelFoodChange", true));
+            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_BLOCK_PLACE, section.getBoolean("cancelBlockPlace", true));
+            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_BLOCK_BREAK, section.getBoolean("cancelBlockBreak", true));
+            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_INVENTORY_INTERACT, section.getBoolean("cancelInventoryInteract", true));
+            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_DROP_ITEM, section.getBoolean("cancelDropItem", true));
+            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_PICKUP_ITEM, section.getBoolean("cancelPickupItem", true));
+        }
+
+        for (CancelableEvent value : CancelableEvent.values()) {
+            if (!cancelableEventBooleanMap.containsKey(value))
+                cancelableEventBooleanMap.put(value, true);
         }
     }
 
@@ -52,7 +46,7 @@ public class CancelableEvents implements Listener {
 
     @EventHandler
     public void onEntityDamageEvent(EntityDamageEvent event) {
-        if (!cancelEntityDamage)
+        if (!cancelableEventBooleanMap.get(CancelableEvent.CANCEL_ENTITY_DAMAGE))
             return;
 
         if (event.getEntity() instanceof Player player) {
@@ -66,7 +60,7 @@ public class CancelableEvents implements Listener {
 
     @EventHandler
     public void onFoodLevelChangeEvent(FoodLevelChangeEvent event) {
-        if (!cancelFoodChange)
+        if (!cancelableEventBooleanMap.get(CancelableEvent.CANCEL_FOOD_CHANGE))
             return;
 
         if (event.getEntity() instanceof Player player) {
@@ -79,7 +73,7 @@ public class CancelableEvents implements Listener {
 
     @EventHandler
     public void onBlockPlaceEvent(BlockPlaceEvent event) {
-        if (!cancelBlockPlace)
+        if (!cancelableEventBooleanMap.get(CancelableEvent.CANCEL_BLOCK_PLACE))
             return;
 
         if (shouldCancel(event.getPlayer()))
@@ -88,7 +82,7 @@ public class CancelableEvents implements Listener {
 
     @EventHandler
     public void onBlockBreakEvent(BlockBreakEvent event) {
-        if (!cancelBlockBreak)
+        if (!cancelableEventBooleanMap.get(CancelableEvent.CANCEL_BLOCK_BREAK))
             return;
 
         if (shouldCancel(event.getPlayer()))
@@ -97,7 +91,7 @@ public class CancelableEvents implements Listener {
 
     @EventHandler
     public void onInventoryInteractEvent(InventoryInteractEvent event) {
-        if (!cancelInventoryInteract)
+        if (!cancelableEventBooleanMap.get(CancelableEvent.CANCEL_INVENTORY_INTERACT))
             return;
 
         if (event.getWhoClicked() instanceof Player player)
@@ -107,7 +101,7 @@ public class CancelableEvents implements Listener {
 
     @EventHandler
     public void onPlayerDropItemEvent(PlayerDropItemEvent event) {
-        if (!cancelDropItem)
+        if (!cancelableEventBooleanMap.get(CancelableEvent.CANCEL_DROP_ITEM))
             return;
 
         if (shouldCancel(event.getPlayer()))
@@ -116,7 +110,7 @@ public class CancelableEvents implements Listener {
 
     @EventHandler
     public void onEntityPickupItemEvent(EntityPickupItemEvent event) {
-        if (!cancelPickupItem)
+        if (!cancelableEventBooleanMap.get(CancelableEvent.CANCEL_PICKUP_ITEM))
             return;
 
         if (event.getEntity() instanceof Player player)
