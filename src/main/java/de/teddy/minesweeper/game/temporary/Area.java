@@ -46,13 +46,13 @@ public class Area {
         map = (Map<?, ?>) map.get("cancelled_events");
 
         if (map != null) {
-            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_ENTITY_DAMAGE, (Boolean) map.get("cancelEntityDamage"));
-            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_FOOD_CHANGE, (Boolean) map.get("cancelFoodChange"));
-            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_BLOCK_PLACE, (Boolean) map.get("cancelBlockPlace"));
-            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_BLOCK_BREAK, (Boolean) map.get("cancelBlockBreak"));
-            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_INVENTORY_INTERACT, (Boolean) map.get("cancelInventoryInteract"));
-            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_DROP_ITEM, (Boolean) map.get("cancelDropItem"));
-            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_PICKUP_ITEM, (Boolean) map.get("cancelPickupItem"));
+            cancelableEventBooleanMap.put(CancelableEvent.ENTITY_DAMAGE, (Boolean) map.get("cancelEntityDamage"));
+            cancelableEventBooleanMap.put(CancelableEvent.FOOD_CHANGE, (Boolean) map.get("cancelFoodChange"));
+            cancelableEventBooleanMap.put(CancelableEvent.BLOCK_PLACE, (Boolean) map.get("cancelBlockPlace"));
+            cancelableEventBooleanMap.put(CancelableEvent.BLOCK_BREAK, (Boolean) map.get("cancelBlockBreak"));
+            cancelableEventBooleanMap.put(CancelableEvent.INVENTORY_INTERACT, (Boolean) map.get("cancelInventoryInteract"));
+            cancelableEventBooleanMap.put(CancelableEvent.DROP_ITEM, (Boolean) map.get("cancelDropItem"));
+            cancelableEventBooleanMap.put(CancelableEvent.PICKUP_ITEM, (Boolean) map.get("cancelPickupItem"));
         }
 
         for (CancelableEvent value : CancelableEvent.values()) {

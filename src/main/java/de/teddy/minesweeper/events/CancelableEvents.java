@@ -27,13 +27,13 @@ public class CancelableEvents implements Listener {
 
     public CancelableEvents(ConfigurationSection section) {
         if (section != null) {
-            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_ENTITY_DAMAGE, section.getBoolean("cancelEntityDamage", true));
-            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_FOOD_CHANGE, section.getBoolean("cancelFoodChange", true));
-            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_BLOCK_PLACE, section.getBoolean("cancelBlockPlace", true));
-            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_BLOCK_BREAK, section.getBoolean("cancelBlockBreak", true));
-            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_INVENTORY_INTERACT, section.getBoolean("cancelInventoryInteract", true));
-            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_DROP_ITEM, section.getBoolean("cancelDropItem", true));
-            cancelableEventBooleanMap.put(CancelableEvent.CANCEL_PICKUP_ITEM, section.getBoolean("cancelPickupItem", true));
+            cancelableEventBooleanMap.put(CancelableEvent.ENTITY_DAMAGE, section.getBoolean("cancelEntityDamage", true));
+            cancelableEventBooleanMap.put(CancelableEvent.FOOD_CHANGE, section.getBoolean("cancelFoodChange", true));
+            cancelableEventBooleanMap.put(CancelableEvent.BLOCK_PLACE, section.getBoolean("cancelBlockPlace", true));
+            cancelableEventBooleanMap.put(CancelableEvent.BLOCK_BREAK, section.getBoolean("cancelBlockBreak", true));
+            cancelableEventBooleanMap.put(CancelableEvent.INVENTORY_INTERACT, section.getBoolean("cancelInventoryInteract", true));
+            cancelableEventBooleanMap.put(CancelableEvent.DROP_ITEM, section.getBoolean("cancelDropItem", true));
+            cancelableEventBooleanMap.put(CancelableEvent.PICKUP_ITEM, section.getBoolean("cancelPickupItem", true));
         }
 
         for (CancelableEvent value : CancelableEvent.values()) {
@@ -58,8 +58,8 @@ public class CancelableEvents implements Listener {
 
     @EventHandler
     public void onEntityDamageEvent(EntityDamageEvent event) {
-        if (cancelableEventBooleanMap.get(CancelableEvent.CANCEL_ENTITY_DAMAGE)
-                || isInsideAreaAndShouldBeCanceled(event.getEntity().getLocation(), CancelableEvent.CANCEL_ENTITY_DAMAGE)) {
+        if (cancelableEventBooleanMap.get(CancelableEvent.ENTITY_DAMAGE)
+                || isInsideAreaAndShouldBeCanceled(event.getEntity().getLocation(), CancelableEvent.ENTITY_DAMAGE)) {
             if (event.getEntity() instanceof Player player) {
                 if (shouldCancel(player)) {
                     player.setInvulnerable(true);
@@ -73,8 +73,8 @@ public class CancelableEvents implements Listener {
 
     @EventHandler
     public void onFoodLevelChangeEvent(FoodLevelChangeEvent event) {
-        if (cancelableEventBooleanMap.get(CancelableEvent.CANCEL_FOOD_CHANGE)
-                || isInsideAreaAndShouldBeCanceled(event.getEntity().getLocation(), CancelableEvent.CANCEL_FOOD_CHANGE)) {
+        if (cancelableEventBooleanMap.get(CancelableEvent.FOOD_CHANGE)
+                || isInsideAreaAndShouldBeCanceled(event.getEntity().getLocation(), CancelableEvent.FOOD_CHANGE)) {
             if (event.getEntity() instanceof Player player) {
                 if (shouldCancel(player)) {
                     event.setFoodLevel(20);
@@ -87,8 +87,8 @@ public class CancelableEvents implements Listener {
 
     @EventHandler
     public void onBlockPlaceEvent(BlockPlaceEvent event) {
-        if (cancelableEventBooleanMap.get(CancelableEvent.CANCEL_BLOCK_PLACE)
-                || isInsideAreaAndShouldBeCanceled(event.getBlockPlaced().getLocation(), CancelableEvent.CANCEL_BLOCK_PLACE)) {
+        if (cancelableEventBooleanMap.get(CancelableEvent.BLOCK_PLACE)
+                || isInsideAreaAndShouldBeCanceled(event.getBlockPlaced().getLocation(), CancelableEvent.BLOCK_PLACE)) {
             if (shouldCancel(event.getPlayer()))
                 event.setCancelled(true);
         }
@@ -97,8 +97,8 @@ public class CancelableEvents implements Listener {
 
     @EventHandler
     public void onBlockBreakEvent(BlockBreakEvent event) {
-        if (cancelableEventBooleanMap.get(CancelableEvent.CANCEL_BLOCK_BREAK)
-                || isInsideAreaAndShouldBeCanceled(event.getBlock().getLocation(), CancelableEvent.CANCEL_BLOCK_BREAK)) {
+        if (cancelableEventBooleanMap.get(CancelableEvent.BLOCK_BREAK)
+                || isInsideAreaAndShouldBeCanceled(event.getBlock().getLocation(), CancelableEvent.BLOCK_BREAK)) {
             if (shouldCancel(event.getPlayer()))
                 event.setCancelled(true);
         }
@@ -107,8 +107,8 @@ public class CancelableEvents implements Listener {
 
     @EventHandler
     public void onInventoryInteractEvent(InventoryInteractEvent event) {
-        if (cancelableEventBooleanMap.get(CancelableEvent.CANCEL_INVENTORY_INTERACT)
-                || isInsideAreaAndShouldBeCanceled(event.getWhoClicked().getLocation(), CancelableEvent.CANCEL_INVENTORY_INTERACT)) {
+        if (cancelableEventBooleanMap.get(CancelableEvent.INVENTORY_INTERACT)
+                || isInsideAreaAndShouldBeCanceled(event.getWhoClicked().getLocation(), CancelableEvent.INVENTORY_INTERACT)) {
             if (event.getWhoClicked() instanceof Player player)
                 if (shouldCancel(player))
                     event.setCancelled(true);
@@ -118,8 +118,8 @@ public class CancelableEvents implements Listener {
 
     @EventHandler
     public void onPlayerDropItemEvent(PlayerDropItemEvent event) {
-        if (cancelableEventBooleanMap.get(CancelableEvent.CANCEL_DROP_ITEM)
-                || isInsideAreaAndShouldBeCanceled(event.getPlayer().getLocation(), CancelableEvent.CANCEL_DROP_ITEM)) {
+        if (cancelableEventBooleanMap.get(CancelableEvent.DROP_ITEM)
+                || isInsideAreaAndShouldBeCanceled(event.getPlayer().getLocation(), CancelableEvent.DROP_ITEM)) {
             if (shouldCancel(event.getPlayer()))
                 event.setCancelled(true);
         }
@@ -128,8 +128,8 @@ public class CancelableEvents implements Listener {
 
     @EventHandler
     public void onEntityPickupItemEvent(EntityPickupItemEvent event) {
-        if (cancelableEventBooleanMap.get(CancelableEvent.CANCEL_PICKUP_ITEM)
-                || isInsideAreaAndShouldBeCanceled(event.getEntity().getLocation(), CancelableEvent.CANCEL_PICKUP_ITEM)) {
+        if (cancelableEventBooleanMap.get(CancelableEvent.PICKUP_ITEM)
+                || isInsideAreaAndShouldBeCanceled(event.getEntity().getLocation(), CancelableEvent.PICKUP_ITEM)) {
             if (event.getEntity() instanceof Player player)
                 if (shouldCancel(player))
                     event.setCancelled(true);
