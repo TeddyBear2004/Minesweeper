@@ -45,9 +45,10 @@ public class GenericEvents implements Listener {
 
     @EventHandler
     public void onPlayerJoinEvent(PlayerJoinEvent event) {
-        event.getPlayer().getInventory().setContents(Inventories.VIEWER_INVENTORY);
         Area inside = isInside(event.getPlayer().getLocation());
-        if (inside == null || inside.isTemporaryFlightEnabled())
+        if (inside == null || Minesweeper.getAreaSettings().isTemporaryInventoryEnabled())
+            event.getPlayer().getInventory().setContents(Inventories.VIEWER_INVENTORY);
+        if (inside == null || Minesweeper.getAreaSettings().isTemporaryFlightEnabled())
             event.getPlayer().setAllowFlight(true);
         Minesweeper.getTexturePackHandler().apply(event.getPlayer());
     }
@@ -94,19 +95,23 @@ public class GenericEvents implements Listener {
 
         Area area = fromInsideToOutside(event);
         if (area != null) {
-            if(area.isTemporaryFlightEnabled()){
+            if (Minesweeper.getAreaSettings().isTemporaryFlightEnabled()) {
                 player.setFlying(false);
                 player.setAllowFlight(false);
+            }
+            if (Minesweeper.getAreaSettings().isTemporaryInventoryEnabled()) {
+                player.getInventory().setContents(player.getInventory().getContents());
             }
             return;
         }
 
         area = fromOutsideToInside(event);
-        if(area != null){
-            if(area.isTemporaryFlightEnabled()){
+        if (area != null) {
+            if (Minesweeper.getAreaSettings().isTemporaryFlightEnabled()) {
                 player.setAllowFlight(true);
                 player.setFlying(true);
             }
         }
     }
+
 }

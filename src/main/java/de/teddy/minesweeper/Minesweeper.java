@@ -13,6 +13,7 @@ import de.teddy.minesweeper.events.packets.RightClickEvent;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.game.temporary.Area;
+import de.teddy.minesweeper.game.temporary.AreaSettings;
 import de.teddy.minesweeper.game.texture.pack.DisableResourceHandler;
 import de.teddy.minesweeper.game.texture.pack.ExternalWebServerHandler;
 import de.teddy.minesweeper.game.texture.pack.InternalWebServerHandler;
@@ -37,6 +38,7 @@ public final class Minesweeper extends JavaPlugin {
 
     private static List<Game> games = new ArrayList<>();
     private static List<Area> areas = new ArrayList<>();
+    private static AreaSettings areaSettings;
     private static JavaPlugin plugin;
     private static Language language;
     private static ResourcePackHandler resourcePackHandler;
@@ -58,6 +60,10 @@ public final class Minesweeper extends JavaPlugin {
         return areas;
     }
 
+    public static AreaSettings getAreaSettings() {
+        return areaSettings;
+    }
+
     public static ResourcePackHandler getTexturePackHandler() {
         return resourcePackHandler;
     }
@@ -73,6 +79,8 @@ public final class Minesweeper extends JavaPlugin {
         loadWorld();
         Minesweeper.games = loadGames();
         Minesweeper.areas = loadAreas();
+        Minesweeper.areaSettings = loadAreaSettings();
+
         try{
             Minesweeper.resourcePackHandler = loadTexturePackHandler(getConfig().getConfigurationSection("resource_pack"));
         }catch(FileNotFoundException e){
@@ -215,6 +223,19 @@ public final class Minesweeper extends JavaPlugin {
         areas1.forEach(map -> list.add(new Area(map)));
 
         return list;
+    }
+
+    private AreaSettings loadAreaSettings() {
+        ConfigurationSection locationBased = getConfig().getConfigurationSection("location_based");
+
+        if (locationBased == null || !locationBased.getBoolean("enable", false))
+            return new AreaSettings();
+
+        ConfigurationSection actions = locationBased.getConfigurationSection("actions");
+        if (actions == null)
+            return new AreaSettings();
+
+        return new AreaSettings(actions);
     }
 
     private ResourcePackHandler loadTexturePackHandler(ConfigurationSection section) throws IOException {

@@ -23,6 +23,17 @@ events:
 
 location_based:
   enable: false
+  actions:
+    temporary_inventory: true
+    temporary_fly: true
+    cancelled_events:
+      cancelEntityDamage: true
+      cancelFoodChange: true
+      cancelBlockPlace: true
+      cancelBlockBreak: true
+      cancelInventoryInteract: true
+      cancelDropItem: true
+      cancelPickupItem: true
   areas:
     - x1: 80
       y1: 10
@@ -31,17 +42,6 @@ location_based:
       y2: 40
       z2: -350
       world: MineSweeper
-      actions:
-        temporary_inventory: true
-        temporary_fly: true
-        cancelled_events:
-          cancelEntityDamage: true
-          cancelFoodChange: true
-          cancelBlockPlace: true
-          cancelBlockBreak: true
-          cancelInventoryInteract: true
-          cancelDropItem: true
-          cancelPickupItem: true
 
 
 
