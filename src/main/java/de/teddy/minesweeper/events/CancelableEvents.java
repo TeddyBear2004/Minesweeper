@@ -49,7 +49,7 @@ public class CancelableEvents implements Listener {
     private static boolean isInsideAreaAndShouldBeCanceled(Location location, CancelableEvent event) {
         for (Area area : Minesweeper.getAreas()) {
             if (area.isInArea(location)) {
-                if (area.getTemporaryEvents(event))
+                if (Minesweeper.getAreaSettings().getTemporaryEvents(event))
                     return true;
             }
         }
