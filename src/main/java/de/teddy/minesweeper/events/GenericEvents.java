@@ -18,40 +18,40 @@ import org.bukkit.event.player.PlayerResourcePackStatusEvent;
 
 public class GenericEvents implements Listener {
 
-    private static Area fromOutsideToInside(PlayerMoveEvent event) {
+    private static boolean fromOutsideToInside(PlayerMoveEvent event) {
         for (Area area : Minesweeper.getAreas())
             if (!area.isInArea(event.getFrom()) && event.getTo() != null && area.isInArea(event.getTo()))
-                return area;
+                return true;
 
-        return null;
+        return false;
     }
 
-    private static Area fromInsideToOutside(PlayerMoveEvent event) {
+    private static boolean fromInsideToOutside(PlayerMoveEvent event) {
         for (Area area : Minesweeper.getAreas())
             if (event.getTo() != null && !area.isInArea(event.getTo()) && area.isInArea(event.getFrom()))
-                return area;
+                return true;
 
-        return null;
+        return false;
     }
 
-    private static Area isInside(Location location) {
+    private static boolean isInside(Location location) {
         for (Area area : Minesweeper.getAreas())
             if (area.isInArea(location))
-                return area;
+                return true;
 
-        return null;
+        return false;
 
     }
 
     @EventHandler
     public void onPlayerJoinEvent(PlayerJoinEvent event) {
-        Area inside = isInside(event.getPlayer().getLocation());
+        boolean inside = isInside(event.getPlayer().getLocation());
 
-        if(!Minesweeper.getAreaSettings().isTemporaryInventoryEnabled() || inside != null)
+        if(!Minesweeper.getAreaSettings().isTemporaryInventoryEnabled() || inside)
             event.getPlayer().getInventory().setContents(Inventories.VIEWER_INVENTORY);
 
 
-        if(!Minesweeper.getAreaSettings().isTemporaryFlightEnabled() || inside != null)
+        if(!Minesweeper.getAreaSettings().isTemporaryFlightEnabled() || inside)
             event.getPlayer().setAllowFlight(true);
 
 
@@ -98,8 +98,7 @@ public class GenericEvents implements Listener {
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
 
-        Area area = fromInsideToOutside(event);
-        if (area != null) {
+        if (fromInsideToOutside(event)) {
             if (Minesweeper.getAreaSettings().isTemporaryFlightEnabled()) {
                 player.setFlying(false);
                 player.setAllowFlight(false);
@@ -110,8 +109,7 @@ public class GenericEvents implements Listener {
             return;
         }
 
-        area = fromOutsideToInside(event);
-        if (area != null) {
+        if (fromOutsideToInside(event)) {
             if (Minesweeper.getAreaSettings().isTemporaryFlightEnabled()) {
                 player.setAllowFlight(true);
                 player.setFlying(true);
