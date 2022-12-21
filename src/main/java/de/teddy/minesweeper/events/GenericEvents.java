@@ -46,10 +46,15 @@ public class GenericEvents implements Listener {
     @EventHandler
     public void onPlayerJoinEvent(PlayerJoinEvent event) {
         Area inside = isInside(event.getPlayer().getLocation());
-        if (inside == null || Minesweeper.getAreaSettings().isTemporaryInventoryEnabled())
+
+        if(!Minesweeper.getAreaSettings().isTemporaryInventoryEnabled() || inside != null)
             event.getPlayer().getInventory().setContents(Inventories.VIEWER_INVENTORY);
-        if (inside == null || Minesweeper.getAreaSettings().isTemporaryFlightEnabled())
+
+
+        if(!Minesweeper.getAreaSettings().isTemporaryFlightEnabled() || inside != null)
             event.getPlayer().setAllowFlight(true);
+
+
         Minesweeper.getTexturePackHandler().apply(event.getPlayer());
     }
 
