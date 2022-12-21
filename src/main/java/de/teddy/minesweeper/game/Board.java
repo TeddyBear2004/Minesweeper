@@ -164,14 +164,14 @@ public class Board {
     public Map<Painter, List<Player>> getCurrentPlayerPainters(List<Player> viewers) {
         Map<Class<? extends Painter>, List<Player>> map1 = new HashMap<>();
         viewers.forEach(player1 -> {
-            Class<? extends Painter> aClass = Game.PLAYER_PAINTER_MAP.get(player1);
+            Class<? extends Painter> aClass = Painter.loadPainterClass(player1.getPersistentDataContainer());
 
             List<Player> orDefault = map1.getOrDefault(aClass, new ArrayList<>());
             orDefault.add(player1);
             map1.put(aClass, orDefault);
         });
 
-        Class<? extends Painter> aClass = Game.PLAYER_PAINTER_MAP.get(player);
+        Class<? extends Painter> aClass = Painter.loadPainterClass(player.getPersistentDataContainer());
         List<Player> orDefault = map1.getOrDefault(aClass, new ArrayList<>());
         orDefault.add(player);
         map1.put(aClass, orDefault);
