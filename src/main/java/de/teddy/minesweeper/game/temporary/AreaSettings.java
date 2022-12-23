@@ -7,24 +7,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AreaSettings {
-
-    private final boolean temporaryInventory;
     private final boolean temporaryFly;
     private final Map<CancelableEvent, Boolean> temporaryEvents;
 
     public AreaSettings(){
-        this(true, true, readTemporaryEvents(null));
+        this(true, readTemporaryEvents(null));
     }
 
     public AreaSettings(ConfigurationSection section) {
-        this(section.getBoolean("temporary_inventory", true),
-                section.getBoolean("temporary_inventory", true),
+        this(section.getBoolean("temporary_fly", true),
              readTemporaryEvents(section.getConfigurationSection("cancelled_events"))
         );
     }
 
-    public AreaSettings(boolean temporaryInventory, boolean temporaryFly, Map<CancelableEvent, Boolean> temporaryEvents) {
-        this.temporaryInventory = temporaryInventory;
+    public AreaSettings(boolean temporaryFly, Map<CancelableEvent, Boolean> temporaryEvents) {
         this.temporaryFly = temporaryFly;
         this.temporaryEvents = temporaryEvents;
     }
@@ -53,10 +49,6 @@ public class AreaSettings {
 
     public boolean isTemporaryFlightEnabled() {
         return temporaryFly;
-    }
-
-    public boolean isTemporaryInventoryEnabled() {
-        return temporaryInventory;
     }
 
     public boolean getTemporaryEvents(CancelableEvent event) {

@@ -24,7 +24,6 @@ events:
 location_based:
   enable: false
   actions:
-    temporary_inventory: true
     temporary_fly: true
     cancelled_events:
       cancelEntityDamage: true

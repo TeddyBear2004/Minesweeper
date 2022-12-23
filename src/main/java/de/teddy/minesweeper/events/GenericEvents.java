@@ -47,8 +47,7 @@ public class GenericEvents implements Listener {
     public void onPlayerJoinEvent(PlayerJoinEvent event) {
         boolean inside = isInside(event.getPlayer().getLocation());
 
-        if(!Minesweeper.getAreaSettings().isTemporaryInventoryEnabled() || inside)
-            event.getPlayer().getInventory().setContents(Inventories.VIEWER_INVENTORY);
+        event.getPlayer().getInventory().setContents(Inventories.VIEWER_INVENTORY);
 
 
         if(!Minesweeper.getAreaSettings().isTemporaryFlightEnabled() || inside)
@@ -103,9 +102,7 @@ public class GenericEvents implements Listener {
                 player.setFlying(false);
                 player.setAllowFlight(false);
             }
-            if (Minesweeper.getAreaSettings().isTemporaryInventoryEnabled()) {
-                player.getInventory().setContents(player.getInventory().getContents());
-            }
+
             return;
         }
 
