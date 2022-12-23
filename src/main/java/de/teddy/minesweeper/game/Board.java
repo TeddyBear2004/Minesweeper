@@ -82,7 +82,7 @@ public class Board {
 
     public void drawBlancField(List<Player> players) {
         getCurrentPlayerPainters(players).forEach((painter, players2) -> {
-            if(painter != null)
+            if (painter != null)
                 painter.drawBlancField(this, players2);
         });
     }
@@ -97,7 +97,7 @@ public class Board {
 
     public void draw(List<Player> players) {
         getCurrentPlayerPainters(players).forEach((painter, players2) -> {
-            if(painter != null)
+            if (painter != null)
                 painter.drawField(this, players2);
         });
     }
@@ -164,14 +164,14 @@ public class Board {
     public Map<Painter, List<Player>> getCurrentPlayerPainters(List<Player> viewers) {
         Map<Class<? extends Painter>, List<Player>> map1 = new HashMap<>();
         viewers.forEach(player1 -> {
-            Class<? extends Painter> aClass = Game.PLAYER_PAINTER_MAP.get(player1);
+            Class<? extends Painter> aClass = Painter.loadPainterClass(player1.getPersistentDataContainer());
 
             List<Player> orDefault = map1.getOrDefault(aClass, new ArrayList<>());
             orDefault.add(player1);
             map1.put(aClass, orDefault);
         });
 
-        Class<? extends Painter> aClass = Game.PLAYER_PAINTER_MAP.get(player);
+        Class<? extends Painter> aClass = Painter.loadPainterClass(player.getPersistentDataContainer());
         List<Player> orDefault = map1.getOrDefault(aClass, new ArrayList<>());
         orDefault.add(player);
         map1.put(aClass, orDefault);
@@ -212,7 +212,7 @@ public class Board {
         finish();
 
         getCurrentPlayerPainters().forEach((painter, players) -> {
-            if(painter != null)
+            if (painter != null)
                 painter.drawBombs(this, players);
         });
 
@@ -280,6 +280,7 @@ public class Board {
 
         return false;
     }
+
     public static class Field {
 
         private final boolean isBomb;
@@ -319,10 +320,6 @@ public class Board {
             this.isMarked = !this.isMarked();
         }
 
-        public Material getActualMaterial(Painter painter) {
-            return painter.getActualMaterial(this);
-        }
-
         public Material getMark() {
             return isMarked ? Material.REDSTONE_TORCH : Material.AIR;
         }
@@ -338,6 +335,7 @@ public class Board {
         public int getY() {
             return y;
         }
+
     }
 
     private static class ActionBarScheduler extends BukkitRunnable {

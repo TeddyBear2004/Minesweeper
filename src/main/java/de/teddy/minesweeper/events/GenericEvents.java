@@ -8,6 +8,7 @@ import de.teddy.minesweeper.game.painter.ArmorStandPainter;
 import de.teddy.minesweeper.game.painter.BlockPainter;
 import de.teddy.minesweeper.game.temporary.Area;
 import org.bukkit.Location;
+import de.teddy.minesweeper.game.painter.Painter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -74,8 +75,8 @@ public class GenericEvents implements Listener {
         Player player = event.getPlayer();
 
         switch(event.getStatus()){
-            case DECLINED, FAILED_DOWNLOAD -> Game.PLAYER_PAINTER_MAP.put(player, ArmorStandPainter.class);
-            case SUCCESSFULLY_LOADED -> Game.PLAYER_PAINTER_MAP.put(player, BlockPainter.class);
+            case DECLINED, FAILED_DOWNLOAD -> Painter.storePainterClass(player.getPersistentDataContainer(), ArmorStandPainter.class);
+            case SUCCESSFULLY_LOADED -> Painter.storePainterClass(player.getPersistentDataContainer(), BlockPainter.class);
         }
 
         boolean watching = false;

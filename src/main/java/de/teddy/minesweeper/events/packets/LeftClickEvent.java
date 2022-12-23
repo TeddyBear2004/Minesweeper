@@ -30,7 +30,7 @@ public class LeftClickEvent implements PacketListener {
         PacketContainer packet = event.getPacket();
 
         Game game = Game.getGame(player);
-        Painter painter = Game.PAINTER_MAP.get(Game.PLAYER_PAINTER_MAP.get(player));
+        Painter painter = Game.getPainter(player);
         if (game == null || painter == null)
             return;
 

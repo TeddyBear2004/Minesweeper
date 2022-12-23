@@ -21,7 +21,6 @@ import java.util.Map;
 
 public class Game {
 
-    public static final Map<Player, Class<? extends Painter>> PLAYER_PAINTER_MAP = new HashMap<>();
     public static final Map<Class<? extends Painter>, Painter> PAINTER_MAP = new HashMap<>();
     private static final Map<Player, Board> gameWatched = new HashMap<>();
     private static final Map<Player, Board> runningGames = new HashMap<>();
@@ -36,7 +35,6 @@ public class Game {
     private final Location spawn;
     private final int size;
     private final int bombCount;
-    private final String difficulty;
     private final int inventoryPosition;
     private final ItemStack itemStack;
 
@@ -45,7 +43,6 @@ public class Game {
         this.spawn = spawn;
         this.size = borderSize;
         this.bombCount = bombCount;
-        this.difficulty = difficulty;
         this.inventoryPosition = inventoryPosition;
 
         this.itemStack = new ItemStack(material);
@@ -123,6 +120,10 @@ public class Game {
         return runningGames;
     }
 
+    public static Painter getPainter(Player player) {
+        return PAINTER_MAP.get(Painter.loadPainterClass(player.getPersistentDataContainer()));
+    }
+
     public boolean isBlockOutsideGame(Block block) {
         return !IsBetween.isBetween2D(corner, size, size, block)
                 || !IsBetween.isBetween(corner.getBlockY(), corner.getBlockY() + 1, block.getY());
@@ -142,10 +143,6 @@ public class Game {
 
     public ItemStack getItemStack() {
         return itemStack;
-    }
-
-    public String getDifficultyName() {
-        return difficulty;
     }
 
     public Board getRunningGame() {
