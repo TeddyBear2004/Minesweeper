@@ -18,7 +18,8 @@ public class Board {
 
     public static boolean notTest = true;
     public final Game map;
-    final List<Player> viewers = new LinkedList<>();
+    private final List<Player> viewers = new LinkedList<>();
+    private final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("mm:ss:SSS");
     private final int width;
     private final int height;
     private final int bombCount;
@@ -26,6 +27,7 @@ public class Board {
     private final Field[][] board;
     private final Point2D[] bombList;
     private final Player player;
+    private final Random random = new Random();
     private long started;
     private boolean isGenerated;
     private boolean isFinished;
@@ -76,6 +78,10 @@ public class Board {
         return player;
     }
 
+    public List<Player> getViewers() {
+        return viewers;
+    }
+
     public void drawBlancField() {
         this.drawBlancField(viewers);
     }
@@ -122,10 +128,15 @@ public class Board {
         x = Math.abs(this.corner.getBlockX() - x);
         y = Math.abs(this.corner.getBlockZ() - y);
 
-        if (!this.isGenerated)
+        boolean isGenerated1 = this.isGenerated;
+
+        if (!isGenerated1)
             generateBoard(x, y);
 
         SurfaceDiscoverer.uncoverFields(this, x, y);
+
+        if (!isGenerated1)
+            this.started = System.currentTimeMillis();
     }
 
     public void checkNumber(int x, int y) throws BombExplodeException {
@@ -140,8 +151,6 @@ public class Board {
     }
 
     private String getActualTimeNeededString() {
-        SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("mm:ss:SSS");
-
         return dateTimeFormatter.format(new Date(getActualTimeNeeded()));
     }
 
@@ -163,21 +172,16 @@ public class Board {
 
     public Map<Painter, List<Player>> getCurrentPlayerPainters(List<Player> viewers) {
         Map<Class<? extends Painter>, List<Player>> map1 = new HashMap<>();
-        viewers.forEach(player1 -> {
-            Class<? extends Painter> aClass = Painter.loadPainterClass(player1.getPersistentDataContainer());
-
-            List<Player> orDefault = map1.getOrDefault(aClass, new ArrayList<>());
-            orDefault.add(player1);
-            map1.put(aClass, orDefault);
+        viewers.forEach(player -> {
+            Class<? extends Painter> painterClass = Painter.loadPainterClass(player.getPersistentDataContainer());
+            map1.computeIfAbsent(painterClass, p -> new ArrayList<>()).add(player);
         });
 
-        Class<? extends Painter> aClass = Painter.loadPainterClass(player.getPersistentDataContainer());
-        List<Player> orDefault = map1.getOrDefault(aClass, new ArrayList<>());
-        orDefault.add(player);
-        map1.put(aClass, orDefault);
+        Class<? extends Painter> playerClass = Painter.loadPainterClass(player.getPersistentDataContainer());
+        map1.computeIfAbsent(playerClass, p -> new ArrayList<>()).add(player);
 
         Map<Painter, List<Player>> map2 = new HashMap<>();
-        map1.forEach((aClass2, players) -> map2.put(Game.PAINTER_MAP.get(aClass2), players));
+        map1.forEach((painterClass, players) -> map2.put(Game.PAINTER_MAP.get(painterClass), players));
         return map2;
     }
 
@@ -198,9 +202,11 @@ public class Board {
     }
 
     public void checkIfWon() {
-        if (Arrays.stream(this.board).flatMap(Arrays::stream).anyMatch(field -> field.isCovered() && !field.isBomb())) {
-            return;
-        }
+        for (Field[] fields : this.board)
+            for (Field field : fields)
+                if (field.isCovered() && !field.isBomb())
+                    return;
+
         win();
     }
 
@@ -234,10 +240,6 @@ public class Board {
         if (this.isGenerated)
             throw new RuntimeException(Minesweeper.getLanguage().getString("error_already_generated"));
 
-        this.started = System.currentTimeMillis();
-        this.isGenerated = true;
-
-        Random random = new Random();
         boolean[][] cache = new boolean[this.height][this.width];
         int[][] ints = new int[this.height][this.width];
 
@@ -257,28 +259,29 @@ public class Board {
             for (int j = -1; j < 2; j++) {
                 for (int k = -1; k < 2; k++) {
                     if (!(j == 0 && k == 0)) {
-                        try{
-                            ints[(int) (point2D.getX() + j)][(int) (point2D.getY() + k)]++;
-                        }catch(ArrayIndexOutOfBoundsException ignore){
+                        int xCoord = (int) (point2D.getX() + j);
+                        int yCoord = (int) (point2D.getY() + k);
+
+                        if (xCoord >= 0 && xCoord < this.height && yCoord >= 0 && yCoord < this.width) {
+                            ints[xCoord][yCoord]++;
                         }
                     }
                 }
             }
         }
 
-        for (int i = 0; i < cache.length; i++)
+        for (int i = 0; i < cache.length; i++) {
             for (int j = 0; j < cache[i].length; j++) {
                 this.board[i][j] = new Field(i, j, cache[i][j], ints[i][j]);
             }
+        }
+
+        this.isGenerated = true;
     }
 
-    private boolean couldBombSpawn(int x, int y, int possibleX, int possibleY) {
-        for (int i = -1; i < 2; i++)
-            for (int j = -1; j < 2; j++)
-                if (x + i == possibleX && y + j == possibleY)
-                    return true;
 
-        return false;
+    private boolean couldBombSpawn(int x, int y, int possibleX, int possibleY) {
+        return Math.abs(x - possibleX) <= 1 && Math.abs(y - possibleY) <= 1;
     }
 
     public static class Field {

@@ -77,13 +77,13 @@ public class Game {
         }
         b.draw(Collections.singletonList(p));
         gameWatched.put(p, b);
-        b.viewers.add(p);
+        b.getViewers().add(p);
     }
 
     private static void stopWatching(Player p) {
         Board b = gameWatched.remove(p);
         if (b != null) {
-            b.viewers.remove(p);
+            b.getViewers().remove(p);
         }
     }
 
@@ -92,8 +92,8 @@ public class Game {
         if (b != null) {
             b.drawBlancField();
             b.finish();
-            b.viewers.forEach(gameWatched::remove);
-            b.viewers.clear();
+            b.getViewers().forEach(gameWatched::remove);
+            b.getViewers().clear();
         } else {
             stopWatching(p);
         }

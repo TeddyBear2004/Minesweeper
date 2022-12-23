@@ -11,11 +11,11 @@ public class AreaSettings {
     private final Map<CancelableEvent, Boolean> temporaryEvents;
 
     public AreaSettings(){
-        this(true, readTemporaryEvents(null));
+        this(false, readTemporaryEvents(null));
     }
 
     public AreaSettings(ConfigurationSection section) {
-        this(section.getBoolean("temporary_fly", true),
+        this(section.getBoolean("temporary_fly", false),
              readTemporaryEvents(section.getConfigurationSection("cancelled_events"))
         );
     }
