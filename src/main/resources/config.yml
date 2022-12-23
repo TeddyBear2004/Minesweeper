@@ -1,7 +1,4 @@
 language: en_US
-use_default_map: true
-
-available_games_inventory_lines: 1
 
 resource_pack:
   internal_web_server:
@@ -13,6 +10,8 @@ resource_pack:
     enable: true
     link: https://cdn.discordapp.com/attachments/676083915382849576/875365210997784587/teddy.zip
 
+allow_fly: true
+
 events:
   cancelEntityDamage: true
   cancelFoodChange: true
@@ -21,6 +20,32 @@ events:
   cancelInventoryInteract: true
   cancelDropItem: true
   cancelPickupItem: true
+
+location_based:
+  enable: false
+  actions:
+    temporary_fly: true
+    cancelled_events:
+      cancelEntityDamage: true
+      cancelFoodChange: true
+      cancelBlockPlace: true
+      cancelBlockBreak: true
+      cancelInventoryInteract: true
+      cancelDropItem: true
+      cancelPickupItem: true
+  areas:
+    - x1: 80
+      y1: 10
+      z1: -300
+      x2: 35
+      y2: 40
+      z2: -350
+      world: MineSweeper
+
+
+
+use_default_map: true
+available_games_inventory_lines: 1
 
 games:
   Map10x10:

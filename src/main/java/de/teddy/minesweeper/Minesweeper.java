@@ -12,6 +12,8 @@ import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.events.packets.RightClickEvent;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.inventory.Inventories;
+import de.teddy.minesweeper.game.temporary.Area;
+import de.teddy.minesweeper.game.temporary.AreaSettings;
 import de.teddy.minesweeper.game.texture.pack.DisableResourceHandler;
 import de.teddy.minesweeper.game.texture.pack.ExternalWebServerHandler;
 import de.teddy.minesweeper.game.texture.pack.InternalWebServerHandler;
@@ -27,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -34,6 +37,8 @@ import java.util.zip.ZipInputStream;
 public final class Minesweeper extends JavaPlugin {
 
     private static List<Game> games = new ArrayList<>();
+    private static List<Area> areas = new ArrayList<>();
+    private static AreaSettings areaSettings;
     private static JavaPlugin plugin;
     private static Language language;
     private static ResourcePackHandler resourcePackHandler;
@@ -51,6 +56,14 @@ public final class Minesweeper extends JavaPlugin {
         return language;
     }
 
+    public static List<Area> getAreas() {
+        return areas;
+    }
+
+    public static AreaSettings getAreaSettings() {
+        return areaSettings;
+    }
+
     public static ResourcePackHandler getTexturePackHandler() {
         return resourcePackHandler;
     }
@@ -65,6 +78,9 @@ public final class Minesweeper extends JavaPlugin {
         Minesweeper.language = loadLanguage();
         loadWorld();
         Minesweeper.games = loadGames();
+        Minesweeper.areas = loadAreas();
+        Minesweeper.areaSettings = loadAreaSettings();
+
         try{
             Minesweeper.resourcePackHandler = loadTexturePackHandler(getConfig().getConfigurationSection("resource_pack"));
         }catch(FileNotFoundException e){
@@ -192,6 +208,34 @@ public final class Minesweeper extends JavaPlugin {
             gameList.add(game);
         });
         return gameList;
+    }
+
+
+    private List<Area> loadAreas() {
+        ConfigurationSection locationBased = getConfig().getConfigurationSection("location_based");
+        List<Area> list = new ArrayList<>();
+
+        if (locationBased == null || !locationBased.getBoolean("enable", false))
+            return list;
+
+        List<Map<?, ?>> areas1 = locationBased.getMapList("areas");
+
+        areas1.forEach(map -> list.add(new Area(map)));
+
+        return list;
+    }
+
+    private AreaSettings loadAreaSettings() {
+        ConfigurationSection locationBased = getConfig().getConfigurationSection("location_based");
+
+        if (locationBased == null || !locationBased.getBoolean("enable", false))
+            return new AreaSettings();
+
+        ConfigurationSection actions = locationBased.getConfigurationSection("actions");
+        if (actions == null)
+            return new AreaSettings();
+
+        return new AreaSettings(actions);
     }
 
     private ResourcePackHandler loadTexturePackHandler(ConfigurationSection section) throws IOException {
