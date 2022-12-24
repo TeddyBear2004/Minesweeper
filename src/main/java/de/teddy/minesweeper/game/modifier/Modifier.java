@@ -2,26 +2,37 @@ package de.teddy.minesweeper.game.modifier;
 
 import de.teddy.minesweeper.events.CancelableEvent;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Modifier {
+
     private final boolean temporaryFly;
+    private final boolean allowFly;
+    private final boolean allowDefaultWatch;
     private final Map<CancelableEvent, Boolean> temporaryEvents;
 
-    public Modifier(){
-        this(false, readTemporaryEvents(null));
+    public Modifier(FileConfiguration config) {
+        this(false,
+             config.getBoolean("allow_fly", true),
+             config.getBoolean("allow_default_watch", true),
+             readTemporaryEvents(null));
     }
 
-    public Modifier(ConfigurationSection section) {
+    public Modifier(ConfigurationSection config, ConfigurationSection section) {
         this(section.getBoolean("temporary_fly", false),
+             config.getBoolean("allow_fly", true),
+             config.getBoolean("allow_default_watch", true),
              readTemporaryEvents(section.getConfigurationSection("cancelled_events"))
         );
     }
 
-    public Modifier(boolean temporaryFly, Map<CancelableEvent, Boolean> temporaryEvents) {
+    public Modifier(boolean temporaryFly, boolean allowFly, boolean allowDefaultWatch, Map<CancelableEvent, Boolean> temporaryEvents) {
         this.temporaryFly = temporaryFly;
+        this.allowFly = allowFly;
+        this.allowDefaultWatch = allowDefaultWatch;
         this.temporaryEvents = temporaryEvents;
     }
 
@@ -49,6 +60,14 @@ public class Modifier {
 
     public boolean isTemporaryFlightEnabled() {
         return temporaryFly;
+    }
+
+    public boolean allowFly() {
+        return allowFly;
+    }
+
+    public boolean allowDefaultWatch() {
+        return allowDefaultWatch;
     }
 
     public boolean getTemporaryEvents(CancelableEvent event) {

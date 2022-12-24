@@ -11,6 +11,7 @@ resource_pack:
     link: https://cdn.discordapp.com/attachments/676083915382849576/875365210997784587/teddy.zip
 
 allow_fly: true
+allow_default_watch: true
 
 events:
   cancelEntityDamage: true

@@ -12,8 +12,8 @@ import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.events.packets.RightClickEvent;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.inventory.Inventories;
-import de.teddy.minesweeper.game.modifier.ModifierArea;
 import de.teddy.minesweeper.game.modifier.Modifier;
+import de.teddy.minesweeper.game.modifier.ModifierArea;
 import de.teddy.minesweeper.game.texture.pack.DisableResourceHandler;
 import de.teddy.minesweeper.game.texture.pack.ExternalWebServerHandler;
 import de.teddy.minesweeper.game.texture.pack.InternalWebServerHandler;
@@ -229,13 +229,13 @@ public final class Minesweeper extends JavaPlugin {
         ConfigurationSection locationBased = getConfig().getConfigurationSection("location_based");
 
         if (locationBased == null || !locationBased.getBoolean("enable", false))
-            return new Modifier();
+            return new Modifier(getConfig());
 
         ConfigurationSection actions = locationBased.getConfigurationSection("actions");
         if (actions == null)
-            return new Modifier();
+            return new Modifier(getConfig());
 
-        return new Modifier(actions);
+        return new Modifier(getConfig(), actions);
     }
 
     private ResourcePackHandler loadTexturePackHandler(ConfigurationSection section) throws IOException {

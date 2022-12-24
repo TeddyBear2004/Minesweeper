@@ -4,11 +4,11 @@ import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.inventory.Inventories;
+import de.teddy.minesweeper.game.modifier.ModifierArea;
 import de.teddy.minesweeper.game.painter.ArmorStandPainter;
 import de.teddy.minesweeper.game.painter.BlockPainter;
-import de.teddy.minesweeper.game.modifier.ModifierArea;
-import org.bukkit.Location;
 import de.teddy.minesweeper.game.painter.Painter;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -35,7 +35,7 @@ public class GenericEvents implements Listener {
         return false;
     }
 
-    private static boolean isInside(Location location) {
+    public static boolean isInside(Location location) {
         for (ModifierArea modifierArea : Minesweeper.getAreas())
             if (modifierArea.isInArea(location))
                 return true;
@@ -46,14 +46,12 @@ public class GenericEvents implements Listener {
 
     @EventHandler
     public void onPlayerJoinEvent(PlayerJoinEvent event) {
-        boolean inside = isInside(event.getPlayer().getLocation());
-
         event.getPlayer().getInventory().setContents(Inventories.VIEWER_INVENTORY);
 
-
-        if(!Minesweeper.getAreaSettings().isTemporaryFlightEnabled() || inside)
+        if (Minesweeper.getAreaSettings().allowFly()
+                || !Minesweeper.getAreaSettings().isTemporaryFlightEnabled()
+                || isInside(event.getPlayer().getLocation()))
             event.getPlayer().setAllowFlight(true);
-
 
         Minesweeper.getTexturePackHandler().apply(event.getPlayer());
     }
@@ -75,22 +73,26 @@ public class GenericEvents implements Listener {
         Player player = event.getPlayer();
 
         switch(event.getStatus()){
-            case DECLINED, FAILED_DOWNLOAD -> Painter.storePainterClass(player.getPersistentDataContainer(), ArmorStandPainter.class);
-            case SUCCESSFULLY_LOADED -> Painter.storePainterClass(player.getPersistentDataContainer(), BlockPainter.class);
+            case DECLINED, FAILED_DOWNLOAD ->
+                    Painter.storePainterClass(player.getPersistentDataContainer(), ArmorStandPainter.class);
+            case SUCCESSFULLY_LOADED ->
+                    Painter.storePainterClass(player.getPersistentDataContainer(), BlockPainter.class);
         }
 
-        boolean watching = false;
-        for (Game map : Game.values()) {
-            Board runningGame = map.getRunningGame();
-            if (runningGame != null) {
-                map.startViewing(event.getPlayer(), runningGame);
-                watching = true;
-                break;
+        if (Minesweeper.getAreaSettings().allowDefaultWatch()) {
+            boolean watching = false;
+            for (Game map : Game.values()) {
+                Board runningGame = map.getRunningGame();
+                if (runningGame != null) {
+                    map.startViewing(event.getPlayer(), runningGame);
+                    watching = true;
+                    break;
+                }
             }
-        }
-        if (!watching) {
-            if (Minesweeper.getGames().size() != 0)
-                Minesweeper.getGames().get(0).startViewing(event.getPlayer(), null);
+            if (!watching) {
+                if (Minesweeper.getGames().size() != 0)
+                    Minesweeper.getGames().get(0).startViewing(event.getPlayer(), null);
+            }
         }
     }
 
@@ -99,7 +101,7 @@ public class GenericEvents implements Listener {
         Player player = event.getPlayer();
 
         if (fromInsideToOutside(event)) {
-            if (Minesweeper.getAreaSettings().isTemporaryFlightEnabled()) {
+            if (!Minesweeper.getAreaSettings().allowFly() && Minesweeper.getAreaSettings().isTemporaryFlightEnabled()) {
                 player.setFlying(false);
                 player.setAllowFlight(false);
             }
@@ -108,7 +110,7 @@ public class GenericEvents implements Listener {
         }
 
         if (fromOutsideToInside(event)) {
-            if (Minesweeper.getAreaSettings().isTemporaryFlightEnabled()) {
+            if (!Minesweeper.getAreaSettings().allowFly() && Minesweeper.getAreaSettings().isTemporaryFlightEnabled()) {
                 player.setAllowFlight(true);
                 player.setFlying(true);
             }

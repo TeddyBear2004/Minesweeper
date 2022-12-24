@@ -1,6 +1,7 @@
 package de.teddy.minesweeper.game;
 
 import de.teddy.minesweeper.Minesweeper;
+import de.teddy.minesweeper.events.GenericEvents;
 import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.game.painter.ArmorStandPainter;
 import de.teddy.minesweeper.game.painter.BlockPainter;
@@ -65,8 +66,10 @@ public class Game {
             Game.finishGame(p);
         }
         playerLocation.put(p, g);
-        p.setAllowFlight(true);
-        p.setFlying(true);
+        if (Minesweeper.getAreaSettings().allowFly() || GenericEvents.isInside(g.getViewingSpawn())) {
+            p.setAllowFlight(true);
+            p.setFlying(true);
+        }
         p.teleport(g.getViewingSpawn());
     }
 
@@ -171,9 +174,13 @@ public class Game {
 
         p.getInventory().clear();
         p.getInventory().setContents(Inventories.GAME_INVENTORY);
-        p.setAllowFlight(true);
+        boolean allowFly = Minesweeper.getAreaSettings().allowFly() || GenericEvents.isInside(getViewingSpawn());
+
+        if (allowFly)
+            p.setAllowFlight(true);
         if (shouldTeleport) {
-            p.setFlying(true);
+            if (allowFly)
+                p.setFlying(true);
             p.teleport(this.getViewingSpawn());
         }
     }
