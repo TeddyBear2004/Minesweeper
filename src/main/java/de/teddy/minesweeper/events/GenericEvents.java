@@ -6,7 +6,7 @@ import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.game.painter.ArmorStandPainter;
 import de.teddy.minesweeper.game.painter.BlockPainter;
-import de.teddy.minesweeper.game.temporary.Area;
+import de.teddy.minesweeper.game.modifier.ModifierArea;
 import org.bukkit.Location;
 import de.teddy.minesweeper.game.painter.Painter;
 import org.bukkit.entity.Player;
@@ -20,24 +20,24 @@ import org.bukkit.event.player.PlayerResourcePackStatusEvent;
 public class GenericEvents implements Listener {
 
     private static boolean fromOutsideToInside(PlayerMoveEvent event) {
-        for (Area area : Minesweeper.getAreas())
-            if (!area.isInArea(event.getFrom()) && event.getTo() != null && area.isInArea(event.getTo()))
+        for (ModifierArea modifierArea : Minesweeper.getAreas())
+            if (!modifierArea.isInArea(event.getFrom()) && event.getTo() != null && modifierArea.isInArea(event.getTo()))
                 return true;
 
         return false;
     }
 
     private static boolean fromInsideToOutside(PlayerMoveEvent event) {
-        for (Area area : Minesweeper.getAreas())
-            if (event.getTo() != null && !area.isInArea(event.getTo()) && area.isInArea(event.getFrom()))
+        for (ModifierArea modifierArea : Minesweeper.getAreas())
+            if (event.getTo() != null && !modifierArea.isInArea(event.getTo()) && modifierArea.isInArea(event.getFrom()))
                 return true;
 
         return false;
     }
 
     private static boolean isInside(Location location) {
-        for (Area area : Minesweeper.getAreas())
-            if (area.isInArea(location))
+        for (ModifierArea modifierArea : Minesweeper.getAreas())
+            if (modifierArea.isInArea(location))
                 return true;
 
         return false;

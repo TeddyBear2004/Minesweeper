@@ -12,8 +12,8 @@ import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.events.packets.RightClickEvent;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.inventory.Inventories;
-import de.teddy.minesweeper.game.temporary.Area;
-import de.teddy.minesweeper.game.temporary.AreaSettings;
+import de.teddy.minesweeper.game.modifier.ModifierArea;
+import de.teddy.minesweeper.game.modifier.Modifier;
 import de.teddy.minesweeper.game.texture.pack.DisableResourceHandler;
 import de.teddy.minesweeper.game.texture.pack.ExternalWebServerHandler;
 import de.teddy.minesweeper.game.texture.pack.InternalWebServerHandler;
@@ -37,8 +37,8 @@ import java.util.zip.ZipInputStream;
 public final class Minesweeper extends JavaPlugin {
 
     private static List<Game> games = new ArrayList<>();
-    private static List<Area> areas = new ArrayList<>();
-    private static AreaSettings areaSettings;
+    private static List<ModifierArea> modifierAreas = new ArrayList<>();
+    private static Modifier modifier;
     private static JavaPlugin plugin;
     private static Language language;
     private static ResourcePackHandler resourcePackHandler;
@@ -56,12 +56,12 @@ public final class Minesweeper extends JavaPlugin {
         return language;
     }
 
-    public static List<Area> getAreas() {
-        return areas;
+    public static List<ModifierArea> getAreas() {
+        return modifierAreas;
     }
 
-    public static AreaSettings getAreaSettings() {
-        return areaSettings;
+    public static Modifier getAreaSettings() {
+        return modifier;
     }
 
     public static ResourcePackHandler getTexturePackHandler() {
@@ -78,8 +78,8 @@ public final class Minesweeper extends JavaPlugin {
         Minesweeper.language = loadLanguage();
         loadWorld();
         Minesweeper.games = loadGames();
-        Minesweeper.areas = loadAreas();
-        Minesweeper.areaSettings = loadAreaSettings();
+        Minesweeper.modifierAreas = loadAreas();
+        Minesweeper.modifier = loadModifier();
 
         try{
             Minesweeper.resourcePackHandler = loadTexturePackHandler(getConfig().getConfigurationSection("resource_pack"));
@@ -211,31 +211,31 @@ public final class Minesweeper extends JavaPlugin {
     }
 
 
-    private List<Area> loadAreas() {
+    private List<ModifierArea> loadAreas() {
         ConfigurationSection locationBased = getConfig().getConfigurationSection("location_based");
-        List<Area> list = new ArrayList<>();
+        List<ModifierArea> list = new ArrayList<>();
 
         if (locationBased == null || !locationBased.getBoolean("enable", false))
             return list;
 
         List<Map<?, ?>> areas1 = locationBased.getMapList("areas");
 
-        areas1.forEach(map -> list.add(new Area(map)));
+        areas1.forEach(map -> list.add(new ModifierArea(map)));
 
         return list;
     }
 
-    private AreaSettings loadAreaSettings() {
+    private Modifier loadModifier() {
         ConfigurationSection locationBased = getConfig().getConfigurationSection("location_based");
 
         if (locationBased == null || !locationBased.getBoolean("enable", false))
-            return new AreaSettings();
+            return new Modifier();
 
         ConfigurationSection actions = locationBased.getConfigurationSection("actions");
         if (actions == null)
-            return new AreaSettings();
+            return new Modifier();
 
-        return new AreaSettings(actions);
+        return new Modifier(actions);
     }
 
     private ResourcePackHandler loadTexturePackHandler(ConfigurationSection section) throws IOException {

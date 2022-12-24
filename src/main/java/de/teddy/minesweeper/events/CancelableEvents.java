@@ -1,7 +1,7 @@
 package de.teddy.minesweeper.events;
 
 import de.teddy.minesweeper.Minesweeper;
-import de.teddy.minesweeper.game.temporary.Area;
+import de.teddy.minesweeper.game.modifier.ModifierArea;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -47,8 +47,8 @@ public class CancelableEvents implements Listener {
     }
 
     private static boolean isInsideAreaAndShouldBeCanceled(Location location, CancelableEvent event) {
-        for (Area area : Minesweeper.getAreas()) {
-            if (area.isInArea(location)) {
+        for (ModifierArea modifierArea : Minesweeper.getAreas()) {
+            if (modifierArea.isInArea(location)) {
                 if (Minesweeper.getAreaSettings().getTemporaryEvents(event))
                     return true;
             }

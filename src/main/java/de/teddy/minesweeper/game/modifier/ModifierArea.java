@@ -1,22 +1,22 @@
-package de.teddy.minesweeper.game.temporary;
+package de.teddy.minesweeper.game.modifier;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 import java.util.Map;
 
-public class Area {
+public class ModifierArea {
 
     private final Location loc1;
     private final Location loc2;
 
-    public Area(Map<?, ?> map) {
+    public ModifierArea(Map<?, ?> map) {
         this(readLoc1(map),
              readLoc2(map));
     }
 
 
-    public Area(Location loc1, Location loc2) {
+    public ModifierArea(Location loc1, Location loc2) {
         this.loc1 = new Location(loc1.getWorld(), Math.min(loc1.getBlockX(), loc2.getBlockX()), Math.min(loc1.getBlockY(), loc2.getBlockY()), Math.min(loc1.getBlockZ(), loc2.getBlockZ()));
         this.loc2 = new Location(loc1.getWorld(), Math.max(loc1.getBlockX(), loc2.getBlockX()), Math.max(loc1.getBlockY(), loc2.getBlockY()), Math.max(loc1.getBlockZ(), loc2.getBlockZ()));
         }

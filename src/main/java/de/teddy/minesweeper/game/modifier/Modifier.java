@@ -1,4 +1,4 @@
-package de.teddy.minesweeper.game.temporary;
+package de.teddy.minesweeper.game.modifier;
 
 import de.teddy.minesweeper.events.CancelableEvent;
 import org.bukkit.configuration.ConfigurationSection;
@@ -6,21 +6,21 @@ import org.bukkit.configuration.ConfigurationSection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AreaSettings {
+public class Modifier {
     private final boolean temporaryFly;
     private final Map<CancelableEvent, Boolean> temporaryEvents;
 
-    public AreaSettings(){
+    public Modifier(){
         this(false, readTemporaryEvents(null));
     }
 
-    public AreaSettings(ConfigurationSection section) {
+    public Modifier(ConfigurationSection section) {
         this(section.getBoolean("temporary_fly", false),
              readTemporaryEvents(section.getConfigurationSection("cancelled_events"))
         );
     }
 
-    public AreaSettings(boolean temporaryFly, Map<CancelableEvent, Boolean> temporaryEvents) {
+    public Modifier(boolean temporaryFly, Map<CancelableEvent, Boolean> temporaryEvents) {
         this.temporaryFly = temporaryFly;
         this.temporaryEvents = temporaryEvents;
     }
