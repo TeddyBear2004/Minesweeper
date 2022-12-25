@@ -277,7 +277,7 @@ public class Board {
 
         for (int i = 0; i < cache.length; i++) {
             for (int j = 0; j < cache[i].length; j++) {
-                this.board[i][j] = new Field(i, j, cache[i][j], ints[i][j]);
+                this.board[i][j] = new Field(this, i, j, cache[i][j], ints[i][j]);
             }
         }
 
@@ -293,12 +293,14 @@ public class Board {
 
         private final boolean isBomb;
         private final int bombCount;
+        private final Board board;
         private final int x;
         private final int y;
         private boolean isCovered;
         private boolean isMarked;
 
-        public Field(int x, int y, boolean isBomb, int bombCount) {
+        public Field(Board board, int x, int y, boolean isBomb, int bombCount) {
+            this.board = board;
             this.x = x;
             this.y = y;
             this.isCovered = true;
@@ -342,6 +344,10 @@ public class Board {
 
         public int getY() {
             return y;
+        }
+
+        public Board getBoard() {
+            return board;
         }
 
     }

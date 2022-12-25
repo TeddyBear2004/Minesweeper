@@ -207,11 +207,13 @@ public class ArmorStandPainter implements Painter {
     @Override
     public ItemStack getActualItemStack(Board.Field field) {
         boolean lightField = Board.isLightField(field.getX(), field.getY());
-        if (field.isCovered())
+        if (field.isCovered() && !field.getBoard().isFinished())
             return new ItemStack(lightField ? LIGHT_DEFAULT : DARK_DEFAULT);
 
         if (field.isBomb())
             return new ItemStack(Material.COAL_BLOCK);
+        else if (field.isCovered())
+            return new ItemStack(lightField ? LIGHT_DEFAULT : DARK_DEFAULT);
         else
             return ITEM_STACKS[field.getNeighborCount()];
     }
