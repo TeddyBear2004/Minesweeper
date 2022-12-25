@@ -69,7 +69,7 @@ public final class Minesweeper extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-        Inventories.initialise(getConfig(), language);
+        Inventories.initialise(getConfig().getInt("available_games_inventory_lines"), language);
 
 
         Objects.requireNonNull(this.getCommand("bypassEventCancellation")).setExecutor(new BypassEventCommand());

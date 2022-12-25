@@ -9,7 +9,6 @@ import de.teddy.minesweeper.util.Language;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
@@ -42,14 +41,14 @@ public enum Inventories {
     public static ItemStack barrier;
     public static ItemStack reload;
 
-    public static void initialise(Configuration config, Language language) {
+    public static void initialise(int availableGamesInventoryLines, Language language) {
         loadGameInventory(language);
         loadViewerInventory(language);
 
         INVENTORY_NAME_MAP.put(CHOOSE_GAME, ChatColor.AQUA + language.getString("minesweeper"));
         INVENTORIES.put(CHOOSE_GAME, createSupplier(Bukkit.createInventory(
                 null,
-                config.getInt("available_games_inventory_lines") * 9,
+                availableGamesInventoryLines * 9,
                 INVENTORY_NAME_MAP.get(CHOOSE_GAME)), CHOOSE_GAME));
 
         INVENTORY_NAME_MAP.put(VIEW_GAMES, ChatColor.AQUA + "Watch other games!");
