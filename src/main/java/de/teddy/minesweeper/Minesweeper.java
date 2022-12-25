@@ -40,7 +40,6 @@ public final class Minesweeper extends JavaPlugin {
     private ResourcePackHandler resourcePackHandler;
     private List<Game> games = new ArrayList<>();
 
-
     public List<Game> getGames() {
         return games;
     }
@@ -136,17 +135,21 @@ public final class Minesweeper extends JavaPlugin {
                     }
                 } else {
                     File parent = newFile.getParentFile();
-                    if (!parent.exists() && !parent.isDirectory() && !parent.mkdirs()) {
-                        throw new IOException("Failed to create directory " + parent);
+                    if (parent != null) {
+                        if (!parent.exists() && !parent.isDirectory() && !parent.mkdirs()) {
+                            throw new IOException("Failed to create directory " + parent);
+                        }
                     }
 
-                    if (!newFile.isDirectory() && !newFile.exists())
-                        if (!newFile.createNewFile())
-                            throw new IOException("Failed to create file " + newFile);
-                    try(FileOutputStream fos = new FileOutputStream(newFile)){
-                        int len;
-                        while ((len = zis.read(buffer)) > 0) {
-                            fos.write(buffer, 0, len);
+                    if (!newFile.getName().equals(".")) {
+                        if (!newFile.isDirectory() && !newFile.exists())
+                            if (!newFile.createNewFile())
+                                throw new IOException("Failed to create file " + newFile);
+                        try(FileOutputStream fos = new FileOutputStream(newFile)){
+                            int len;
+                            while ((len = zis.read(buffer)) > 0) {
+                                fos.write(buffer, 0, len);
+                            }
                         }
                     }
                 }
