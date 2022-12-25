@@ -61,19 +61,10 @@ public class Modifier {
     private static Map<CancelableEvent, Boolean> readTemporaryEvents(ConfigurationSection map) {
         Map<CancelableEvent, Boolean> cancelableEventBooleanMap = new HashMap<>();
 
-        if (map != null) {
-            cancelableEventBooleanMap.put(CancelableEvent.ENTITY_DAMAGE, map.getBoolean("cancelEntityDamage", true));
-            cancelableEventBooleanMap.put(CancelableEvent.FOOD_CHANGE, map.getBoolean("cancelFoodChange", true));
-            cancelableEventBooleanMap.put(CancelableEvent.BLOCK_PLACE, map.getBoolean("cancelBlockPlace", true));
-            cancelableEventBooleanMap.put(CancelableEvent.BLOCK_BREAK, map.getBoolean("cancelBlockBreak", true));
-            cancelableEventBooleanMap.put(CancelableEvent.INVENTORY_INTERACT, map.getBoolean("cancelInventoryInteract", true));
-            cancelableEventBooleanMap.put(CancelableEvent.DROP_ITEM, map.getBoolean("cancelDropItem", true));
-            cancelableEventBooleanMap.put(CancelableEvent.PICKUP_ITEM, map.getBoolean("cancelPickupItem", true));
-        }
-
-        for (CancelableEvent value : CancelableEvent.values()) {
-            if (!cancelableEventBooleanMap.containsKey(value))
-                cancelableEventBooleanMap.put(value, true);
+        for (CancelableEvent cancelableEvent : CancelableEvent.values()) {
+            cancelableEventBooleanMap.put(cancelableEvent, map == null
+                    ? cancelableEvent.getDefaultValue()
+                    : map.getBoolean(cancelableEvent.getKey(), cancelableEvent.getDefaultValue()));
         }
 
         return cancelableEventBooleanMap;

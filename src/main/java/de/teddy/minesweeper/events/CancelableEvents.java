@@ -30,19 +30,11 @@ public class CancelableEvents implements Listener {
     
     public CancelableEvents(ConfigurationSection section, List<ModifierArea> areas) {
         this.areas = areas;
-        if (section != null) {
-            cancelableEventBooleanMap.put(CancelableEvent.ENTITY_DAMAGE, section.getBoolean("cancelEntityDamage", true));
-            cancelableEventBooleanMap.put(CancelableEvent.FOOD_CHANGE, section.getBoolean("cancelFoodChange", true));
-            cancelableEventBooleanMap.put(CancelableEvent.BLOCK_PLACE, section.getBoolean("cancelBlockPlace", true));
-            cancelableEventBooleanMap.put(CancelableEvent.BLOCK_BREAK, section.getBoolean("cancelBlockBreak", true));
-            cancelableEventBooleanMap.put(CancelableEvent.INVENTORY_INTERACT, section.getBoolean("cancelInventoryInteract", true));
-            cancelableEventBooleanMap.put(CancelableEvent.DROP_ITEM, section.getBoolean("cancelDropItem", true));
-            cancelableEventBooleanMap.put(CancelableEvent.PICKUP_ITEM, section.getBoolean("cancelPickupItem", true));
-        }
 
-        for (CancelableEvent value : CancelableEvent.values()) {
-            if (!cancelableEventBooleanMap.containsKey(value))
-                cancelableEventBooleanMap.put(value, true);
+        for (CancelableEvent cancelableEvent : CancelableEvent.values()) {
+            cancelableEventBooleanMap.put(cancelableEvent, section == null
+            ? cancelableEvent.getDefaultValue()
+                    : section.getBoolean(cancelableEvent.getKey(), cancelableEvent.getDefaultValue()));
         }
     }
 
