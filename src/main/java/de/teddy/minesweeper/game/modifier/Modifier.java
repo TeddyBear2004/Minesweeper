@@ -50,12 +50,12 @@ public class Modifier {
     }
 
     public static void initialise(ConfigurationSection config, ConfigurationSection section, List<ModifierArea> areas) {
-        if (modifier != null)
+        if (modifier == null)
             modifier = new Modifier(config, section, areas);
     }
 
     public static void initialise(FileConfiguration config, List<ModifierArea> areas) {
-        if (modifier != null) modifier = new Modifier(config, areas);
+        if (modifier == null) modifier = new Modifier(config, areas);
     }
 
     private static Map<CancelableEvent, Boolean> readTemporaryEvents(ConfigurationSection map) {
