@@ -1,6 +1,7 @@
 package de.teddy.minesweeper.events;
 
 import de.teddy.minesweeper.Minesweeper;
+import de.teddy.minesweeper.game.modifier.Modifier;
 import de.teddy.minesweeper.game.modifier.ModifierArea;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -18,14 +19,17 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CancelableEvents implements Listener {
 
-    public static final NamespacedKey BYPASS_EVENTS = new NamespacedKey(Minesweeper.getPlugin(), "bypass_events");
+    public static final NamespacedKey BYPASS_EVENTS = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "bypass_events");
     private final Map<CancelableEvent, Boolean> cancelableEventBooleanMap = new HashMap<>();
-
-    public CancelableEvents(ConfigurationSection section) {
+    private final List<ModifierArea> areas;
+    
+    public CancelableEvents(ConfigurationSection section, List<ModifierArea> areas) {
+        this.areas = areas;
         if (section != null) {
             cancelableEventBooleanMap.put(CancelableEvent.ENTITY_DAMAGE, section.getBoolean("cancelEntityDamage", true));
             cancelableEventBooleanMap.put(CancelableEvent.FOOD_CHANGE, section.getBoolean("cancelFoodChange", true));
@@ -42,14 +46,14 @@ public class CancelableEvents implements Listener {
         }
     }
 
-    private static boolean shouldCancel(Player player) {
+    private boolean shouldCancel(Player player) {
         return player.getPersistentDataContainer().getOrDefault(BYPASS_EVENTS, PersistentDataType.BYTE, (byte) 0) == 0b0;
     }
 
-    private static boolean isInsideAreaAndShouldBeCanceled(Location location, CancelableEvent event) {
-        for (ModifierArea modifierArea : Minesweeper.getAreas()) {
+    private boolean isInsideAreaAndShouldBeCanceled(Location location, CancelableEvent event) {
+        for (ModifierArea modifierArea : areas) {
             if (modifierArea.isInArea(location)) {
-                if (Minesweeper.getAreaSettings().getTemporaryEvents(event))
+                if (Modifier.getInstance().getTemporaryEvents(event))
                     return true;
             }
         }

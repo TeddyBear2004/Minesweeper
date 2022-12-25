@@ -5,9 +5,11 @@ import de.teddy.minesweeper.game.inventory.content.ContentFiller;
 import de.teddy.minesweeper.game.inventory.content.MainMenuFiller;
 import de.teddy.minesweeper.game.inventory.content.ViewGamesFiller;
 import de.teddy.minesweeper.util.HeadGenerator;
+import de.teddy.minesweeper.util.Language;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
@@ -40,14 +42,14 @@ public enum Inventories {
     public static ItemStack barrier;
     public static ItemStack reload;
 
-    public static void initialise() {
-        loadGameInventory();
-        loadViewerInventory();
+    public static void initialise(Configuration config, Language language) {
+        loadGameInventory(language);
+        loadViewerInventory(language);
 
-        INVENTORY_NAME_MAP.put(CHOOSE_GAME, ChatColor.AQUA + Minesweeper.getLanguage().getString("minesweeper"));
+        INVENTORY_NAME_MAP.put(CHOOSE_GAME, ChatColor.AQUA + language.getString("minesweeper"));
         INVENTORIES.put(CHOOSE_GAME, createSupplier(Bukkit.createInventory(
                 null,
-                Minesweeper.getPlugin().getConfig().getInt("available_games_inventory_lines") * 9,
+                config.getInt("available_games_inventory_lines") * 9,
                 INVENTORY_NAME_MAP.get(CHOOSE_GAME)), CHOOSE_GAME));
 
         INVENTORY_NAME_MAP.put(VIEW_GAMES, ChatColor.AQUA + "Watch other games!");
@@ -67,45 +69,45 @@ public enum Inventories {
     }
 
     private static List<ContentFiller> getIContentFillers() {
-        return List.of(new MainMenuFiller(Minesweeper.getGames()), new ViewGamesFiller());
+        return List.of(new MainMenuFiller(Minesweeper.getPlugin(Minesweeper.class).getGames()), new ViewGamesFiller());
     }
 
-    private static void loadGameInventory() {
+    private static void loadGameInventory(Language language) {
         barrier = new ItemStack(Material.BARRIER);
         ItemMeta barrierMeta = barrier.getItemMeta();
         if (barrierMeta != null)
-            barrierMeta.setDisplayName(ChatColor.DARK_RED + Minesweeper.getLanguage().getString("leave"));
+            barrierMeta.setDisplayName(ChatColor.DARK_RED + language.getString("leave"));
         barrier.setItemMeta(barrierMeta);
 
         reload = HeadGenerator.getHeadFromUrl("http://textures.minecraft.net/texture/e887cc388c8dcfcf1ba8aa5c3c102dce9cf7b1b63e786b34d4f1c3796d3e9d61");
 
         SkullMeta headMeta = (SkullMeta) reload.getItemMeta();
         if (headMeta != null)
-            headMeta.setDisplayName(ChatColor.YELLOW + Minesweeper.getLanguage().getString("restart_pl"));
+            headMeta.setDisplayName(ChatColor.YELLOW + language.getString("restart_pl"));
         reload.setItemMeta(headMeta);
 
         GAME_INVENTORY[2] = reload;
         GAME_INVENTORY[6] = barrier;
     }
 
-    private static void loadViewerInventory() {
+    private static void loadViewerInventory(Language language) {
         compass = new ItemStack(Material.COMPASS);
         ItemMeta compassMeta = compass.getItemMeta();
         if (compassMeta != null)
-            compassMeta.setDisplayName(ChatColor.GREEN + Minesweeper.getLanguage().getString("watch_others"));
+            compassMeta.setDisplayName(ChatColor.GREEN + language.getString("watch_others"));
         compass.setItemMeta(compassMeta);
 
         String[] tutorialPages = new String[]{
-                Minesweeper.getLanguage().getString("book_page_1"),
-                Minesweeper.getLanguage().getString("book_page_2"),
-                Minesweeper.getLanguage().getString("book_page_3")};
+                language.getString("book_page_1"),
+                language.getString("book_page_2"),
+                language.getString("book_page_3")};
 
         book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta bookMeta = (BookMeta) book.getItemMeta();
         if (bookMeta != null) {
-            bookMeta.setDisplayName(ChatColor.YELLOW + Minesweeper.getLanguage().getString("book_tutorial"));
+            bookMeta.setDisplayName(ChatColor.YELLOW + language.getString("book_tutorial"));
             bookMeta.setAuthor(ChatColor.AQUA + "TeddyBear_2004");
-            bookMeta.setTitle(Minesweeper.getLanguage().getString("book_title"));
+            bookMeta.setTitle(language.getString("book_title"));
             bookMeta.setPages(tutorialPages);
         }
         book.setItemMeta(bookMeta);
@@ -114,7 +116,7 @@ public enum Inventories {
 
         SkullMeta timeMeta = (SkullMeta) hourGlass.getItemMeta();
         if (timeMeta != null)
-            timeMeta.setDisplayName(ChatColor.AQUA + Minesweeper.getLanguage().getString("hour_glass_display_name"));
+            timeMeta.setDisplayName(ChatColor.AQUA + language.getString("hour_glass_display_name"));
 
         hourGlass.setItemMeta(timeMeta);
 

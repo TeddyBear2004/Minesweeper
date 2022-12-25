@@ -6,7 +6,6 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.injector.GamePhase;
-import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.painter.Painter;
 import org.bukkit.entity.Player;
@@ -20,6 +19,11 @@ import java.util.Set;
 public class LeftClickEvent implements PacketListener {
 
     public static final Map<Player, Long> LAST_CLICKED = new HashMap<>();
+    private final Plugin plugin;
+
+    public LeftClickEvent(Plugin plugin){
+        this.plugin = plugin;
+    }
 
     @Override
     public void onPacketSending(PacketEvent event) { }
@@ -59,7 +63,7 @@ public class LeftClickEvent implements PacketListener {
 
     @Override
     public Plugin getPlugin() {
-        return Minesweeper.getPlugin();
+        return plugin;
     }
 
 }

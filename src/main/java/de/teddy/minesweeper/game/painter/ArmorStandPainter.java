@@ -9,7 +9,6 @@ import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
 import com.comphenix.protocol.wrappers.WrappedEnumEntityUseAction;
-import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
@@ -23,6 +22,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 
 import java.awt.geom.Point2D;
 import java.lang.reflect.InvocationTargetException;
@@ -41,12 +41,16 @@ public class ArmorStandPainter implements Painter {
             HeadGenerator.getHeadFromUrl("http://textures.minecraft.net/texture/581559800cf78b5324519d939f69c83d4a41a00b1bd770cf425fb9a65e3d1d45"),
             HeadGenerator.getHeadFromUrl("http://textures.minecraft.net/texture/aae59430f811d4037d548e3891f03667393aee15d0ded4da64ca84973b0d60db")
     };
-
     public static final Material LIGHT_DEFAULT = Material.LIME_CONCRETE_POWDER;
     public static final Material DARK_DEFAULT = Material.GREEN_CONCRETE_POWDER;
+    private final Plugin plugin;
     private Map<Integer, ItemStack> currentItemStackPerEntityId = new HashMap<>();
     private Map<Integer, int[]> armorStandEntityIds;
     private Map<int[], Integer> locationEntityIds;
+
+    public ArmorStandPainter(Plugin plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public void drawBlancField(Board board, List<Player> players) {
@@ -180,7 +184,7 @@ public class ArmorStandPainter implements Painter {
             clone.setZ(board.getCorner().getBlockZ() + point2D.getY());
 
 
-            Bukkit.getScheduler().runTaskLater(Minesweeper.getPlugin(), () -> {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 Integer integer = this.locationEntityIds.get(new int[]{(int) point2D.getX(), (int) point2D.getY()});
                 if (integer == null)
                     return;
@@ -229,7 +233,7 @@ public class ArmorStandPainter implements Painter {
 
     @Override
     public void onRightClick(Player player, PacketEvent event, Game game, PacketContainer packet) {
-        if(packet.getType() == PacketType.Play.Client.USE_ITEM){
+        if (packet.getType() == PacketType.Play.Client.USE_ITEM) {
             Game.PAINTER_MAP.get(BlockPainter.class).onRightClick(player, event, game, packet);
             return;
         }
@@ -266,7 +270,7 @@ public class ArmorStandPainter implements Painter {
 
     @Override
     public void onLeftClick(Player player, PacketEvent event, Game game, PacketContainer packet) {
-        if(packet.getType() == PacketType.Play.Client.BLOCK_DIG){
+        if (packet.getType() == PacketType.Play.Client.BLOCK_DIG) {
             Game.PAINTER_MAP.get(BlockPainter.class).onLeftClick(player, event, game, packet);
             return;
         }

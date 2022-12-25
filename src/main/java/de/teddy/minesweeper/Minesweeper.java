@@ -36,36 +36,13 @@ import java.util.zip.ZipInputStream;
 
 public final class Minesweeper extends JavaPlugin {
 
-    private static List<Game> games = new ArrayList<>();
-    private static List<ModifierArea> modifierAreas = new ArrayList<>();
-    private static Modifier modifier;
-    private static JavaPlugin plugin;
-    private static Language language;
-    private static ResourcePackHandler resourcePackHandler;
     private final String langPath = "lang/" + getConfig().getString("language") + ".toml";
+    private ResourcePackHandler resourcePackHandler;
+    private List<Game> games = new ArrayList<>();
 
-    public static JavaPlugin getPlugin() {
-        return plugin;
-    }
 
-    public static List<Game> getGames() {
+    public List<Game> getGames() {
         return games;
-    }
-
-    public static Language getLanguage() {
-        return language;
-    }
-
-    public static List<ModifierArea> getAreas() {
-        return modifierAreas;
-    }
-
-    public static Modifier getAreaSettings() {
-        return modifier;
-    }
-
-    public static ResourcePackHandler getTexturePackHandler() {
-        return resourcePackHandler;
     }
 
     @Override
@@ -74,41 +51,42 @@ public final class Minesweeper extends JavaPlugin {
         saveResource(langPath, false);
 
 
-        Minesweeper.plugin = this;
-        Minesweeper.language = loadLanguage();
+        Language language = loadLanguage();
+        List<ModifierArea> modifierAreas = loadAreas();
         loadWorld();
-        Minesweeper.games = loadGames();
-        Minesweeper.modifierAreas = loadAreas();
-        Minesweeper.modifier = loadModifier();
+        loadModifier(modifierAreas);
+        this.games = loadGames(language);
 
         try{
-            Minesweeper.resourcePackHandler = loadTexturePackHandler(getConfig().getConfigurationSection("resource_pack"));
+            this.resourcePackHandler = loadTexturePackHandler(getConfig().getConfigurationSection("resource_pack"));
         }catch(FileNotFoundException e){
             getLogger().severe("Could not find the corresponding resource pack file. Please check the config.");
+            e.printStackTrace();
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }catch(IOException e){
             getLogger().severe("Could not start the internal web server. Please check the config.");
+            e.printStackTrace();
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-        Inventories.initialise();
+        Inventories.initialise(getConfig(), language);
 
 
         Objects.requireNonNull(this.getCommand("bypassEventCancellation")).setExecutor(new BypassEventCommand());
 
-        getServer().getPluginManager().registerEvents(new CancelableEvents(getConfig().getConfigurationSection("events")), this);
-        getServer().getPluginManager().registerEvents(new GenericEvents(), this);
+        getServer().getPluginManager().registerEvents(new CancelableEvents(getConfig().getConfigurationSection("events"), modifierAreas), this);
+        getServer().getPluginManager().registerEvents(new GenericEvents(games, resourcePackHandler), this);
         getServer().getPluginManager().registerEvents(new GenericRightClickEvent(), this);
         getServer().getPluginManager().registerEvents(new InventoryClickEvents(), this);
 
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
-        protocolManager.addPacketListener(new RightClickEvent());
-        protocolManager.addPacketListener(new LeftClickEvent());
+        protocolManager.addPacketListener(new RightClickEvent(this));
+        protocolManager.addPacketListener(new LeftClickEvent(this));
 
         Bukkit.getOnlinePlayers().forEach(player -> {
             player.getInventory().setContents(Inventories.VIEWER_INVENTORY);
-            if (Minesweeper.getGames().size() != 0)
+            if (games.size() != 0)
                 games.get(0).startViewing(player, null);
         });
     }
@@ -181,7 +159,7 @@ public final class Minesweeper extends JavaPlugin {
         WorldCreator.name("MineSweeper").type(WorldType.FLAT).createWorld();
     }
 
-    private List<Game> loadGames() {
+    private List<Game> loadGames(Language language) {
         List<Game> gameList = new ArrayList<>();
 
         ConfigurationSection games = getConfig().getConfigurationSection("games");
@@ -204,7 +182,7 @@ public final class Minesweeper extends JavaPlugin {
             Material material = Material.valueOf(games.getString(key + ".inventory_material"));
             int inventoryPosition = games.getInt(key + ".inventory_position");
 
-            Game game = new Game(corner, spawn, borderSize, bombCount, Minesweeper.language.getString(difficultyLangPath), material, inventoryPosition);
+            Game game = new Game(this, gameList, language, corner, spawn, borderSize, bombCount, language.getString(difficultyLangPath), material, inventoryPosition);
             gameList.add(game);
         });
         return gameList;
@@ -225,17 +203,19 @@ public final class Minesweeper extends JavaPlugin {
         return list;
     }
 
-    private Modifier loadModifier() {
+    private void loadModifier(List<ModifierArea> areas) {
         ConfigurationSection locationBased = getConfig().getConfigurationSection("location_based");
 
-        if (locationBased == null || !locationBased.getBoolean("enable", false))
-            return new Modifier(getConfig());
+        if (locationBased == null || !locationBased.getBoolean("enable", false)) {
+            Modifier.initialise(getConfig(), areas);
+            return;
+        }
 
         ConfigurationSection actions = locationBased.getConfigurationSection("actions");
         if (actions == null)
-            return new Modifier(getConfig());
-
-        return new Modifier(getConfig(), actions);
+            Modifier.initialise(getConfig(), areas);
+        else
+            Modifier.initialise(getConfig(), actions, areas);
     }
 
     private ResourcePackHandler loadTexturePackHandler(ConfigurationSection section) throws IOException {

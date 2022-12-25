@@ -1,6 +1,5 @@
 package de.teddy.minesweeper.game;
 
-import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
 
 import java.util.Stack;
@@ -27,12 +26,13 @@ public class SurfaceDiscoverer {
             field.setUncover();
 
             if (field.isBomb()) {
-                throw new BombExplodeException(Minesweeper.getLanguage().getString("error_bomb_exploded", String.valueOf(width), String.valueOf(height)));
+                throw new BombExplodeException("Bomb at " + width + " and " + height + " is exploded.");
+
             }
 
             if (field.getNeighborCount() == 0) {
                 Stack<int[]> stack = new Stack<>();
-                stack.push(new int[] {width, height});
+                stack.push(new int[]{width, height});
 
                 while (!stack.isEmpty()) {
                     int[] coordinates = stack.pop();
@@ -48,7 +48,7 @@ public class SurfaceDiscoverer {
                                     if (neighborField.isCovered()) {
                                         neighborField.setUncover();
                                         if (neighborField.getNeighborCount() == 0) {
-                                            stack.push(new int[] {x + i, y + j});
+                                            stack.push(new int[]{x + i, y + j});
                                         }
                                     }
                                 }

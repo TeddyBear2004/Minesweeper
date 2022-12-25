@@ -1,14 +1,13 @@
 package de.teddy.minesweeper.events;
 
-import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.inventory.Inventories;
-import de.teddy.minesweeper.game.modifier.ModifierArea;
+import de.teddy.minesweeper.game.modifier.Modifier;
 import de.teddy.minesweeper.game.painter.ArmorStandPainter;
 import de.teddy.minesweeper.game.painter.BlockPainter;
 import de.teddy.minesweeper.game.painter.Painter;
-import org.bukkit.Location;
+import de.teddy.minesweeper.game.texture.pack.ResourcePackHandler;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,43 +16,28 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerResourcePackStatusEvent;
 
+import java.util.List;
+
 public class GenericEvents implements Listener {
 
-    private static boolean fromOutsideToInside(PlayerMoveEvent event) {
-        for (ModifierArea modifierArea : Minesweeper.getAreas())
-            if (!modifierArea.isInArea(event.getFrom()) && event.getTo() != null && modifierArea.isInArea(event.getTo()))
-                return true;
+    private final List<Game> games;
+    private final ResourcePackHandler resourcePackHandler;
 
-        return false;
-    }
-
-    private static boolean fromInsideToOutside(PlayerMoveEvent event) {
-        for (ModifierArea modifierArea : Minesweeper.getAreas())
-            if (event.getTo() != null && !modifierArea.isInArea(event.getTo()) && modifierArea.isInArea(event.getFrom()))
-                return true;
-
-        return false;
-    }
-
-    public static boolean isInside(Location location) {
-        for (ModifierArea modifierArea : Minesweeper.getAreas())
-            if (modifierArea.isInArea(location))
-                return true;
-
-        return false;
-
+    public GenericEvents(List<Game> games, ResourcePackHandler resourcePackHandler){
+        this.games = games;
+        this.resourcePackHandler = resourcePackHandler;
     }
 
     @EventHandler
     public void onPlayerJoinEvent(PlayerJoinEvent event) {
         event.getPlayer().getInventory().setContents(Inventories.VIEWER_INVENTORY);
 
-        if (Minesweeper.getAreaSettings().allowFly()
-                || !Minesweeper.getAreaSettings().isTemporaryFlightEnabled()
-                || isInside(event.getPlayer().getLocation()))
+        if (Modifier.getInstance().allowFly()
+                || !Modifier.getInstance().isTemporaryFlightEnabled()
+                || Modifier.getInstance().isInside(event.getPlayer().getLocation()))
             event.getPlayer().setAllowFlight(true);
 
-        Minesweeper.getTexturePackHandler().apply(event.getPlayer());
+        resourcePackHandler.apply(event.getPlayer());
     }
 
     @EventHandler
@@ -79,9 +63,9 @@ public class GenericEvents implements Listener {
                     Painter.storePainterClass(player.getPersistentDataContainer(), BlockPainter.class);
         }
 
-        if (Minesweeper.getAreaSettings().allowDefaultWatch()) {
+        if (Modifier.getInstance().allowDefaultWatch()) {
             boolean watching = false;
-            for (Game map : Game.values()) {
+            for (Game map : games) {
                 Board runningGame = map.getRunningGame();
                 if (runningGame != null) {
                     map.startViewing(event.getPlayer(), runningGame);
@@ -90,8 +74,8 @@ public class GenericEvents implements Listener {
                 }
             }
             if (!watching) {
-                if (Minesweeper.getGames().size() != 0)
-                    Minesweeper.getGames().get(0).startViewing(event.getPlayer(), null);
+                if (games.size() != 0)
+                    games.get(0).startViewing(event.getPlayer(), null);
             }
         }
     }
@@ -100,8 +84,8 @@ public class GenericEvents implements Listener {
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
 
-        if (fromInsideToOutside(event)) {
-            if (!Minesweeper.getAreaSettings().allowFly() && Minesweeper.getAreaSettings().isTemporaryFlightEnabled()) {
+        if (Modifier.getInstance().fromInsideToOutside(event)) {
+            if (!Modifier.getInstance().allowFly() && Modifier.getInstance().isTemporaryFlightEnabled()) {
                 player.setFlying(false);
                 player.setAllowFlight(false);
             }
@@ -109,8 +93,8 @@ public class GenericEvents implements Listener {
             return;
         }
 
-        if (fromOutsideToInside(event)) {
-            if (!Minesweeper.getAreaSettings().allowFly() && Minesweeper.getAreaSettings().isTemporaryFlightEnabled()) {
+        if (Modifier.getInstance().fromOutsideToInside(event)) {
+            if (!Modifier.getInstance().allowFly() && Modifier.getInstance().isTemporaryFlightEnabled()) {
                 player.setAllowFlight(true);
                 player.setFlying(true);
             }

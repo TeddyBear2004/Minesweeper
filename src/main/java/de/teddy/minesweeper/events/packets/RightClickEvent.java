@@ -18,6 +18,12 @@ import java.util.Set;
 
 public class RightClickEvent implements PacketListener {
 
+
+    private final Plugin plugin;
+
+    public RightClickEvent(Plugin plugin){
+        this.plugin = plugin;
+    }
     @Override
     public void onPacketSending(PacketEvent event) { }
 
@@ -34,7 +40,7 @@ public class RightClickEvent implements PacketListener {
         if (game == null || painter == null)
             return;
 
-        if(painter.getRightClickPacketType().contains(packet.getType()))
+        if (painter.getRightClickPacketType().contains(packet.getType()))
             painter.onRightClick(player, event, game, packet);
     }
 
@@ -59,7 +65,7 @@ public class RightClickEvent implements PacketListener {
 
     @Override
     public Plugin getPlugin() {
-        return Minesweeper.getPlugin();
+        return plugin;
     }
 
 }

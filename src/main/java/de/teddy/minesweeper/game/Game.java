@@ -1,12 +1,13 @@
 package de.teddy.minesweeper.game;
 
 import de.teddy.minesweeper.Minesweeper;
-import de.teddy.minesweeper.events.GenericEvents;
 import de.teddy.minesweeper.game.inventory.Inventories;
+import de.teddy.minesweeper.game.modifier.Modifier;
 import de.teddy.minesweeper.game.painter.ArmorStandPainter;
 import de.teddy.minesweeper.game.painter.BlockPainter;
 import de.teddy.minesweeper.game.painter.Painter;
 import de.teddy.minesweeper.util.IsBetween;
+import de.teddy.minesweeper.util.Language;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,6 +15,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,10 +30,13 @@ public class Game {
     private static final Map<Player, Game> playerLocation = new HashMap<>();
 
     static {
-        PAINTER_MAP.put(BlockPainter.class, new BlockPainter());
-        PAINTER_MAP.put(ArmorStandPainter.class, new ArmorStandPainter());
+        PAINTER_MAP.put(BlockPainter.class, new BlockPainter(Minesweeper.getPlugin(Minesweeper.class)));
+        PAINTER_MAP.put(ArmorStandPainter.class, new ArmorStandPainter(Minesweeper.getPlugin(Minesweeper.class)));
     }
 
+    private final Plugin plugin;
+    private final List<Game> games;
+    private final Language language;
     private final Location corner;
     private final Location spawn;
     private final int size;
@@ -39,7 +44,10 @@ public class Game {
     private final int inventoryPosition;
     private final ItemStack itemStack;
 
-    public Game(Location corner, Location spawn, int borderSize, int bombCount, String difficulty, Material material, int inventoryPosition) {
+    public Game(Plugin plugin, List<Game> games, Language language, Location corner, Location spawn, int borderSize, int bombCount, String difficulty, Material material, int inventoryPosition) {
+        this.plugin = plugin;
+        this.games = games;
+        this.language = language;
         this.corner = corner;
         this.spawn = spawn;
         this.size = borderSize;
@@ -51,12 +59,8 @@ public class Game {
         assert itemMeta != null;
 
         itemMeta.setDisplayName(difficulty);
-        itemMeta.setLore(Collections.singletonList(Minesweeper.getLanguage().getString("field_desc", String.valueOf(size), String.valueOf(size), String.valueOf(bombCount))));
+        itemMeta.setLore(Collections.singletonList(language.getString("field_desc", String.valueOf(size), String.valueOf(size), String.valueOf(bombCount))));
         itemStack.setItemMeta(itemMeta);
-    }
-
-    public static List<Game> values() {
-        return Collections.unmodifiableList(Minesweeper.getGames());
     }
 
     private static void switchToMap(Player p, Game g) {
@@ -66,7 +70,7 @@ public class Game {
             Game.finishGame(p);
         }
         playerLocation.put(p, g);
-        if (Minesweeper.getAreaSettings().allowFly() || GenericEvents.isInside(g.getViewingSpawn())) {
+        if (Modifier.getInstance().allowFly() || Modifier.getInstance().isInside(g.getViewingSpawn())) {
             p.setAllowFlight(true);
             p.setFlying(true);
         }
@@ -162,7 +166,7 @@ public class Game {
     public void startGame(Player p, boolean shouldTeleport) {
         stopGames(p);
         Board b;
-        b = new Board(this, size, size, bombCount, corner, p);
+        b = new Board(plugin, language, this, size, size, bombCount, corner, p);
         b.drawBlancField(Collections.singletonList(p));
         startWatching(p, b);
         runningGames.put(p, b);
@@ -174,7 +178,7 @@ public class Game {
 
         p.getInventory().clear();
         p.getInventory().setContents(Inventories.GAME_INVENTORY);
-        boolean allowFly = Minesweeper.getAreaSettings().allowFly() || GenericEvents.isInside(getViewingSpawn());
+        boolean allowFly = Modifier.getInstance().allowFly() || Modifier.getInstance().isInside(getViewingSpawn());
 
         if (allowFly)
             p.setAllowFlight(true);
@@ -199,7 +203,7 @@ public class Game {
 
     public void startViewing(Player player, Board runningGame) {
         if (runningGame == null) {
-            Game.switchToMap(player, Minesweeper.getGames().get(0));
+            Game.switchToMap(player, games.get(0));
         } else {
             Game.startWatching(player, runningGame);
         }

@@ -8,7 +8,6 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
-import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
@@ -23,6 +22,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 
 import java.awt.geom.Point2D;
 import java.lang.reflect.InvocationTargetException;
@@ -52,14 +52,19 @@ public class BlockPainter implements Painter {
             Material.LIGHT_BLUE_TERRACOTTA};
     public static final Material LIGHT_DEFAULT = Material.LIME_CONCRETE_POWDER;
     public static final Material DARK_DEFAULT = Material.GREEN_CONCRETE_POWDER;
+    private final Plugin plugin;
+
+    public BlockPainter(Plugin plugin) {
+        this.plugin = plugin;
+    }
 
     private static void sendMultiBlockChange(List<Player> players, Map<BlockPosition, Tuple2<List<Short>, List<WrappedBlockData>>> subChunkMap) {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         subChunkMap.forEach((blockPosition, listListTuple) -> {
             PacketContainer multiBlockChange = PacketUtil.getMultiBlockChange(
-                    ArrayUtils.toPrimitive(listListTuple.getA().toArray(new Short[0])),
+                    ArrayUtils.toPrimitive(listListTuple.a().toArray(new Short[0])),
                     blockPosition,
-                    listListTuple.getB().toArray(new WrappedBlockData[0]),
+                    listListTuple.b().toArray(new WrappedBlockData[0]),
                     true);
             for (Player p : players) {
                 try{
@@ -97,12 +102,12 @@ public class BlockPainter implements Painter {
                 m = (b ? LIGHT_DEFAULT : DARK_DEFAULT);
 
                 Tuple2<List<Short>, List<WrappedBlockData>> listListTuple2 = subChunkMap.get(subChunkTuple);
-                listListTuple2.getA().add(Board.convertToLocal(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
-                listListTuple2.getB().add(WrappedBlockData.createData(m));
+                listListTuple2.a().add(Board.convertToLocal(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+                listListTuple2.b().add(WrappedBlockData.createData(m));
 
                 Tuple2<List<Short>, List<WrappedBlockData>> listListTuple2PlusOne = subChunkMap.get(subChunkTuplePlusOne);
-                listListTuple2PlusOne.getA().add(Board.convertToLocal(location.getBlockX(), location.getBlockY() + 1, location.getBlockZ()));
-                listListTuple2PlusOne.getB().add(WrappedBlockData.createData(Material.AIR));
+                listListTuple2PlusOne.a().add(Board.convertToLocal(location.getBlockX(), location.getBlockY() + 1, location.getBlockZ()));
+                listListTuple2PlusOne.b().add(WrappedBlockData.createData(Material.AIR));
             }
         }
 
@@ -143,17 +148,17 @@ public class BlockPainter implements Painter {
 
                 Tuple2<List<Short>, List<WrappedBlockData>> listListTuple2 = subChunkMap.get(subChunkTuple);
 
-                listListTuple2.getA().add(Board.convertToLocal(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
-                listListTuple2.getB().add(WrappedBlockData.createData(m));
+                listListTuple2.a().add(Board.convertToLocal(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+                listListTuple2.b().add(WrappedBlockData.createData(m));
 
                 Tuple2<List<Short>, List<WrappedBlockData>> listListTuple2PlusOne = subChunkMap.get(subChunkTuplePlusOne);
 
-                listListTuple2PlusOne.getA().add(Board.convertToLocal(location.getBlockX(), location.getBlockY() + 1, location.getBlockZ()));
+                listListTuple2PlusOne.a().add(Board.convertToLocal(location.getBlockX(), location.getBlockY() + 1, location.getBlockZ()));
 
                 if (field != null && field.isMarked()) {
-                    listListTuple2PlusOne.getB().add(WrappedBlockData.createData(Material.REDSTONE_TORCH));
+                    listListTuple2PlusOne.b().add(WrappedBlockData.createData(Material.REDSTONE_TORCH));
                 } else
-                    listListTuple2PlusOne.getB().add(WrappedBlockData.createData(Material.AIR));
+                    listListTuple2PlusOne.b().add(WrappedBlockData.createData(Material.AIR));
             }
         }
 
@@ -171,7 +176,7 @@ public class BlockPainter implements Painter {
             clone.setZ(board.getCorner().getBlockZ() + point2D.getY());
 
 
-            Bukkit.getScheduler().runTaskLater(Minesweeper.getPlugin(), () -> {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 for (Player p : players) {
                     PacketUtil.sendBlockChange(p, new BlockPosition(clone.toVector()), WrappedBlockData.createData(Material.COAL_BLOCK));
                     PacketUtil.sendSoundEffect(p, Sound.BLOCK_STONE_PLACE, 1f, clone);
