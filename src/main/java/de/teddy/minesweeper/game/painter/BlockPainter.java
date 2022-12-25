@@ -195,15 +195,14 @@ public class BlockPainter implements Painter {
     @Override
     public Material getActualMaterial(Board.Field field) {
         boolean lightField = Board.isLightField(field.getX(), field.getY());
-        if (field.isCovered() && !field.getBoard().isFinished())
+
+        if (field.getBoard().isFinished() && field.isBomb())
+            return Material.COAL_BLOCK;
+
+        if (field.isCovered())
             return lightField ? LIGHT_DEFAULT : DARK_DEFAULT;
 
-        if (field.isBomb())
-            return Material.COAL_BLOCK;
-        else if(field.isCovered()){
-            return lightField ? LIGHT_DEFAULT : DARK_DEFAULT;
-        }else
-            return (lightField ? LIGHT_MATERIALS : DARK_MATERIALS)[field.getNeighborCount()];
+        return (lightField ? LIGHT_MATERIALS : DARK_MATERIALS)[field.getNeighborCount()];
     }
 
     @Override
