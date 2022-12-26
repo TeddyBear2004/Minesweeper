@@ -156,7 +156,7 @@ public class BlockPainter implements Painter {
                 listListTuple2PlusOne.a().add(Board.convertToLocal(location.getBlockX(), location.getBlockY() + 1, location.getBlockZ()));
 
                 if (field != null && field.isMarked()) {
-                    listListTuple2PlusOne.b().add(WrappedBlockData.createData(Material.REDSTONE_TORCH));
+                    listListTuple2PlusOne.b().add(WrappedBlockData.createData(field.getMark()));
                 } else
                     listListTuple2PlusOne.b().add(WrappedBlockData.createData(Material.AIR));
             }

@@ -304,14 +304,14 @@ public class Board {
         private final int x;
         private final int y;
         private boolean isCovered;
-        private boolean isMarked;
+        private MarkType markType;
 
         public Field(Board board, int x, int y, boolean isBomb, int bombCount) {
             this.board = board;
             this.x = x;
             this.y = y;
             this.isCovered = true;
-            this.isMarked = false;
+            this.markType = MarkType.NONE;
             this.isBomb = isBomb;
             this.bombCount = bombCount;
         }
@@ -321,7 +321,7 @@ public class Board {
         }
 
         public void setUncover() {
-            this.isMarked = false;
+            this.markType = MarkType.NONE;
             this.isCovered = false;
         }
 
@@ -330,15 +330,15 @@ public class Board {
         }
 
         public boolean isMarked() {
-            return isMarked;
+            return !markType.isNone();
         }
 
         public void reverseMark() {
-            this.isMarked = !this.isMarked();
+            this.markType = this.markType.next();
         }
 
         public Material getMark() {
-            return isMarked ? Material.REDSTONE_TORCH : Material.AIR;
+            return markType.getMaterial();
         }
 
         public boolean isCovered() {
