@@ -57,7 +57,6 @@ public final class Minesweeper extends JavaPlugin {
         this.games = loadGames(language);
 
         try{
-            System.out.println(getConfig().getKeys(false));
             this.resourcePackHandler = loadTexturePackHandler(getConfig().getConfigurationSection("resource_pack"));
         }catch(FileNotFoundException e){
             getLogger().severe("Could not find the corresponding resource pack file. Please check the config.");
