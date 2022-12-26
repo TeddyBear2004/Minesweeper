@@ -302,37 +302,39 @@ public class ArmorStandPainter implements Painter {
         if (board.isFinished())
             return;
 
-        try{
-            if (field == null) {
-                try{
-                    board.checkField(location.getBlockX(), location.getBlockZ());
-                }catch(IllegalArgumentException ignore){
+        if (board.getPlayer().equals(player)) {
+            try{
+                if (field == null) {
+                    try{
+                        board.checkField(location.getBlockX(), location.getBlockZ());
+                    }catch(IllegalArgumentException ignore){
+                    }
+
+                    board.draw();
+                    return;
                 }
 
-                board.draw();
-                return;
+                if (field.isMarked()) {
+                    if (location.getBlockY() - game.getFieldHeight() == 1)
+                        PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(field.getMark()));
+
+                    return;
+                }
+
+                if (field.isCovered()) {
+                    board.checkField(location.getBlockX(), location.getBlockZ());
+                } else if (System.currentTimeMillis() - LeftClickEvent.LAST_CLICKED.getOrDefault(player, (long) -1000) <= 350) {
+                    board.checkNumber(location.getBlockX(), location.getBlockZ());
+                }
+
+                LeftClickEvent.LAST_CLICKED.put(player, System.currentTimeMillis());
+            }catch(BombExplodeException e){
+                board.lose();
             }
 
-            if (field.isMarked()) {
-                if (location.getBlockY() - game.getFieldHeight() == 1)
-                    PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(field.getMark()));
-
-                return;
-            }
-
-            if (field.isCovered()) {
-                board.checkField(location.getBlockX(), location.getBlockZ());
-            } else if (System.currentTimeMillis() - LeftClickEvent.LAST_CLICKED.getOrDefault(player, (long) -1000) <= 350) {
-                board.checkNumber(location.getBlockX(), location.getBlockZ());
-            }
-
-            LeftClickEvent.LAST_CLICKED.put(player, System.currentTimeMillis());
-        }catch(BombExplodeException e){
-            board.lose();
+            board.draw();
+            board.checkIfWon();
         }
-
-        board.draw();
-        board.checkIfWon();
     }
 
     public Location getLocation(Board board, int entityId) {

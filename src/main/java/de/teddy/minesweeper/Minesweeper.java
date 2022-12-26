@@ -36,7 +36,7 @@ import java.util.zip.ZipInputStream;
 
 public final class Minesweeper extends JavaPlugin {
 
-    private final String langPath = "lang/" + getConfig().getString("language") + ".toml";
+    private String langPath;
     private ResourcePackHandler resourcePackHandler;
     private List<Game> games = new ArrayList<>();
 
@@ -46,6 +46,8 @@ public final class Minesweeper extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        langPath = "lang/" + getConfig().getString("language") + ".toml";
+
         saveDefaultConfig();
         reloadConfig();
         saveResource(langPath, false);
@@ -93,7 +95,8 @@ public final class Minesweeper extends JavaPlugin {
     @Override
     public void onDisable() {
         try{
-            resourcePackHandler.close();
+            if (resourcePackHandler != null)
+                resourcePackHandler.close();
         }catch(IOException e){
             throw new RuntimeException(e);
         }

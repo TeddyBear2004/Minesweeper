@@ -1,11 +1,9 @@
 package de.teddy.minesweeper.events.packets;
 
 import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.ListeningWhitelist;
+import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.events.PacketListener;
-import com.comphenix.protocol.injector.GamePhase;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.painter.Painter;
 import org.bukkit.entity.Player;
@@ -16,17 +14,20 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class LeftClickEvent implements PacketListener {
+public class LeftClickEvent extends PacketAdapter {
 
     public static final Map<Player, Long> LAST_CLICKED = new HashMap<>();
-    private final Plugin plugin;
 
-    public LeftClickEvent(Plugin plugin){
-        this.plugin = plugin;
+    public LeftClickEvent(Plugin plugin) {
+        super(plugin, getPacketTypes());
     }
 
-    @Override
-    public void onPacketSending(PacketEvent event) { }
+    private static PacketType[] getPacketTypes() {
+        Set<PacketType> types = new HashSet<>();
+        Game.PAINTER_MAP.values().forEach(painter -> types.addAll(painter.getLeftClickPacketType()));
+
+        return types.toArray(new PacketType[0]);
+    }
 
     @Override
     public void onPacketReceiving(PacketEvent event) {
@@ -38,32 +39,8 @@ public class LeftClickEvent implements PacketListener {
         if (game == null || painter == null)
             return;
 
-        if(painter.getLeftClickPacketType().contains(packet.getType()))
+        if (painter.getLeftClickPacketType().contains(packet.getType()))
             painter.onLeftClick(player, event, game, packet);
-    }
-
-    @Override
-    public ListeningWhitelist getSendingWhitelist() {
-        return ListeningWhitelist.EMPTY_WHITELIST;
-    }
-
-    @Override
-    public ListeningWhitelist getReceivingWhitelist() {
-        Set<PacketType> types = new HashSet<>();
-
-        Game.PAINTER_MAP.values().forEach(painter -> types.addAll(painter.getLeftClickPacketType()));
-
-        return ListeningWhitelist
-                .newBuilder()
-                .gamePhase(GamePhase.PLAYING)
-                .types(types.toArray(new PacketType[0]))
-                .high()
-                .build();
-    }
-
-    @Override
-    public Plugin getPlugin() {
-        return plugin;
     }
 
 }

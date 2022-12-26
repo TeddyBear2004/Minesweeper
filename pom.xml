@@ -12,8 +12,8 @@
 	<name>Minesweeper</name>
 
 	<properties>
-		<java.version>19</java.version>
-		<project.version>19</project.version>
+		<java.version>17</java.version>
+		<project.version>17</project.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -53,6 +53,13 @@
 				<excludes>
 					<exclude>MineSweeper.zip</exclude>
 				</excludes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<includes>
+					<include>MineSweeper.zip</include>
+				</includes>
 			</resource>
 		</resources>
 	</build>

@@ -1,10 +1,7 @@
 package de.teddy.minesweeper.events.packets;
 
 import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.ListeningWhitelist;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.events.PacketListener;
+import com.comphenix.protocol.events.*;
 import com.comphenix.protocol.injector.GamePhase;
 import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.game.Game;
@@ -13,19 +10,15 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class RightClickEvent implements PacketListener {
-
-
-    private final Plugin plugin;
-
+public class RightClickEvent extends PacketAdapter {
     public RightClickEvent(Plugin plugin){
-        this.plugin = plugin;
+        super(plugin, getPacketTypes());
     }
-    @Override
-    public void onPacketSending(PacketEvent event) { }
 
     @Override
     public void onPacketReceiving(PacketEvent event) {
@@ -44,28 +37,10 @@ public class RightClickEvent implements PacketListener {
             painter.onRightClick(player, event, game, packet);
     }
 
-    @Override
-    public ListeningWhitelist getSendingWhitelist() {
-        return ListeningWhitelist.EMPTY_WHITELIST;
-    }
-
-    @Override
-    public ListeningWhitelist getReceivingWhitelist() {
+    private static PacketType[] getPacketTypes(){
         Set<PacketType> types = new HashSet<>();
-
         Game.PAINTER_MAP.values().forEach(painter -> types.addAll(painter.getRightClickPacketType()));
 
-        return ListeningWhitelist
-                .newBuilder()
-                .gamePhase(GamePhase.PLAYING)
-                .types(types.toArray(new PacketType[0]))
-                .high()
-                .build();
+        return types.toArray(new PacketType[0]);
     }
-
-    @Override
-    public Plugin getPlugin() {
-        return plugin;
-    }
-
 }

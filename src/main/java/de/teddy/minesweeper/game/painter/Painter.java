@@ -17,7 +17,7 @@ import java.util.List;
 
 public interface Painter {
     NamespacedKey PAINTER_KEY = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "painter_class");
-    Class<? extends Painter> DEFAULT_PAINTER = ArmorStandPainter.class;
+    Class<? extends Painter> DEFAULT_PAINTER = BlockPainter.class;
 
     static void storePainterClass(PersistentDataContainer container, Class<? extends Painter> clazz) {
         container.set(PAINTER_KEY, PersistentDataType.STRING, clazz.getName());

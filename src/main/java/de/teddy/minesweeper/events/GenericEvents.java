@@ -106,7 +106,7 @@ public class GenericEvents implements Listener {
 
         Block block = event.getClickedBlock();
 
-        if (Game.getBoard(event.getPlayer()) != null)
+        if (Game.getBoard(event.getPlayer()) != null ||Game.getBoardWatched(event.getPlayer()) != null)
             return;
 
         for (Game game : games) {

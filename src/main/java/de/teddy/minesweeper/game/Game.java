@@ -193,6 +193,7 @@ public class Game {
         stopGames(p);
         Board b = getRunningGame();
         if (b != null) {
+            b.drawBlancField(Collections.singletonList(p));
             Bukkit.getOnlinePlayers().forEach(onPlayer -> {
                 if (gameWatched.get(onPlayer) == null && b.map == playerLocation.get(onPlayer)) {
                     startWatching(onPlayer, b);
