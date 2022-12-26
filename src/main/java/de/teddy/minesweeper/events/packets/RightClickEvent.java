@@ -13,7 +13,6 @@ import org.bukkit.plugin.Plugin;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class RightClickEvent extends PacketAdapter {
     public RightClickEvent(Plugin plugin){
