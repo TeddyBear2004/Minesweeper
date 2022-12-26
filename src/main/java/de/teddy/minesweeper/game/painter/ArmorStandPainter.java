@@ -208,7 +208,7 @@ public class ArmorStandPainter implements Painter {
     public ItemStack getActualItemStack(Board.Field field) {
         boolean lightField = Board.isLightField(field.getX(), field.getY());
 
-        if (field.getBoard().isFinished() && field.isBomb())
+        if (field.getBoard().isFinished() && field.isBomb() && field.isCovered())
             return new ItemStack(Material.COAL_BLOCK);
 
         if (field.isCovered())
