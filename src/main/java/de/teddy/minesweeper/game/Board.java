@@ -18,9 +18,9 @@ import java.util.*;
 public class Board {
 
     public static boolean notTest = true;
+    public final Game map;
     private final Plugin plugin;
     private final Language language;
-    public final Game map;
     private final List<Player> viewers = new LinkedList<>();
     private final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("mm:ss:SSS");
     private final int width;
@@ -31,6 +31,7 @@ public class Board {
     private final Point2D[] bombList;
     private final Player player;
     private final Random random = new Random();
+    private boolean win = false;
     private long started;
     private boolean isGenerated;
     private boolean isFinished;
@@ -73,6 +74,10 @@ public class Board {
 
     public boolean isFinished() {
         return this.isFinished;
+    }
+
+    public boolean isWin() {
+        return win;
     }
 
     public Field[][] getBoard() {
@@ -195,6 +200,7 @@ public class Board {
     }
 
     public void win() {
+        this.win = true;
         this.finish();
 
         this.player.sendMessage(language.getString("message_win"));
@@ -220,6 +226,7 @@ public class Board {
     }
 
     public void lose() {
+        this.win = false;
         finish();
 
         getCurrentPlayerPainters().forEach((painter, players) -> {
