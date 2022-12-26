@@ -8,13 +8,12 @@ import de.teddy.minesweeper.game.painter.ArmorStandPainter;
 import de.teddy.minesweeper.game.painter.BlockPainter;
 import de.teddy.minesweeper.game.painter.Painter;
 import de.teddy.minesweeper.game.texture.pack.ResourcePackHandler;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerResourcePackStatusEvent;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.*;
 
 import java.util.List;
 
@@ -23,7 +22,7 @@ public class GenericEvents implements Listener {
     private final List<Game> games;
     private final ResourcePackHandler resourcePackHandler;
 
-    public GenericEvents(List<Game> games, ResourcePackHandler resourcePackHandler){
+    public GenericEvents(List<Game> games, ResourcePackHandler resourcePackHandler) {
         this.games = games;
         this.resourcePackHandler = resourcePackHandler;
     }
@@ -98,6 +97,23 @@ public class GenericEvents implements Listener {
                 player.setAllowFlight(true);
                 player.setFlying(true);
             }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        if (event.getAction() != Action.LEFT_CLICK_BLOCK) return;
+
+        Block block = event.getClickedBlock();
+
+        if (Game.getBoard(event.getPlayer()) != null)
+            return;
+
+        for (Game game : games) {
+            if (game.isBlockOutsideGame(block)) continue;
+
+            game.startGame(event.getPlayer(), false);
+            break;
         }
     }
 
