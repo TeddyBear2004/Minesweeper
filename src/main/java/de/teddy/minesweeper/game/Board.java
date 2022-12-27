@@ -8,6 +8,7 @@ import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.*;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
@@ -35,6 +36,7 @@ public class Board {
     private long started;
     private boolean isGenerated;
     private boolean isFinished;
+    private Scoreboard scoreboard;
 
     public Board(Plugin plugin, Language language, Game map, int width, int height, int bombCount, Location corner, Player player) {
         this.plugin = plugin;
@@ -51,8 +53,11 @@ public class Board {
         this.height = height;
         this.bombCount = bombCount;
         this.board = new Field[width][height];
+        if (Bukkit.getScoreboardManager() != null)
+            this.scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+
         if (notTest) {
-            new ActionBarScheduler(this).runTaskTimer(plugin, 0, 1);
+            new BoardScheduler(this).runTaskTimer(plugin, 0, 1);
             draw();
         }
     }
@@ -90,6 +95,27 @@ public class Board {
 
     public List<Player> getViewers() {
         return viewers;
+    }
+
+    public List<Player> getAllPlayers() {
+        List<Player> list = new ArrayList<>(viewers);
+
+        list.add(player);
+
+        return list;
+    }
+
+    public void addViewer(Player player) {
+        this.viewers.add(player);
+        setScoreBoard(player);
+    }
+
+    public void removeViewer(Player player) {
+        this.viewers.remove(player);
+    }
+
+    public void clearViewers() {
+        this.viewers.clear();
     }
 
     public void drawBlancField() {
@@ -199,6 +225,12 @@ public class Board {
         return getCurrentPlayerPainters(this.viewers);
     }
 
+    public int getCurrentFlagCount() {
+        return Arrays.stream(this.board)
+                .mapToInt(fields -> (int) Arrays.stream(fields).filter(Field::isMarked).count())
+                .sum();
+    }
+
     public void win() {
         this.win = true;
         this.finish();
@@ -289,12 +321,59 @@ public class Board {
         }
 
         this.isGenerated = true;
+        initScoreboard();
     }
 
 
     private boolean couldBombSpawn(int x, int y, int possibleX, int possibleY) {
         return Math.abs(x - possibleX) <= 1 && Math.abs(y - possibleY) <= 1;
     }
+
+    private void initScoreboard() {
+        if (scoreboard != null) {
+            Objective objective = scoreboard.registerNewObjective("Minesweeper", Criteria.DUMMY, ChatColor.AQUA + "Minesweeper");
+            objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+
+            Team difficulty = scoreboard.registerNewTeam("difficulty");
+            difficulty.addEntry(ChatColor.GREEN + map.getDifficulty());
+            difficulty.setPrefix(ChatColor.GRAY + "Difficulty:     ");
+            objective.getScore(ChatColor.GREEN + map.getDifficulty()).setScore(15);
+
+            Team size = scoreboard.registerNewTeam("size");
+            size.addEntry(ChatColor.GREEN + " " + width + "x" + height);
+            size.setPrefix(ChatColor.GRAY + "Board size:  ");
+            objective.getScore(ChatColor.GREEN + " " + width + "x" + height).setScore(14);
+
+            Team flagBombCounter = scoreboard.registerNewTeam("flagCounter");
+            flagBombCounter.addEntry(ChatColor.GRAY + "Flags/Bombs: ");
+            flagBombCounter.setSuffix(ChatColor.GREEN + getFlagCounterString());
+            objective.getScore(ChatColor.GRAY + "Flags/Bombs: ").setScore(13);
+        }
+    }
+
+    public void updateScoreBoard() {
+        Team flagCounter = scoreboard.getTeam("flagCounter");
+        if (flagCounter != null)
+            flagCounter.setSuffix(ChatColor.GREEN + getFlagCounterString());
+    }
+
+    public void setScoreBoard(Player player) {
+        if (scoreboard == null)
+            return;
+
+        player.setScoreboard(scoreboard);
+    }
+
+    private String getFlagCounterString() {
+        return (bombCount < getCurrentFlagCount() ? ChatColor.DARK_RED : ChatColor.GREEN) + "" + getCurrentFlagCount() + ChatColor.GREEN + "/" + bombCount;
+    }
+
+    public void removeScoreBoard(Player player) {
+        ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
+        if (scoreboardManager != null)
+            player.setScoreboard(scoreboardManager.getNewScoreboard());
+    }
+
 
     public static class Field {
 
@@ -359,11 +438,11 @@ public class Board {
 
     }
 
-    private static class ActionBarScheduler extends BukkitRunnable {
+    private static class BoardScheduler extends BukkitRunnable {
 
         private final Board board;
 
-        private ActionBarScheduler(Board board) {
+        private BoardScheduler(Board board) {
             this.board = board;
         }
 
@@ -371,8 +450,11 @@ public class Board {
         public void run() {
             if (board.isFinished) {
                 cancel();
+                board.getAllPlayers().forEach(board::removeScoreBoard);
                 return;
             }
+            if (board.isGenerated)
+                board.updateScoreBoard();
             PacketUtil.sendActionBar(board.player, board.getActualTimeNeededString());
         }
 
