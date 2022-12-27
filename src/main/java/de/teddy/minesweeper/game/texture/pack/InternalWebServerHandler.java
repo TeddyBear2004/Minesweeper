@@ -3,6 +3,7 @@ package de.teddy.minesweeper.game.texture.pack;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import de.teddy.minesweeper.game.modifier.PersonalModifier;
 import org.bukkit.entity.Player;
 
 import java.io.*;
@@ -42,7 +43,9 @@ public class InternalWebServerHandler implements ResourcePackHandler {
 
     @Override
     public void apply(Player player) {
-        player.setResourcePack("http://" + this.host + ":" + this.port + "/");
+        PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player.getPersistentDataContainer());
+
+        player.setResourcePack(personalModifier.getResourcePackUrl().orElse("http://" + this.host + ":" + this.port + "/"));
     }
 
 

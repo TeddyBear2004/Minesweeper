@@ -1,6 +1,8 @@
 package de.teddy.minesweeper.game;
 
+import de.teddy.minesweeper.game.modifier.PersonalModifier;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 
 public enum MarkType {
     NONE(Material.AIR),
@@ -17,15 +19,24 @@ public enum MarkType {
         return material;
     }
 
-    public MarkType next() {
+    public MarkType next(Player player) {
         int nextId = this.ordinal() + 1;
 
         MarkType[] values = values();
 
-        if (values.length <= nextId)
+        if (player == null) {
+            if (values.length <= nextId)
+                nextId = 0;
+        } else if (PersonalModifier
+                .getPersonalModifier(player.getPersistentDataContainer())
+                .isEnableQuestionMark()
+                .orElse(false)
+                && values.length - 1 <= nextId) {
             nextId = 0;
+        }
 
         return values[nextId];
+
     }
 
     public boolean isNone() {

@@ -334,7 +334,7 @@ public class Board {
         }
 
         public void reverseMark() {
-            this.markType = this.markType.next();
+            this.markType = this.markType.next(board.getPlayer());
         }
 
         public Material getMark() {

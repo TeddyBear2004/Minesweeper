@@ -5,6 +5,7 @@ import com.comphenix.protocol.ProtocolManager;
 import com.moandjiezana.toml.Toml;
 import de.teddy.minesweeper.commands.BypassEventCommand;
 import de.teddy.minesweeper.commands.MinesweeperCommand;
+import de.teddy.minesweeper.commands.SettingsCommand;
 import de.teddy.minesweeper.events.CancelableEvents;
 import de.teddy.minesweeper.events.GenericEvents;
 import de.teddy.minesweeper.events.GenericRightClickEvent;
@@ -77,6 +78,7 @@ public final class Minesweeper extends JavaPlugin {
 
         Objects.requireNonNull(this.getCommand("bypassEventCancellation")).setExecutor(new BypassEventCommand());
         Objects.requireNonNull(this.getCommand("minesweeper")).setExecutor(new MinesweeperCommand(games));
+        Objects.requireNonNull(this.getCommand("settings")).setExecutor(new SettingsCommand());
 
         getServer().getPluginManager().registerEvents(new CancelableEvents(getConfig().getConfigurationSection("events"), modifierAreas), this);
         getServer().getPluginManager().registerEvents(new GenericEvents(games, resourcePackHandler), this);

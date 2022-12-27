@@ -24,3 +24,6 @@ commands:
     usage: "/minesweeper [game]"
     description: "Start a game of minesweeper."
     permission: minesweeper.minesweeper
+  settings:
+    usage: /settings
+    permission: minesweeper.settings

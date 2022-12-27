@@ -13,6 +13,7 @@ import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
 import de.teddy.minesweeper.game.inventory.Inventories;
+import de.teddy.minesweeper.game.modifier.PersonalModifier;
 import de.teddy.minesweeper.util.PacketUtil;
 import de.teddy.minesweeper.util.Tuple2;
 import org.apache.commons.lang3.ArrayUtils;
@@ -329,9 +330,11 @@ public class BlockPainter implements Painter {
                     return;
                 }
 
+                PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player.getPersistentDataContainer());
+
                 if (field.isCovered()) {
                     board.checkField(location.getBlockX(), location.getBlockZ());
-                } else if (System.currentTimeMillis() - LeftClickEvent.LAST_CLICKED.getOrDefault(player, (long) -1000) <= 350) {
+                } else if (System.currentTimeMillis() - LeftClickEvent.LAST_CLICKED.getOrDefault(player, (long) -1000) <= personalModifier.getDoubleClickDuration().orElse(350)) {
                     try{
                         board.checkNumber(location.getBlockX(), location.getBlockZ());
                     }catch(ArrayIndexOutOfBoundsException ignore){
