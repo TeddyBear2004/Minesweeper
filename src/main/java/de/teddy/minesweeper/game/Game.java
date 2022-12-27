@@ -41,6 +41,7 @@ public class Game {
     private final Location spawn;
     private final int size;
     private final int bombCount;
+    private final String difficulty;
     private final int inventoryPosition;
     private final ItemStack itemStack;
 
@@ -52,6 +53,7 @@ public class Game {
         this.spawn = spawn;
         this.size = borderSize;
         this.bombCount = bombCount;
+        this.difficulty = difficulty;
         this.inventoryPosition = inventoryPosition;
 
         this.itemStack = new ItemStack(material);
@@ -208,6 +210,10 @@ public class Game {
         } else {
             Game.startWatching(player, runningGame);
         }
+    }
+
+    public String getDifficulty() {
+        return difficulty;
     }
 
 }
