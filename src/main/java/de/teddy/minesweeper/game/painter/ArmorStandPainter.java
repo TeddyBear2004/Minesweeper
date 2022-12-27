@@ -322,7 +322,7 @@ public class ArmorStandPainter implements Painter {
                     return;
                 }
 
-                PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player.getPersistentDataContainer());
+                PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
 
                 if (field.isCovered()) {
                     board.checkField(location.getBlockX(), location.getBlockZ());

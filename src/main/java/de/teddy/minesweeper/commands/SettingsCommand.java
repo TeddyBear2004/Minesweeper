@@ -17,11 +17,11 @@ public class SettingsCommand implements TabExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player player)) {
+        if (!(sender instanceof Player player) ||args.length == 0) {
             return true;
         }
 
-        PersonalModifier modifier = PersonalModifier.getPersonalModifier(player.getPersistentDataContainer());
+        PersonalModifier modifier = PersonalModifier.getPersonalModifier(player);
         switch(args[0]){
             case "resource_pack_url" -> {
                 if (args.length == 1) {
@@ -50,7 +50,6 @@ public class SettingsCommand implements TabExecutor {
                     player.sendMessage(ChatColor.GREEN + "The specified double click duration was applied.");
                 }catch(NumberFormatException e){
                     player.sendMessage(ChatColor.DARK_RED + "Please make sure that you provide a valid number.");
-                    return true;
                 }
             }
             case "painter" -> {
@@ -63,7 +62,7 @@ public class SettingsCommand implements TabExecutor {
                     if (aClass.getSimpleName().equalsIgnoreCase(args[1])) {
                         modifier.setPainterClass(aClass.getName());
                         player.sendMessage(ChatColor.GREEN + "The specified painter was applied.");
-                        break;
+                        return true;
                     }
                 }
                 player.sendMessage(ChatColor.DARK_RED + "Please make sure the provided painter is valid.");
@@ -77,12 +76,12 @@ public class SettingsCommand implements TabExecutor {
                 if (args[1].equalsIgnoreCase("true")) {
                     modifier.setEnableQuestionMark(true);
                     player.sendMessage(ChatColor.GREEN + "Enabled second mark.");
-                    return true;
+                    break;
                 }
                 if (args[1].equalsIgnoreCase("false")) {
                     modifier.setEnableQuestionMark(false);
                     player.sendMessage(ChatColor.GREEN + "Disabled second mark.");
-                    return true;
+                    break;
                 }
                 player.sendMessage(ChatColor.DARK_RED + "No true or false could be found as an argument, so the command is ignored.");
             }

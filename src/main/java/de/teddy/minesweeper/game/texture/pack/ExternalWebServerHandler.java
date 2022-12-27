@@ -13,7 +13,7 @@ public class ExternalWebServerHandler implements ResourcePackHandler {
 
     @Override
     public void apply(Player player) {
-        PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player.getPersistentDataContainer());
+        PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
 
         player.setResourcePack(personalModifier.getResourcePackUrl().orElse(link));
     }

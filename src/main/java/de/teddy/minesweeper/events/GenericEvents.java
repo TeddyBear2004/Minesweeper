@@ -37,7 +37,7 @@ public class GenericEvents implements Listener {
                 || Modifier.getInstance().isInside(event.getPlayer().getLocation()))
             event.getPlayer().setAllowFlight(true);
 
-        PersonalModifier modifier = PersonalModifier.getPersonalModifier(event.getPlayer().getPersistentDataContainer());
+        PersonalModifier modifier = PersonalModifier.getPersonalModifier(event.getPlayer());
 
         if (modifier.getPainterClass().isPresent()) {
             try{
@@ -69,7 +69,7 @@ public class GenericEvents implements Listener {
     @EventHandler
     public void onResourcePack(PlayerResourcePackStatusEvent event) {
         Player player = event.getPlayer();
-        PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player.getPersistentDataContainer());
+        PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
 
         if (personalModifier.getPainterClass().isEmpty()) {
             switch(event.getStatus()){

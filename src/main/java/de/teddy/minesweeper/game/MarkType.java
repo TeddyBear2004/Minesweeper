@@ -20,23 +20,21 @@ public enum MarkType {
     }
 
     public MarkType next(Player player) {
+        MarkType[] values = values();
         int nextId = this.ordinal() + 1;
 
-        MarkType[] values = values();
-
-        if (player == null) {
-            if (values.length <= nextId)
-                nextId = 0;
-        } else if (PersonalModifier
-                .getPersonalModifier(player.getPersistentDataContainer())
-                .isEnableQuestionMark()
-                .orElse(false)
-                && values.length - 1 <= nextId) {
+        if (nextId >= values.length) {
             nextId = 0;
         }
 
-        return values[nextId];
+        if (player != null) {
+            PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
+            if (!personalModifier.isEnableQuestionMark().orElse(false) && values.length > 2 && nextId == 2) {
+                nextId = 0;
+            }
+        }
 
+        return values[nextId];
     }
 
     public boolean isNone() {
