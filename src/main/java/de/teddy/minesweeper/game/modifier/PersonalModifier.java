@@ -18,20 +18,26 @@ public class PersonalModifier {
     private final static NamespacedKey DOUBLE_CLICK_DURATION_KEY = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "double_click_duration");
     private final static NamespacedKey PAINTER_CLASS_KEY = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "painter_class");
     private final static NamespacedKey ENABLE_QUESTION_MARK_KEY = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "enable_question_mark");
+    private final static NamespacedKey ENABLE_MARKS = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "enable_marks");
+    private final static NamespacedKey ENABLE_DOUBLE_CLICK = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "enable_double_click");
     private final Player player;
     private final PersistentDataContainer container;
     private String resourcePackUrl;
     private Integer doubleClickDuration;
     private String painterClass;
     private Boolean enableQuestionMark;
+    private Boolean enableMarks;
+    private Boolean enableDoubleClick;
 
-    private PersonalModifier(Player player, PersistentDataContainer container, String resourcePackUrl, Integer doubleClickDuration, String painterClass, Boolean enableQuestionMark) {
+    private PersonalModifier(Player player, PersistentDataContainer container, String resourcePackUrl, Integer doubleClickDuration, String painterClass, Boolean enableQuestionMark, Boolean enableMarks, Boolean enableDoubleClick) {
         this.player = player;
         this.container = container;
         this.resourcePackUrl = resourcePackUrl;
         this.doubleClickDuration = doubleClickDuration;
         this.painterClass = painterClass;
         this.enableQuestionMark = enableQuestionMark;
+        this.enableMarks = enableMarks;
+        this.enableDoubleClick = enableDoubleClick;
     }
 
     public static PersonalModifier getPersonalModifier(Player player) {
@@ -43,13 +49,17 @@ public class PersonalModifier {
         Integer doubleClickDuration = container.get(DOUBLE_CLICK_DURATION_KEY, PersistentDataType.INTEGER);
         String painterClass = container.get(PAINTER_CLASS_KEY, PersistentDataType.STRING);
         Byte enableQuestionMark = container.get(ENABLE_QUESTION_MARK_KEY, PersistentDataType.BYTE);
+        Byte enableMarks = container.get(ENABLE_MARKS, PersistentDataType.BYTE);
+        Byte enableDoubleClick = container.get(ENABLE_DOUBLE_CLICK, PersistentDataType.BYTE);
 
         return new PersonalModifier(player,
                                     container,
                                     resourcePackUrl,
                                     doubleClickDuration == null ? 350 : doubleClickDuration,
                                     painterClass,
-                                    enableQuestionMark != null && enableQuestionMark == 0b1);
+                                    enableQuestionMark == null ? null : enableQuestionMark == 0b1,
+                                    enableMarks == null ? null : enableMarks == 0b1,
+                                    enableDoubleClick == null ? null : enableDoubleClick == 0b1);
     }
 
     public Optional<String> getResourcePackUrl() {
@@ -124,6 +134,34 @@ public class PersonalModifier {
             this.container.set(ENABLE_QUESTION_MARK_KEY, PersistentDataType.BYTE, this.enableQuestionMark ? (byte) 1 : (byte) 0);
         } else {
             this.container.remove(ENABLE_QUESTION_MARK_KEY);
+        }
+    }
+
+    public Optional<Boolean> isEnableMarks() {
+        return Optional.ofNullable(enableMarks);
+    }
+
+    public void setEnableMarks(Boolean enableMarks) {
+        this.enableMarks = enableMarks;
+
+        if (this.enableMarks != null) {
+            this.container.set(ENABLE_MARKS, PersistentDataType.BYTE, this.enableMarks ? (byte) 1 : (byte) 0);
+        } else {
+            this.container.remove(ENABLE_MARKS);
+        }
+    }
+
+    public Optional<Boolean> isEnableDoubleClick() {
+        return Optional.ofNullable(enableDoubleClick);
+    }
+
+    public void setEnableDoubleClick(Boolean enableQuestionMark) {
+        this.enableDoubleClick = enableQuestionMark;
+
+        if (this.enableDoubleClick != null) {
+            this.container.set(ENABLE_DOUBLE_CLICK, PersistentDataType.BYTE, this.enableDoubleClick ? (byte) 1 : (byte) 0);
+        } else {
+            this.container.remove(ENABLE_DOUBLE_CLICK);
         }
     }
 

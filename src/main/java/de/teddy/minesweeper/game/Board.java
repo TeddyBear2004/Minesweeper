@@ -1,6 +1,7 @@
 package de.teddy.minesweeper.game;
 
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
+import de.teddy.minesweeper.game.modifier.PersonalModifier;
 import de.teddy.minesweeper.game.painter.Painter;
 import de.teddy.minesweeper.util.Language;
 import de.teddy.minesweeper.util.PacketUtil;
@@ -421,7 +422,12 @@ public class Board {
         }
 
         public void reverseMark() {
-            this.markType = this.markType.next(board.getPlayer());
+            PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(board.player);
+            if (personalModifier.isEnableMarks().orElse(true))
+                this.markType = this.markType.next(board.getPlayer());
+            else
+                this.markType = MarkType.NONE;
+
         }
 
         public Material getMark() {

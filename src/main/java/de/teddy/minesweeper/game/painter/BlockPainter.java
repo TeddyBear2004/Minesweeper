@@ -341,7 +341,8 @@ public class BlockPainter implements Painter {
                     }
                 }
 
-                LeftClickEvent.LAST_CLICKED.put(player, System.currentTimeMillis());
+                if (personalModifier.isEnableDoubleClick().orElse(true))
+                    LeftClickEvent.LAST_CLICKED.put(player, System.currentTimeMillis());
             }catch(BombExplodeException e){
                 board.lose();
             }

@@ -330,7 +330,8 @@ public class ArmorStandPainter implements Painter {
                     board.checkNumber(location.getBlockX(), location.getBlockZ());
                 }
 
-                LeftClickEvent.LAST_CLICKED.put(player, System.currentTimeMillis());
+                if (personalModifier.isEnableDoubleClick().orElse(true))
+                    LeftClickEvent.LAST_CLICKED.put(player, System.currentTimeMillis());
             }catch(BombExplodeException e){
                 board.lose();
             }

@@ -17,12 +17,12 @@ public class SettingsCommand implements TabExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player player) ||args.length == 0) {
+        if (!(sender instanceof Player player) || args.length == 0) {
             return true;
         }
 
         PersonalModifier modifier = PersonalModifier.getPersonalModifier(player);
-        switch(args[0]){
+        switch(args[0].toLowerCase()){
             case "resource_pack_url" -> {
                 if (args.length == 1) {
                     modifier.setResourcePackUrl(null);
@@ -85,6 +85,42 @@ public class SettingsCommand implements TabExecutor {
                 }
                 player.sendMessage(ChatColor.DARK_RED + "No true or false could be found as an argument, so the command is ignored.");
             }
+            case "enable_marks" -> {
+                if (args.length == 1) {
+                    modifier.setEnableMarks(null);
+                    player.sendMessage(ChatColor.GREEN + "Disabled custom mark configuration.");
+                    break;
+                }
+                if (args[1].equalsIgnoreCase("true")) {
+                    modifier.setEnableMarks(true);
+                    player.sendMessage(ChatColor.GREEN + "Enabled marks.");
+                    break;
+                }
+                if (args[1].equalsIgnoreCase("false")) {
+                    modifier.setEnableMarks(false);
+                    player.sendMessage(ChatColor.GREEN + "Disabled marks.");
+                    break;
+                }
+                player.sendMessage(ChatColor.DARK_RED + "No true or false could be found as an argument, so the command is ignored.");
+            }
+            case "enable_double_click" -> {
+                if (args.length == 1) {
+                    modifier.setEnableDoubleClick(null);
+                    player.sendMessage(ChatColor.GREEN + "Disabled custom double click configuration.");
+                    break;
+                }
+                if (args[1].equalsIgnoreCase("true")) {
+                    modifier.setEnableDoubleClick(true);
+                    player.sendMessage(ChatColor.GREEN + "Enabled double click.");
+                    break;
+                }
+                if (args[1].equalsIgnoreCase("false")) {
+                    modifier.setEnableDoubleClick(false);
+                    player.sendMessage(ChatColor.GREEN + "Disabled double click.");
+                    break;
+                }
+                player.sendMessage(ChatColor.DARK_RED + "No true or false could be found as an argument, so the command is ignored.");
+            }
         }
 
         return true;
@@ -98,7 +134,10 @@ public class SettingsCommand implements TabExecutor {
             return strings;
 
         if (args.length == 1) {
-            strings.addAll(Arrays.asList("resource_pack_url", "double_click", "painter", "second_mark"));
+            Arrays.asList("resource_pack_url", "double_click", "painter", "second_mark", "enable_marks", "enable_double_click").forEach(s -> {
+                if(s.startsWith(args[0]))
+                    strings.add(s);
+            });
         } else {
             switch(args[0]){
                 case "resource_pack_url":
@@ -112,7 +151,7 @@ public class SettingsCommand implements TabExecutor {
                             strings.add(aClass.getSimpleName());
                     });
                     break;
-                case "second_mark":
+                case "second_mark", "enable_double_click", "enable_marks":
                     if ("true".startsWith(args[1].toLowerCase()))
                         strings.add("true");
                     if ("false".startsWith(args[1].toLowerCase()))
