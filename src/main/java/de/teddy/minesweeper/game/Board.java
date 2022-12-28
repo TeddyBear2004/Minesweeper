@@ -31,18 +31,21 @@ public class Board {
     private final Field[][] board;
     private final Point2D[] bombList;
     private final Player player;
-    private final Random random = new Random();
+    private final Random random;
+    private final long seed;
     private boolean win = false;
     private long started;
     private boolean isGenerated;
     private boolean isFinished;
     private Scoreboard scoreboard;
 
-    public Board(Plugin plugin, Language language, Game map, int width, int height, int bombCount, Location corner, Player player) {
+    public Board(Plugin plugin, Language language, Game map, int width, int height, int bombCount, Location corner, Player player, long seed) {
         this.plugin = plugin;
         this.language = language;
         this.map = map;
         this.player = player;
+        this.seed = seed;
+        this.random = new Random(seed);
         if (width * height - 9 <= bombCount || width * height <= bombCount)
             throw new IllegalArgumentException("bombCount cannot be bigger than width * height");
 
@@ -242,6 +245,7 @@ public class Board {
         this.player.sendMessage(language.getString("message_win"));
         this.player.sendMessage(language.getString("field_desc", String.valueOf(this.width), String.valueOf(this.height), String.valueOf(this.bombCount)));
         this.player.sendMessage(language.getString("message_time_needed", getActualTimeNeededString()));
+        this.player.sendMessage("Seed: " + seed);
 
         this.player.sendTitle(ChatColor.DARK_GREEN + language.getString("title_win"), ChatColor.GREEN + language.getString("message_time_needed", getActualTimeNeededString()), 10, 70, 20);
         PacketUtil.sendSoundEffect(this.player, Sound.UI_TOAST_CHALLENGE_COMPLETE, .5f, this.player.getLocation());

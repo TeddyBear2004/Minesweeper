@@ -24,10 +24,19 @@ public record MinesweeperCommand(List<Game> games) implements TabExecutor {
 
         for (Game game : games) {
             if (game.getDifficulty().replaceAll(" ", "_").equals(args[0])) {
-                if (args.length > 1) {
+                if (args.length == 2) {
                     try{
                         game.startGame(player, true, Integer.parseInt(args[1]));
+                    }catch(NumberFormatException e){
+                        player.sendMessage("Please write a whole number as second argument.");
+                    }catch(IllegalArgumentException e){
+                        player.sendMessage("The provided bomb count is too large.");
+                    }
+                } else if (args.length > 2) {
+                    try{
+                        game.startGame(player, true, Integer.parseInt(args[1]), Long.parseLong(args[2]));
                     }catch(NumberFormatException ignored){
+                        player.sendMessage("Please write a whole number as second and third argument.");
                     }catch(IllegalArgumentException e){
                         player.sendMessage("The provided bomb count is too large.");
                     }

@@ -17,10 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Game {
 
@@ -170,9 +167,13 @@ public class Game {
     }
 
     public void startGame(Player p, boolean shouldTeleport, int bombCount) {
+        startGame(p, shouldTeleport, bombCount, new Random().nextLong());
+    }
+
+    public void startGame(Player p, boolean shouldTeleport, int bombCount, long seed) {
         stopGames(p);
         Board b;
-        b = new Board(plugin, language, this, size, size, bombCount, corner, p);
+        b = new Board(plugin, language, this, size, size, bombCount, corner, p, seed);
         b.drawBlancField(Collections.singletonList(p));
         startWatching(p, b);
         runningGames.put(p, b);
