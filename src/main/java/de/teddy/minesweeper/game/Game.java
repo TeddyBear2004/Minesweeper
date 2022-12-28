@@ -166,6 +166,10 @@ public class Game {
     }
 
     public void startGame(Player p, boolean shouldTeleport) {
+        startGame(p, shouldTeleport, bombCount);
+    }
+
+    public void startGame(Player p, boolean shouldTeleport, int bombCount) {
         stopGames(p);
         Board b;
         b = new Board(plugin, language, this, size, size, bombCount, corner, p);

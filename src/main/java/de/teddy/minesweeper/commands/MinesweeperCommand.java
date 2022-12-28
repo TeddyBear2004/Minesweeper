@@ -24,7 +24,15 @@ public record MinesweeperCommand(List<Game> games) implements TabExecutor {
 
         for (Game game : games) {
             if (game.getDifficulty().replaceAll(" ", "_").equals(args[0])) {
-                game.startGame(player, true);
+                if (args.length > 1) {
+                    try{
+                        game.startGame(player, true, Integer.parseInt(args[1]));
+                    }catch(NumberFormatException ignored){
+                    }catch(IllegalArgumentException e){
+                        player.sendMessage("The provided bomb count is too large.");
+                    }
+                } else
+                    game.startGame(player, true);
                 break;
             }
         }
@@ -35,7 +43,12 @@ public record MinesweeperCommand(List<Game> games) implements TabExecutor {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         List<String> strings = new ArrayList<>();
-        games.forEach(game -> strings.add(game.getDifficulty().replaceAll(" ", "_")));
+        if (args.length == 1)
+            games.forEach(game -> {
+                String s = game.getDifficulty().replaceAll(" ", "_");
+                if (s.toLowerCase().startsWith(args[0].toLowerCase()))
+                    strings.add(s);
+            });
         return strings;
     }
 

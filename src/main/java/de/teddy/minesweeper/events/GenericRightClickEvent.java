@@ -26,7 +26,7 @@ public class GenericRightClickEvent implements Listener {
                 Board board = Game.getBoard(event.getPlayer());
                 if(board.isGenerated()){
                     Game.finishGame(event.getPlayer());
-                    game.startGame(event.getPlayer(), false);
+                    game.startGame(event.getPlayer(), false, board.getBombCount());
                     event.setCancelled(true);
                 }
                 return;

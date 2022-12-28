@@ -11,6 +11,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
@@ -28,8 +29,8 @@ public enum Inventories {
     CHOOSE_GAME,
     VIEW_GAMES;
 
-    public static final ItemStack[] GAME_INVENTORY= new ItemStack[27];
-    public static final ItemStack[] VIEWER_INVENTORY= new ItemStack[27];
+    public static final ItemStack[] GAME_INVENTORY = new ItemStack[27];
+    public static final ItemStack[] VIEWER_INVENTORY = new ItemStack[27];
     private static final Map<Inventories, Supplier<Inventory>> INVENTORIES = new HashMap<>();
     private static final Map<Inventories, String> INVENTORY_NAME_MAP = new HashMap<>();
     private static final Map<ItemStack, Function<Player, Inventory>> ITEM_INVENTORY_MAP = new HashMap<>();
@@ -46,16 +47,14 @@ public enum Inventories {
         loadViewerInventory(language);
 
         INVENTORY_NAME_MAP.put(CHOOSE_GAME, ChatColor.AQUA + language.getString("minesweeper"));
-        INVENTORIES.put(CHOOSE_GAME, createSupplier(Bukkit.createInventory(
-                null,
-                availableGamesInventoryLines * 9,
-                INVENTORY_NAME_MAP.get(CHOOSE_GAME)), CHOOSE_GAME));
+        INVENTORIES.put(CHOOSE_GAME, createSupplier(null,
+                                                    availableGamesInventoryLines * 9,
+                                                    INVENTORY_NAME_MAP.get(CHOOSE_GAME), CHOOSE_GAME));
 
         INVENTORY_NAME_MAP.put(VIEW_GAMES, ChatColor.AQUA + "Watch other games!");
-        INVENTORIES.put(VIEW_GAMES, createSupplier(Bukkit.createInventory(
-                null,
-                54,
-                INVENTORY_NAME_MAP.get(VIEW_GAMES)), VIEW_GAMES));
+        INVENTORIES.put(VIEW_GAMES, createSupplier(null,
+                                                   54,
+                                                   INVENTORY_NAME_MAP.get(VIEW_GAMES), VIEW_GAMES));
     }
 
     public static Consumer<Inventory> getConsumer(ItemStack itemStack, Player whoClicked) {
@@ -124,7 +123,8 @@ public enum Inventories {
         VIEWER_INVENTORY[7] = book;
     }
 
-    private static Supplier<Inventory> createSupplier(Inventory inventory, Inventories inventories) {
+    private static Supplier<Inventory> createSupplier(InventoryHolder holder, int size, String name, Inventories inventories) {
+        Inventory inventory = Bukkit.createInventory(holder, size, name);
         return () -> {
             getIContentFillers().forEach(iContentFiller -> {
                 if (iContentFiller.getEInventory() == inventories) {

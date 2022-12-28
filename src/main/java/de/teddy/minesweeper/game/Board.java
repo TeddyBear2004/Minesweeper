@@ -89,6 +89,10 @@ public class Board {
         return this.board;
     }
 
+    public int getBombCount() {
+        return bombCount;
+    }
+
     public Player getPlayer() {
         return player;
     }
@@ -247,7 +251,7 @@ public class Board {
     public void checkIfWon() {
         for (Field[] fields : this.board)
             for (Field field : fields)
-                if (field.isCovered() && !field.isBomb())
+                if (field != null && field.isCovered() && !field.isBomb())
                     return;
 
         win();
