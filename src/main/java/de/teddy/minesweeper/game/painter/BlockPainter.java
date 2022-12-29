@@ -24,6 +24,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.awt.geom.Point2D;
 import java.lang.reflect.InvocationTargetException;
@@ -54,6 +55,7 @@ public class BlockPainter implements Painter {
     public static final Material LIGHT_DEFAULT = Material.LIME_CONCRETE_POWDER;
     public static final Material DARK_DEFAULT = Material.GREEN_CONCRETE_POWDER;
     private final Plugin plugin;
+    private BukkitTask bombTask;
 
     public BlockPainter(Plugin plugin) {
         this.plugin = plugin;
@@ -113,6 +115,8 @@ public class BlockPainter implements Painter {
         }
 
         sendMultiBlockChange(players, subChunkMap);
+        if (bombTask != null)
+            this.bombTask.cancel();
     }
 
     @Override
@@ -176,8 +180,10 @@ public class BlockPainter implements Painter {
             clone.setX(board.getCorner().getBlockX() + point2D.getX());
             clone.setZ(board.getCorner().getBlockZ() + point2D.getY());
 
+            if (bombTask != null)
+                bombTask.cancel();
 
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            bombTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 for (Player p : players) {
                     PacketUtil.sendBlockChange(p, new BlockPosition(clone.toVector()), WrappedBlockData.createData(Material.COAL_BLOCK));
                     PacketUtil.sendSoundEffect(p, Sound.BLOCK_STONE_PLACE, 1f, clone);

@@ -24,6 +24,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.awt.geom.Point2D;
 import java.lang.reflect.InvocationTargetException;
@@ -48,6 +49,7 @@ public class ArmorStandPainter implements Painter {
     private Map<Integer, ItemStack> currentItemStackPerEntityId = new HashMap<>();
     private Map<Integer, int[]> armorStandEntityIds;
     private Map<int[], Integer> locationEntityIds;
+    private BukkitTask bombTask;
 
     public ArmorStandPainter(Plugin plugin) {
         this.plugin = plugin;
@@ -81,6 +83,9 @@ public class ArmorStandPainter implements Painter {
             this.armorStandEntityIds = null;
             this.locationEntityIds = null;
             this.currentItemStackPerEntityId = null;
+
+            if (bombTask != null)
+                this.bombTask.cancel();
         }
     }
 
@@ -184,8 +189,10 @@ public class ArmorStandPainter implements Painter {
             clone.setX(board.getCorner().getBlockX() + point2D.getX());
             clone.setZ(board.getCorner().getBlockZ() + point2D.getY());
 
+            if (bombTask != null)
+                bombTask.cancel();
 
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            bombTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 Integer integer = this.locationEntityIds.get(new int[]{(int) point2D.getX(), (int) point2D.getY()});
                 if (integer == null)
                     return;
