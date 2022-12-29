@@ -80,6 +80,11 @@ public class BlockPainter implements Painter {
     }
 
     @Override
+    public String getName() {
+        return "classic";
+    }
+
+    @Override
     public void drawBlancField(Board board, List<Player> players) {
         if (board == null || !Board.notTest)
             return;

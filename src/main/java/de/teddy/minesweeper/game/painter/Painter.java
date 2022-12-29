@@ -39,6 +39,8 @@ public interface Painter {
         return clazz;
     }
 
+    String getName();
+
     void drawBlancField(Board board, List<Player> players);
 
     void drawField(Board board, List<Player> players);

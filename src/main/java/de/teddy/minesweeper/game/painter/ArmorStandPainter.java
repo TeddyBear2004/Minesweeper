@@ -56,6 +56,11 @@ public class ArmorStandPainter implements Painter {
     }
 
     @Override
+    public String getName() {
+        return "heads";
+    }
+
+    @Override
     public void drawBlancField(Board board, List<Player> players) {
         if (board == null || !Board.notTest)
             return;

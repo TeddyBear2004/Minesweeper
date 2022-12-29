@@ -15,6 +15,13 @@ import java.util.List;
 
 public class SettingsCommand implements TabExecutor {
 
+    private static final String CUSTOM_RESOURCE_PACK_URL = "custom_resource_pack_url";
+    private static final String QUICK_REVEAL_DURATION = "quick_reveal_duration";
+    private static final String BOARD_STYLE = "board_style";
+    private static final String ENABLE_QUESTION_MARK = "enable_question_mark";
+    private static final String ENABLE_FLAG = "enable_flag";
+    private static final String QUICK_REVEAL = "quick_reveal";
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player) || args.length == 0) {
@@ -23,7 +30,7 @@ public class SettingsCommand implements TabExecutor {
 
         PersonalModifier modifier = PersonalModifier.getPersonalModifier(player);
         switch(args[0].toLowerCase()){
-            case "resource_pack_url" -> {
+            case CUSTOM_RESOURCE_PACK_URL -> {
                 if (args.length == 1) {
                     modifier.setResourcePackUrl(null);
                     player.sendMessage(ChatColor.GREEN + "Disabled custom resource pack.");
@@ -37,7 +44,7 @@ public class SettingsCommand implements TabExecutor {
                 modifier.setResourcePackUrl(url);
                 player.sendMessage(ChatColor.GREEN + "The specified resource pack url was applied.");
             }
-            case "double_click" -> {
+            case QUICK_REVEAL_DURATION -> {
                 if (args.length == 1) {
                     modifier.setDoubleClickDuration(null);
                     player.sendMessage(ChatColor.GREEN + "Disabled custom double click duration.");
@@ -52,7 +59,7 @@ public class SettingsCommand implements TabExecutor {
                     player.sendMessage(ChatColor.DARK_RED + "Please make sure that you provide a valid number.");
                 }
             }
-            case "painter" -> {
+            case BOARD_STYLE -> {
                 if (args.length == 1) {
                     modifier.setPainterClass(null);
                     player.sendMessage(ChatColor.GREEN + "Disabled custom painter.");
@@ -67,7 +74,7 @@ public class SettingsCommand implements TabExecutor {
                 }
                 player.sendMessage(ChatColor.DARK_RED + "Please make sure the provided painter is valid.");
             }
-            case "second_mark" -> {
+            case ENABLE_QUESTION_MARK -> {
                 if (args.length == 1) {
                     modifier.setEnableQuestionMark(null);
                     player.sendMessage(ChatColor.GREEN + "Disabled custom second mark configuration.");
@@ -85,7 +92,7 @@ public class SettingsCommand implements TabExecutor {
                 }
                 player.sendMessage(ChatColor.DARK_RED + "No true or false could be found as an argument, so the command is ignored.");
             }
-            case "enable_marks" -> {
+            case ENABLE_FLAG -> {
                 if (args.length == 1) {
                     modifier.setEnableMarks(null);
                     player.sendMessage(ChatColor.GREEN + "Disabled custom mark configuration.");
@@ -103,7 +110,7 @@ public class SettingsCommand implements TabExecutor {
                 }
                 player.sendMessage(ChatColor.DARK_RED + "No true or false could be found as an argument, so the command is ignored.");
             }
-            case "enable_double_click" -> {
+            case QUICK_REVEAL -> {
                 if (args.length == 1) {
                     modifier.setEnableDoubleClick(null);
                     player.sendMessage(ChatColor.GREEN + "Disabled custom double click configuration.");
@@ -134,24 +141,24 @@ public class SettingsCommand implements TabExecutor {
             return strings;
 
         if (args.length == 1) {
-            Arrays.asList("resource_pack_url", "double_click", "painter", "second_mark", "enable_marks", "enable_double_click").forEach(s -> {
-                if(s.startsWith(args[0]))
+            Arrays.asList(CUSTOM_RESOURCE_PACK_URL, QUICK_REVEAL_DURATION, BOARD_STYLE, ENABLE_QUESTION_MARK, ENABLE_FLAG, QUICK_REVEAL).forEach(s -> {
+                if (s.startsWith(args[0]))
                     strings.add(s);
             });
         } else {
             switch(args[0]){
-                case "resource_pack_url":
+                case CUSTOM_RESOURCE_PACK_URL:
                     break;
-                case "double_click":
+                case QUICK_REVEAL_DURATION:
                     strings.add("350");
                     break;
-                case "painter":
+                case BOARD_STYLE:
                     Game.PAINTER_MAP.keySet().forEach(aClass -> {
                         if (aClass.getSimpleName().toLowerCase().startsWith(args[1].toLowerCase()))
                             strings.add(aClass.getSimpleName());
                     });
                     break;
-                case "second_mark", "enable_double_click", "enable_marks":
+                case ENABLE_QUESTION_MARK, QUICK_REVEAL, ENABLE_FLAG:
                     if ("true".startsWith(args[1].toLowerCase()))
                         strings.add("true");
                     if ("false".startsWith(args[1].toLowerCase()))
