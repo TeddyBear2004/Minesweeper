@@ -19,7 +19,7 @@ public class ModifierArea {
     public ModifierArea(Location loc1, Location loc2) {
         this.loc1 = new Location(loc1.getWorld(), Math.min(loc1.getBlockX(), loc2.getBlockX()), Math.min(loc1.getBlockY(), loc2.getBlockY()), Math.min(loc1.getBlockZ(), loc2.getBlockZ()));
         this.loc2 = new Location(loc1.getWorld(), Math.max(loc1.getBlockX(), loc2.getBlockX()), Math.max(loc1.getBlockY(), loc2.getBlockY()), Math.max(loc1.getBlockZ(), loc2.getBlockZ()));
-        }
+    }
 
     private static Location readLoc1(Map<?, ?> map) {
         return new Location(Bukkit.getWorld(map.get("world").toString()), (int) map.get("x1"), (int) map.get("y1"), (int) map.get("z1"));
