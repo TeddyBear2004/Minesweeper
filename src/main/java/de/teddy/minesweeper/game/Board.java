@@ -115,6 +115,7 @@ public class Board {
 
     public void addViewer(Player player) {
         this.viewers.add(player);
+        draw(Collections.singletonList(player));
         setScoreBoard(player);
     }
 
@@ -256,7 +257,7 @@ public class Board {
     public void checkIfWon() {
         for (Field[] fields : this.board)
             for (Field field : fields)
-                if (field != null && field.isCovered() && !field.isBomb())
+                if (field == null || (field.isCovered() && !field.isBomb()))
                     return;
 
         win();
@@ -358,6 +359,8 @@ public class Board {
             flagBombCounter.setSuffix(ChatColor.GREEN + getFlagCounterString());
             objective.getScore(ChatColor.GRAY + "Flags/Bombs: ").setScore(13);
         }
+
+        getAllPlayers().forEach(this::setScoreBoard);
     }
 
     public void updateScoreBoard() {
@@ -367,7 +370,7 @@ public class Board {
     }
 
     public void setScoreBoard(Player player) {
-        if (scoreboard == null)
+        if (scoreboard == null || isFinished)
             return;
 
         player.setScoreboard(scoreboard);

@@ -8,4 +8,6 @@ public interface ResourcePackHandler extends Closeable {
 
     void apply(Player player);
 
+    String getUrl(Player player);
+
 }

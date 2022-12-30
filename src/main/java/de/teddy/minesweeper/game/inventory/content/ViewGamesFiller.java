@@ -4,6 +4,7 @@ import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.util.HeadGenerator;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -39,8 +40,11 @@ public class ViewGamesFiller implements ContentFiller {
         Map<Player, Board> runningGames = Game.getRunningGames();
         List<Player> players = new ArrayList<>(runningGames.keySet());
 
-        for (int i = START_SLOT; i < END_SLOT && i < runningGames.size(); i++) {
-            Player player = players.get(i);
+        ItemStack itemStack = new ItemStack(Material.AIR);
+        for (int i = START_SLOT; i < END_SLOT; i++) inventory.setItem(i, itemStack);
+
+        for (int i = START_SLOT, s = 0; i < END_SLOT && s < runningGames.size(); i++, s++) {
+            Player player = players.get(s);
             inventory.setItem(i, generatePlayerView(player, runningGames.get(player), map));
         }
 

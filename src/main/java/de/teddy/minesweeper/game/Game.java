@@ -77,6 +77,7 @@ public class Game {
     }
 
     private static void startWatching(Player p, Board b) {
+        stopWatching(p);
         Game cur = playerLocation.get(p);
         if (cur != b.map) {
             switchToMap(p, b.map);
@@ -177,9 +178,11 @@ public class Game {
         b.drawBlancField(Collections.singletonList(p));
         startWatching(p, b);
         runningGames.put(p, b);
+
         Bukkit.getOnlinePlayers().forEach(onPlayer -> {
             if (gameWatched.get(onPlayer) == null && b.map == playerLocation.get(onPlayer)) {
                 startWatching(onPlayer, b);
+                b.setScoreBoard(onPlayer);
             }
         });
 

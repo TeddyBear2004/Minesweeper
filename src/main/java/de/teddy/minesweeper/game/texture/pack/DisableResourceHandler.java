@@ -9,12 +9,18 @@ public class DisableResourceHandler implements ResourcePackHandler {
 
     @Override
     public void apply(Player player) {
-        PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
-
-        if (personalModifier.getResourcePackUrl().isPresent())
-            player.setResourcePack(personalModifier.getResourcePackUrl().get());
+        String url = getUrl(player);
+        if (url != null)
+            player.setResourcePack(url);
         else
             Painter.storePainterClass(player.getPersistentDataContainer(), ArmorStandPainter.class);
+    }
+
+    @Override
+    public String getUrl(Player player) {
+        PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
+
+        return personalModifier.getResourcePackUrl().orElse(null);
     }
 
     @Override

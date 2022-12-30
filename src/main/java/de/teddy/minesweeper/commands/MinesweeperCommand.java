@@ -2,6 +2,7 @@ package de.teddy.minesweeper.commands;
 
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.inventory.Inventories;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -34,7 +35,12 @@ public record MinesweeperCommand(List<Game> games) implements TabExecutor {
                     }
                 } else if (args.length > 2) {
                     try{
-                        game.startGame(player, true, Integer.parseInt(args[1]), Long.parseLong(args[2]));
+                        int bombCount = Integer.parseInt(args[1]);
+                        if(bombCount <= 0){
+                            player.sendMessage(ChatColor.DARK_RED + "The number of bombs must be greater than 0.");
+                            return true;
+                        }
+                        game.startGame(player, true, bombCount, Long.parseLong(args[2]));
                     }catch(NumberFormatException ignored){
                         player.sendMessage("Please write a whole number as second and third argument.");
                     }catch(IllegalArgumentException e){

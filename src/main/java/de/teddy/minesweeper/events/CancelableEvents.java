@@ -14,7 +14,10 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -27,13 +30,13 @@ public class CancelableEvents implements Listener {
     public static final NamespacedKey BYPASS_EVENTS = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "bypass_events");
     private final Map<CancelableEvent, Boolean> cancelableEventBooleanMap = new HashMap<>();
     private final List<ModifierArea> areas;
-    
+
     public CancelableEvents(ConfigurationSection section, List<ModifierArea> areas) {
         this.areas = areas;
 
         for (CancelableEvent cancelableEvent : CancelableEvent.values()) {
             cancelableEventBooleanMap.put(cancelableEvent, section == null
-            ? cancelableEvent.getDefaultValue()
+                    ? cancelableEvent.getDefaultValue()
                     : section.getBoolean(cancelableEvent.getKey(), cancelableEvent.getDefaultValue()));
         }
     }
@@ -130,7 +133,20 @@ public class CancelableEvents implements Listener {
                 if (shouldCancel(player))
                     event.setCancelled(true);
         }
-
     }
 
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onInventoryMoveItem(InventoryMoveItemEvent event) {
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        event.setCancelled(true);
+    }
 }

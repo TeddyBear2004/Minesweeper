@@ -3,6 +3,7 @@ package de.teddy.minesweeper.commands;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.modifier.PersonalModifier;
 import de.teddy.minesweeper.game.painter.Painter;
+import de.teddy.minesweeper.game.texture.pack.ResourcePackHandler;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -21,6 +22,11 @@ public class SettingsCommand implements TabExecutor {
     private static final String ENABLE_QUESTION_MARK = "enable_question_mark";
     private static final String ENABLE_FLAG = "enable_flag";
     private static final String QUICK_REVEAL = "quick_reveal";
+    private final ResourcePackHandler packHandler;
+
+    public SettingsCommand(ResourcePackHandler packHandler) {
+        this.packHandler = packHandler;
+    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -32,9 +38,12 @@ public class SettingsCommand implements TabExecutor {
         switch(args[0].toLowerCase()){
             case CUSTOM_RESOURCE_PACK_URL -> {
                 if (args.length == 1) {
-                    modifier.setResourcePackUrl(null);
-                    player.sendMessage(ChatColor.GREEN + "Disabled custom resource pack.");
+                    player.sendMessage(ChatColor.GREEN + "Your current resource pack url is: " + modifier.getResourcePackUrl().orElse("default"));
                     break;
+                }
+                if (args[1].equalsIgnoreCase("default")) {
+                    modifier.setResourcePackUrl(null);
+                    return true;
                 }
                 String url = args[1];
                 if (!(url.toLowerCase().startsWith("http://") || url.toLowerCase().startsWith("https://"))) {
@@ -43,60 +52,82 @@ public class SettingsCommand implements TabExecutor {
                 }
                 modifier.setResourcePackUrl(url);
                 player.sendMessage(ChatColor.GREEN + "The specified resource pack url was applied.");
+                packHandler.apply(player);
             }
             case QUICK_REVEAL_DURATION -> {
                 if (args.length == 1) {
-                    modifier.setDoubleClickDuration(null);
-                    player.sendMessage(ChatColor.GREEN + "Disabled custom double click duration.");
+                    player.sendMessage(ChatColor.GREEN + "Your current quick reveal duration (time between double clicks) is: " + (modifier.getDoubleClickDuration().isPresent() ? modifier.getDoubleClickDuration().get() : "default"));
                     break;
+                }
+                if (args[1].equalsIgnoreCase("default")) {
+                    modifier.setDoubleClickDuration(null);
+                    return true;
                 }
                 try{
                     int number = Integer.parseInt(args[1]);
 
                     modifier.setDoubleClickDuration(number);
-                    player.sendMessage(ChatColor.GREEN + "The specified double click duration was applied.");
+                    player.sendMessage(ChatColor.GREEN + "The specified quick reveal duration was applied.");
                 }catch(NumberFormatException e){
                     player.sendMessage(ChatColor.DARK_RED + "Please make sure that you provide a valid number.");
                 }
             }
             case BOARD_STYLE -> {
                 if (args.length == 1) {
-                    modifier.setPainterClass(null);
-                    player.sendMessage(ChatColor.GREEN + "Disabled custom painter.");
+                    if (modifier.getPainterClass().isPresent()) {
+                        try{
+                            Painter painter = Game.PAINTER_MAP.get(Class.forName(modifier.getPainterClass().get()));
+
+                            player.sendMessage(ChatColor.GREEN + "Your current board style is: " + painter.getName());
+                        }catch(ClassNotFoundException e){
+                            player.sendMessage(ChatColor.DARK_RED + "An unknown error has occurred.");
+                        }
+                    } else
+                        player.sendMessage(ChatColor.GREEN + "Your current board style is: " + modifier.getPainterClass().orElse("default"));
                     break;
                 }
-                for (Class<? extends Painter> aClass : Game.PAINTER_MAP.keySet()) {
-                    if (aClass.getSimpleName().equalsIgnoreCase(args[1])) {
-                        modifier.setPainterClass(aClass.getName());
-                        player.sendMessage(ChatColor.GREEN + "The specified painter was applied.");
+                if (args[1].equalsIgnoreCase("default")) {
+                    modifier.setPainterClass(null);
+                    return true;
+                }
+                for (Painter painter : Game.PAINTER_MAP.values()) {
+                    if (painter.getName().equalsIgnoreCase(args[1])) {
+                        modifier.setPainterClass(painter.getClass().getName());
+                        player.sendMessage(ChatColor.GREEN + "The specified board style was applied.");
                         return true;
                     }
                 }
-                player.sendMessage(ChatColor.DARK_RED + "Please make sure the provided painter is valid.");
+                player.sendMessage(ChatColor.DARK_RED + "Please make sure the provided board style is valid.");
             }
             case ENABLE_QUESTION_MARK -> {
                 if (args.length == 1) {
-                    modifier.setEnableQuestionMark(null);
-                    player.sendMessage(ChatColor.GREEN + "Disabled custom second mark configuration.");
+                    player.sendMessage(ChatColor.GREEN + "Currently question marks are " + (modifier.isEnableQuestionMark().isPresent() ? modifier.isEnableQuestionMark().get() ? "enabled." : "disabled." : "default setting."));
                     break;
+                }
+                if (args[1].equalsIgnoreCase("default")) {
+                    modifier.setEnableQuestionMark(null);
+                    return true;
                 }
                 if (args[1].equalsIgnoreCase("true")) {
                     modifier.setEnableQuestionMark(true);
-                    player.sendMessage(ChatColor.GREEN + "Enabled second mark.");
+                    player.sendMessage(ChatColor.GREEN + "Enabled question mark.");
                     break;
                 }
                 if (args[1].equalsIgnoreCase("false")) {
                     modifier.setEnableQuestionMark(false);
-                    player.sendMessage(ChatColor.GREEN + "Disabled second mark.");
+                    player.sendMessage(ChatColor.GREEN + "Disabled question mark.");
                     break;
                 }
                 player.sendMessage(ChatColor.DARK_RED + "No true or false could be found as an argument, so the command is ignored.");
             }
             case ENABLE_FLAG -> {
                 if (args.length == 1) {
-                    modifier.setEnableMarks(null);
-                    player.sendMessage(ChatColor.GREEN + "Disabled custom mark configuration.");
+                    player.sendMessage(ChatColor.GREEN + "Currently flags are " + (modifier.isEnableMarks().isPresent() ? modifier.isEnableMarks().get() ? "enabled." : "disabled." : "default setting."));
                     break;
+                }
+                if (args[1].equalsIgnoreCase("default")) {
+                    modifier.setEnableMarks(null);
+                    return true;
                 }
                 if (args[1].equalsIgnoreCase("true")) {
                     modifier.setEnableMarks(true);
@@ -112,9 +143,12 @@ public class SettingsCommand implements TabExecutor {
             }
             case QUICK_REVEAL -> {
                 if (args.length == 1) {
-                    modifier.setEnableDoubleClick(null);
-                    player.sendMessage(ChatColor.GREEN + "Disabled custom double click configuration.");
+                    player.sendMessage(ChatColor.GREEN + "Currently quick reveal is " + (modifier.isEnableDoubleClick().isPresent() ? modifier.isEnableDoubleClick().get() ? "enabled." : "disabled." : "default setting."));
                     break;
+                }
+                if (args[1].equalsIgnoreCase("default")) {
+                    modifier.setEnableDoubleClick(null);
+                    return true;
                 }
                 if (args[1].equalsIgnoreCase("true")) {
                     modifier.setEnableDoubleClick(true);
@@ -137,6 +171,9 @@ public class SettingsCommand implements TabExecutor {
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         List<String> strings = new ArrayList<>();
 
+        if (!(sender instanceof Player player))
+            return strings;
+
         if (args.length == 0)
             return strings;
 
@@ -145,25 +182,36 @@ public class SettingsCommand implements TabExecutor {
                 if (s.startsWith(args[0]))
                     strings.add(s);
             });
-        } else {
+        } else if (args.length == 2) {
             switch(args[0]){
-                case CUSTOM_RESOURCE_PACK_URL:
-                    break;
-                case QUICK_REVEAL_DURATION:
-                    strings.add("350");
-                    break;
-                case BOARD_STYLE:
-                    Game.PAINTER_MAP.keySet().forEach(aClass -> {
-                        if (aClass.getSimpleName().toLowerCase().startsWith(args[1].toLowerCase()))
-                            strings.add(aClass.getSimpleName());
+                case CUSTOM_RESOURCE_PACK_URL -> {
+                    String url = packHandler.getUrl(player);
+                    if (url != null)
+                        strings.add(url);
+                    if ("default".startsWith(args[1].toLowerCase()))
+                        strings.add("default");
+                }
+                case QUICK_REVEAL_DURATION -> {
+                    if ("default".startsWith(args[1].toLowerCase()))
+                        strings.add("default");
+                }
+                case BOARD_STYLE -> {
+                    Game.PAINTER_MAP.values().forEach(painter -> {
+                        if (painter.getName().toLowerCase().startsWith(args[1].toLowerCase()))
+                            strings.add(painter.getName());
+
                     });
-                    break;
-                case ENABLE_QUESTION_MARK, QUICK_REVEAL, ENABLE_FLAG:
+                    if ("default".startsWith(args[1].toLowerCase()))
+                        strings.add("default");
+                }
+                case ENABLE_QUESTION_MARK, QUICK_REVEAL, ENABLE_FLAG -> {
                     if ("true".startsWith(args[1].toLowerCase()))
                         strings.add("true");
                     if ("false".startsWith(args[1].toLowerCase()))
                         strings.add("false");
-                    break;
+                    if ("default".startsWith(args[1].toLowerCase()))
+                        strings.add("default");
+                }
             }
         }
 

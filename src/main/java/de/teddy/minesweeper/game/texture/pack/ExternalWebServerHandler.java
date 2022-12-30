@@ -13,9 +13,14 @@ public class ExternalWebServerHandler implements ResourcePackHandler {
 
     @Override
     public void apply(Player player) {
+        player.setResourcePack(getUrl(player));
+    }
+
+    @Override
+    public String getUrl(Player player) {
         PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
 
-        player.setResourcePack(personalModifier.getResourcePackUrl().orElse(link));
+        return personalModifier.getResourcePackUrl().orElse(link);
     }
 
     @Override

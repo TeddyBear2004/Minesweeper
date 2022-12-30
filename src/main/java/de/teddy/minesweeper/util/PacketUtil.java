@@ -50,6 +50,7 @@ public class PacketUtil {
 
         return packet;
     }
+
     public static void sendBlockChange(Player player, BlockPosition blockPosition, WrappedBlockData wrappedBlockData) {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         PacketContainer packet = getBlockChange(blockPosition, wrappedBlockData);
@@ -130,7 +131,7 @@ public class PacketUtil {
         wrappedDataWatcher.setObject(0, byteSerializer, (byte) 0x20);
         wrappedDataWatcher.setObject(1, intSerializer, 300);
         wrappedDataWatcher.setObject(7, intSerializer, 0);
-        wrappedDataWatcher.setObject(8, intSerializer, 0);
+        wrappedDataWatcher.setObject(8, byteSerializer, (byte) 0);
         wrappedDataWatcher.setObject(9, intSerializer, 20);
         wrappedDataWatcher.setObject(10, intSerializer, 0);
         wrappedDataWatcher.setObject(12, intSerializer, 0);
