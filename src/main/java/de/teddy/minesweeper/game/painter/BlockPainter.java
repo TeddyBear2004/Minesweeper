@@ -245,7 +245,7 @@ public class BlockPainter implements Painter {
                 if (field != null) {
                     Material[] materials = new Material[]{getActualMaterial(field), field.getMark()};
                     int i = location.getBlockY() - game.getFieldHeight();
-                    if (i < materials.length)
+                    if (i < materials.length && i > 0)
                         PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(materials[i]));
                 }
                 player.getInventory().setContents(Inventories.VIEWER_INVENTORY);
