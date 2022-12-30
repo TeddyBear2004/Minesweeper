@@ -242,6 +242,10 @@ public class BlockPainter implements Painter {
 
             if (watching != null) {
                 Board.Field field = watching.getField(location);
+
+                if (watching.isBlockOutsideGame(location.getBlock()))
+                    return;
+
                 if (field != null) {
                     Material[] materials = new Material[]{getActualMaterial(field), field.getMark()};
                     int i = location.getBlockY() - game.getFieldHeight();
