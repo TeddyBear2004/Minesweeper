@@ -40,10 +40,11 @@ import java.util.zip.ZipInputStream;
 
 public final class Minesweeper extends JavaPlugin {
 
+    private final List<BukkitTask> tasks = new ArrayList<>();
     private String langPath;
     private ResourcePackHandler resourcePackHandler;
     private List<Game> games = new ArrayList<>();
-    private final List<BukkitTask> tasks = new ArrayList<>();
+    private Game customGame;
 
     public List<Game> getGames() {
         return games;
@@ -62,6 +63,10 @@ public final class Minesweeper extends JavaPlugin {
         loadWorld();
         loadModifier(modifierAreas);
         this.games = loadGames(language);
+        this.customGame = loadCustomGame(getConfig().getConfigurationSection("custom_game"), games, language);
+
+        if (customGame != null)
+            this.games.add(customGame);
 
         try{
             this.resourcePackHandler = loadTexturePackHandler(getConfig().getConfigurationSection("resource_pack"));
@@ -80,11 +85,11 @@ public final class Minesweeper extends JavaPlugin {
 
 
         Objects.requireNonNull(this.getCommand("bypassEventCancellation")).setExecutor(new BypassEventCommand());
-        Objects.requireNonNull(this.getCommand("minesweeper")).setExecutor(new MinesweeperCommand(games));
+        Objects.requireNonNull(this.getCommand("minesweeper")).setExecutor(new MinesweeperCommand(games, customGame));
         Objects.requireNonNull(this.getCommand("settings")).setExecutor(new SettingsCommand(resourcePackHandler));
 
         getServer().getPluginManager().registerEvents(new CancelableEvents(getConfig().getConfigurationSection("events"), modifierAreas), this);
-        getServer().getPluginManager().registerEvents(new GenericEvents(games, resourcePackHandler), this);
+        getServer().getPluginManager().registerEvents(new GenericEvents(games, resourcePackHandler, customGame), this);
         getServer().getPluginManager().registerEvents(new GenericRightClickEvent(), this);
         getServer().getPluginManager().registerEvents(new InventoryClickEvents(), this);
 
@@ -198,12 +203,40 @@ public final class Minesweeper extends JavaPlugin {
             Material material = Material.valueOf(games.getString(key + ".inventory_material"));
             int inventoryPosition = games.getInt(key + ".inventory_position");
 
-            Game game = new Game(this, gameList, language, corner, spawn, borderSize, bombCount, language.getString(difficultyLangPath), material, inventoryPosition);
+            Game game = new Game(this,
+                                 gameList,
+                                 language,
+                                 corner,
+                                 spawn,
+                                 borderSize,
+                                 bombCount,
+                                 language.getString(difficultyLangPath),
+                                 material,
+                                 inventoryPosition);
             gameList.add(game);
         });
         return gameList;
     }
 
+    private Game loadCustomGame(ConfigurationSection section, List<Game> games, Language language) {
+        if (section == null || !section.getBoolean("enable", false))
+            return null;
+
+        ConfigurationSection cornerSection = section.getConfigurationSection("corner");
+        assert cornerSection != null;
+        Location corner = new Location(Bukkit.createWorld(WorldCreator.name(Objects.requireNonNull(cornerSection.getString("world")))), cornerSection.getInt("x"), cornerSection.getInt("y"), cornerSection.getInt("z"));
+
+        ConfigurationSection spawnSection = section.getConfigurationSection("spawn");
+        assert spawnSection != null;
+        Location spawn = new Location(Bukkit.createWorld(WorldCreator.name(Objects.requireNonNull(spawnSection.getString("world")))), spawnSection.getInt("x"), spawnSection.getInt("y"), spawnSection.getInt("z"), spawnSection.getInt("yaw"), spawnSection.getInt("pitch"));
+
+        int minWidth = section.getInt("min-size.width");
+        int minHeight = section.getInt("min-size.height");
+        int maxWidth = section.getInt("max-size.width");
+        int maxHeight = section.getInt("max-size.height");
+
+        return new Game(this, games, language, corner, spawn, minWidth, minHeight, maxWidth, maxHeight, "custom");
+    }
 
     private List<ModifierArea> loadAreas() {
         ConfigurationSection locationBased = getConfig().getConfigurationSection("location_based");

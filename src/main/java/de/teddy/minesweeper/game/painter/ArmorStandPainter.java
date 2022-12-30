@@ -263,7 +263,7 @@ public class ArmorStandPainter implements Painter {
         if (board == null) return;
 
         Location location = getLocation(board, entityId);
-        if (location == null || game.isBlockOutsideGame(location.getBlock()))
+        if (location == null || board.isBlockOutsideGame(location.getBlock()))
             return;
 
         Board.Field field = board.getField(location);
@@ -306,7 +306,7 @@ public class ArmorStandPainter implements Painter {
 
         BlockPosition blockPosition = new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ());
 
-        if (game.isBlockOutsideGame(location.getBlock()))
+        if (board.isBlockOutsideGame(location.getBlock()))
             return;
 
         Board.Field field = board.getField(location);

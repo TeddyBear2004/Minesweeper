@@ -21,11 +21,13 @@ import java.util.List;
 public class GenericEvents implements Listener {
 
     private final List<Game> games;
+    private final Game customGame;
     private final ResourcePackHandler resourcePackHandler;
 
-    public GenericEvents(List<Game> games, ResourcePackHandler resourcePackHandler) {
+    public GenericEvents(List<Game> games, ResourcePackHandler resourcePackHandler, Game customGame) {
         this.games = games;
         this.resourcePackHandler = resourcePackHandler;
+        this.customGame = customGame;
     }
 
     @EventHandler
@@ -128,11 +130,10 @@ public class GenericEvents implements Listener {
             return;
 
         for (Game game : games) {
-            if (game.isBlockOutsideGame(block)) continue;
+            if (game.equals(customGame) || game.isBlockOutsideGame(block)) continue;
 
             game.startGame(event.getPlayer(), false);
             break;
         }
     }
-
 }

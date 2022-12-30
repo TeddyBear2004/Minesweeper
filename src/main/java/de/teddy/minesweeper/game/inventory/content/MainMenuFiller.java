@@ -40,6 +40,8 @@ public class MainMenuFiller implements ContentFiller {
         HashMap<ItemStack, Function<Player, Consumer<Inventory>>> itemStackFunctionHashMap = new HashMap<>();
 
         for (Game game : games) {
+            if (game.getInventoryPosition() < 0 || game.getItemStack() == null)
+                continue;
             inventory.setItem(game.getInventoryPosition(), game.getItemStack());
             itemStackFunctionHashMap.put(game.getItemStack(), player -> {
                 game.startGame(player);

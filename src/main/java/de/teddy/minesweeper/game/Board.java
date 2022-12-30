@@ -3,9 +3,11 @@ package de.teddy.minesweeper.game;
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
 import de.teddy.minesweeper.game.modifier.PersonalModifier;
 import de.teddy.minesweeper.game.painter.Painter;
+import de.teddy.minesweeper.util.IsBetween;
 import de.teddy.minesweeper.util.Language;
 import de.teddy.minesweeper.util.PacketUtil;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -294,8 +296,8 @@ public class Board {
         if (this.isGenerated)
             throw new RuntimeException(language.getString("error_already_generated"));
 
-        boolean[][] cache = new boolean[this.height][this.width];
-        int[][] ints = new int[this.height][this.width];
+        boolean[][] cache = new boolean[this.width][this.height];
+        int[][] ints = new int[this.width][this.height];
 
         for (int i = 0; i < this.bombCount; i++) {
             int randWidth, randHeight;
@@ -316,7 +318,7 @@ public class Board {
                         int xCoord = (int) (point2D.getX() + j);
                         int yCoord = (int) (point2D.getY() + k);
 
-                        if (xCoord >= 0 && xCoord < this.height && yCoord >= 0 && yCoord < this.width) {
+                        if (xCoord >= 0 && xCoord < this.width && yCoord >= 0 && yCoord < this.height) {
                             ints[xCoord][yCoord]++;
                         }
                     }
@@ -337,6 +339,11 @@ public class Board {
 
     private boolean couldBombSpawn(int x, int y, int possibleX, int possibleY) {
         return Math.abs(x - possibleX) <= 1 && Math.abs(y - possibleY) <= 1;
+    }
+
+    public boolean isBlockOutsideGame(Block block) {
+        return !IsBetween.isBetween2D(corner, width, height, block)
+                || !IsBetween.isBetween(corner.getBlockY(), corner.getBlockY() + 1, block.getY());
     }
 
     private void initScoreboard() {

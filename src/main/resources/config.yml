@@ -8,7 +8,7 @@ resource_pack:
     name: pack.zip
   external_web_server:
     enable: true
-    link: https://cdn.discordapp.com/attachments/755817146986004551/1058009457998692392/teddy_3.zip
+    link: https://cdn.discordapp.com/attachments/755817146986004551/1058350165888614430/assets.zip
 
 allow_fly: true
 allow_default_watch: true
@@ -47,6 +47,28 @@ location_based:
 
 use_default_map: true
 available_games_inventory_lines: 1
+
+custom_game:
+  enable: true
+  corner:
+    x: 31
+    y: 35
+    z: -214
+    world: MineSweeper
+  min-size:
+    width: 4
+    height: 4
+  max-size:
+    width: 50
+    height: 50
+  spawn:
+    x: 58
+    y: 40
+    z: -222
+    yaw: 0
+    pitch: 30
+    world: MineSweeper
+
 
 games:
   Map10x10:

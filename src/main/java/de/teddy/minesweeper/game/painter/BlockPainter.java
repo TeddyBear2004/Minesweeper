@@ -232,10 +232,10 @@ public class BlockPainter implements Painter {
         BlockPosition blockPosition = packet.getMovingBlockPositions().read(0).getBlockPosition();
         Location location = blockPosition.toLocation(player.getWorld());
 
-        if (game.isBlockOutsideGame(location.getBlock()))
-            return;
-
         Board board = Game.getBoard(player);
+
+        if (board != null && board.isBlockOutsideGame(location.getBlock()))
+            return;
 
         if (board == null) {
             Board watching = Game.getBoardWatched(player);
@@ -244,7 +244,9 @@ public class BlockPainter implements Painter {
                 Board.Field field = watching.getField(location);
                 if (field != null) {
                     Material[] materials = new Material[]{getActualMaterial(field), field.getMark()};
-                    PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(materials[location.getBlockY() - game.getFieldHeight()]));
+                    int i = location.getBlockY() - game.getFieldHeight();
+                    if (i < materials.length)
+                        PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(materials[i]));
                 }
                 player.getInventory().setContents(Inventories.VIEWER_INVENTORY);
                 event.setCancelled(true);
@@ -274,10 +276,10 @@ public class BlockPainter implements Painter {
         BlockPosition blockPosition = packet.getBlockPositionModifier().read(0);
         Location location = blockPosition.toLocation(player.getWorld());
 
-        if (game.isBlockOutsideGame(location.getBlock()))
+        Board board = Game.getBoard(player);
+        if (board != null && board.isBlockOutsideGame(location.getBlock()))
             return;
 
-        Board board = Game.getBoard(player);
         if (board == null)
             board = Game.getBoardWatched(player);
 

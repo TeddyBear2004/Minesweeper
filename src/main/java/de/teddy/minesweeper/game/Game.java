@@ -41,8 +41,17 @@ public class Game {
     private final String difficulty;
     private final int inventoryPosition;
     private final ItemStack itemStack;
+    private final int minWidth;
+    private final int minHeight;
+    private final int maxWidth;
+    private final int maxHeight;
 
     public Game(Plugin plugin, List<Game> games, Language language, Location corner, Location spawn, int borderSize, int bombCount, String difficulty, Material material, int inventoryPosition) {
+        this.minWidth = -1;
+        this.minHeight = -1;
+        this.maxWidth = -1;
+        this.maxHeight = -1;
+
         this.plugin = plugin;
         this.games = games;
         this.language = language;
@@ -60,6 +69,28 @@ public class Game {
         itemMeta.setDisplayName(difficulty);
         itemMeta.setLore(Collections.singletonList(language.getString("field_desc", String.valueOf(size), String.valueOf(size), String.valueOf(bombCount))));
         itemStack.setItemMeta(itemMeta);
+    }
+
+    public Game(Minesweeper plugin, List<Game> games, Language language, Location corner, Location spawn, int minWidth, int minHeight, int maxWidth, int maxHeight, String difficulty) {
+        this.size = -1;
+        this.bombCount = -1;
+        this.inventoryPosition = -1;
+        this.itemStack = new ItemStack(Material.AIR);
+
+        if (minWidth > maxWidth || minHeight > maxHeight)
+            throw new IllegalArgumentException("Min size cannot be bigger max size in custom game.");
+
+        this.minWidth = minWidth;
+        this.minHeight = minHeight;
+        this.maxWidth = maxWidth;
+        this.maxHeight = maxHeight;
+
+        this.plugin = plugin;
+        this.games = games;
+        this.language = language;
+        this.corner = corner;
+        this.spawn = spawn;
+        this.difficulty = difficulty;
     }
 
     private static void switchToMap(Player p, Game g) {
@@ -168,13 +199,26 @@ public class Game {
     }
 
     public void startGame(Player p, boolean shouldTeleport, int bombCount) {
-        startGame(p, shouldTeleport, bombCount, new Random().nextLong());
+        startGame(p, shouldTeleport, bombCount, size, size);
     }
 
     public void startGame(Player p, boolean shouldTeleport, int bombCount, long seed) {
+        startGame(p, shouldTeleport, bombCount, size, size, seed);
+    }
+
+    public void startGame(Player p, boolean shouldTeleport, int bombCount, int width, int height) {
+        startGame(p, shouldTeleport, bombCount, width, height, new Random().nextLong());
+    }
+
+    public void startGame(Player p, boolean shouldTeleport, int bombCount, int width, int height, long seed) {
+        if (minHeight != -1 || maxHeight != -1 || minWidth != -1 || maxWidth != -1)
+            if (minHeight > height || height > maxHeight || minWidth > width || width > maxWidth)
+                return;
+
         stopGames(p);
         Board b;
-        b = new Board(plugin, language, this, size, size, bombCount, corner, p, seed);
+
+        b = new Board(plugin, language, this, width, height, bombCount, corner, p, seed);
         b.drawBlancField(Collections.singletonList(p));
         startWatching(p, b);
         runningGames.put(p, b);
