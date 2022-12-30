@@ -13,6 +13,7 @@ import de.teddy.minesweeper.events.InventoryClickEvents;
 import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.events.packets.RightClickEvent;
 import de.teddy.minesweeper.game.Game;
+import de.teddy.minesweeper.game.HidePlayerScheduler;
 import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.game.modifier.Modifier;
 import de.teddy.minesweeper.game.modifier.ModifierArea;
@@ -24,6 +25,7 @@ import de.teddy.minesweeper.util.Language;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -41,6 +43,7 @@ public final class Minesweeper extends JavaPlugin {
     private String langPath;
     private ResourcePackHandler resourcePackHandler;
     private List<Game> games = new ArrayList<>();
+    private final List<BukkitTask> tasks = new ArrayList<>();
 
     public List<Game> getGames() {
         return games;
@@ -94,10 +97,13 @@ public final class Minesweeper extends JavaPlugin {
             if (games.size() != 0)
                 games.get(0).startViewing(player, null);
         });
+
+        tasks.add(new HidePlayerScheduler(this).runTaskTimer(this, 20, 5));
     }
 
     @Override
     public void onDisable() {
+        tasks.forEach(BukkitTask::cancel);
         try{
             if (resourcePackHandler != null)
                 resourcePackHandler.close();

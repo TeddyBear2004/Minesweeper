@@ -22,6 +22,8 @@ public class SettingsCommand implements TabExecutor {
     private static final String ENABLE_QUESTION_MARK = "enable_question_mark";
     private static final String ENABLE_FLAG = "enable_flag";
     private static final String QUICK_REVEAL = "quick_reveal";
+    private static final String HIDE_PLAYER = "hide_player";
+    private static final String HIDE_PLAYER_DISTANCE = "hide_player_distance";
     private final ResourcePackHandler packHandler;
 
     public SettingsCommand(ResourcePackHandler packHandler) {
@@ -162,6 +164,45 @@ public class SettingsCommand implements TabExecutor {
                 }
                 player.sendMessage(ChatColor.DARK_RED + "No true or false could be found as an argument, so the command is ignored.");
             }
+            case HIDE_PLAYER -> {
+                if (args.length == 1) {
+                    player.sendMessage(ChatColor.GREEN + "Currently hide player is " + (modifier.isEnableDoubleClick().isPresent() ? modifier.isEnableDoubleClick().get() ? "enabled." : "disabled." : "default setting."));
+                    break;
+                }
+                if (args[1].equalsIgnoreCase("default")) {
+                    modifier.setHidePlayer(null);
+                    return true;
+                }
+                if (args[1].equalsIgnoreCase("true")) {
+                    modifier.setHidePlayer(true);
+                    player.sendMessage(ChatColor.GREEN + "Applied setting: hide player.");
+                    break;
+                }
+                if (args[1].equalsIgnoreCase("false")) {
+                    modifier.setHidePlayer(false);
+                    player.sendMessage(ChatColor.GREEN + "Applied setting: show player.");
+                    break;
+                }
+                player.sendMessage(ChatColor.DARK_RED + "No true or false could be found as an argument, so the command is ignored.");
+            }
+            case HIDE_PLAYER_DISTANCE -> {
+                if (args.length == 1) {
+                    player.sendMessage(ChatColor.GREEN + "Your current hide player distance " + (modifier.getHidePlayerDistance().isPresent() ? modifier.getHidePlayerDistance().get() : "default"));
+                    break;
+                }
+                if (args[1].equalsIgnoreCase("default")) {
+                    modifier.setDoubleClickDuration(null);
+                    return true;
+                }
+                try{
+                    double number = Double.parseDouble(args[1]);
+
+                    modifier.setHidePlayerDistance(number);
+                    player.sendMessage(ChatColor.GREEN + "The specified hide player distance was applied.");
+                }catch(NumberFormatException e){
+                    player.sendMessage(ChatColor.DARK_RED + "Please make sure that you provide a valid number.");
+                }
+            }
         }
 
         return true;
@@ -178,7 +219,7 @@ public class SettingsCommand implements TabExecutor {
             return strings;
 
         if (args.length == 1) {
-            Arrays.asList(CUSTOM_RESOURCE_PACK_URL, QUICK_REVEAL_DURATION, BOARD_STYLE, ENABLE_QUESTION_MARK, ENABLE_FLAG, QUICK_REVEAL).forEach(s -> {
+            Arrays.asList(CUSTOM_RESOURCE_PACK_URL, QUICK_REVEAL_DURATION, BOARD_STYLE, ENABLE_QUESTION_MARK, ENABLE_FLAG, QUICK_REVEAL, HIDE_PLAYER, HIDE_PLAYER_DISTANCE).forEach(s -> {
                 if (s.startsWith(args[0]))
                     strings.add(s);
             });
@@ -191,10 +232,6 @@ public class SettingsCommand implements TabExecutor {
                     if ("default".startsWith(args[1].toLowerCase()))
                         strings.add("default");
                 }
-                case QUICK_REVEAL_DURATION -> {
-                    if ("default".startsWith(args[1].toLowerCase()))
-                        strings.add("default");
-                }
                 case BOARD_STYLE -> {
                     Game.PAINTER_MAP.values().forEach(painter -> {
                         if (painter.getName().toLowerCase().startsWith(args[1].toLowerCase()))
@@ -204,7 +241,11 @@ public class SettingsCommand implements TabExecutor {
                     if ("default".startsWith(args[1].toLowerCase()))
                         strings.add("default");
                 }
-                case ENABLE_QUESTION_MARK, QUICK_REVEAL, ENABLE_FLAG -> {
+                case QUICK_REVEAL_DURATION, HIDE_PLAYER_DISTANCE -> {
+                    if ("default".startsWith(args[1].toLowerCase()))
+                        strings.add("default");
+                }
+                case ENABLE_QUESTION_MARK, QUICK_REVEAL, ENABLE_FLAG, HIDE_PLAYER -> {
                     if ("true".startsWith(args[1].toLowerCase()))
                         strings.add("true");
                     if ("false".startsWith(args[1].toLowerCase()))

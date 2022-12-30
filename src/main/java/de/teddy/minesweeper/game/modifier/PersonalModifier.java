@@ -20,6 +20,8 @@ public class PersonalModifier {
     private final static NamespacedKey ENABLE_QUESTION_MARK_KEY = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "enable_question_mark");
     private final static NamespacedKey ENABLE_MARKS = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "enable_marks");
     private final static NamespacedKey ENABLE_DOUBLE_CLICK = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "enable_double_click");
+    private final static NamespacedKey HIDE_PLAYER = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "hide_player");
+    private final static NamespacedKey HIDE_PLAYER_DISTANCE = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "hide_player_distance");
     private final Player player;
     private final PersistentDataContainer container;
     private String resourcePackUrl;
@@ -28,8 +30,10 @@ public class PersonalModifier {
     private Boolean enableQuestionMark;
     private Boolean enableMarks;
     private Boolean enableDoubleClick;
+    private Boolean hidePlayer;
+    private Double hidePlayerDistance;
 
-    private PersonalModifier(Player player, PersistentDataContainer container, String resourcePackUrl, Integer doubleClickDuration, String painterClass, Boolean enableQuestionMark, Boolean enableMarks, Boolean enableDoubleClick) {
+    private PersonalModifier(Player player, PersistentDataContainer container, String resourcePackUrl, Integer doubleClickDuration, String painterClass, Boolean enableQuestionMark, Boolean enableMarks, Boolean enableDoubleClick, Boolean hidePlayer, Double hidePlayerDistance) {
         this.player = player;
         this.container = container;
         this.resourcePackUrl = resourcePackUrl;
@@ -38,6 +42,8 @@ public class PersonalModifier {
         this.enableQuestionMark = enableQuestionMark;
         this.enableMarks = enableMarks;
         this.enableDoubleClick = enableDoubleClick;
+        this.hidePlayer = hidePlayer;
+        this.hidePlayerDistance = hidePlayerDistance;
     }
 
     public static PersonalModifier getPersonalModifier(Player player) {
@@ -51,6 +57,8 @@ public class PersonalModifier {
         Byte enableQuestionMark = container.get(ENABLE_QUESTION_MARK_KEY, PersistentDataType.BYTE);
         Byte enableMarks = container.get(ENABLE_MARKS, PersistentDataType.BYTE);
         Byte enableDoubleClick = container.get(ENABLE_DOUBLE_CLICK, PersistentDataType.BYTE);
+        Byte hidePlayer = container.get(HIDE_PLAYER, PersistentDataType.BYTE);
+        Double hidePlayerDistance = container.get(HIDE_PLAYER_DISTANCE, PersistentDataType.DOUBLE);
 
         return new PersonalModifier(player,
                                     container,
@@ -59,7 +67,9 @@ public class PersonalModifier {
                                     painterClass,
                                     enableQuestionMark == null ? null : enableQuestionMark == 0b1,
                                     enableMarks == null ? null : enableMarks == 0b1,
-                                    enableDoubleClick == null ? null : enableDoubleClick == 0b1);
+                                    enableDoubleClick == null ? null : enableDoubleClick == 0b1,
+                                    hidePlayer == null ? null : hidePlayer == 0b1,
+                                    hidePlayerDistance);
     }
 
     public Optional<String> getResourcePackUrl() {
@@ -162,6 +172,34 @@ public class PersonalModifier {
             this.container.set(ENABLE_DOUBLE_CLICK, PersistentDataType.BYTE, this.enableDoubleClick ? (byte) 1 : (byte) 0);
         } else {
             this.container.remove(ENABLE_DOUBLE_CLICK);
+        }
+    }
+
+    public Optional<Boolean> isHidePlayer(){
+        return Optional.ofNullable(hidePlayer);
+    }
+
+    public void setHidePlayer(Boolean hidePlayer) {
+        this.hidePlayer = hidePlayer;
+
+        if (this.hidePlayer != null) {
+            this.container.set(HIDE_PLAYER, PersistentDataType.BYTE, this.hidePlayer ? (byte) 1 : (byte) 0);
+        } else {
+            this.container.remove(HIDE_PLAYER);
+        }
+    }
+
+    public Optional<Double> getHidePlayerDistance(){
+        return Optional.ofNullable(hidePlayerDistance);
+    }
+
+    public void setHidePlayerDistance(Double hidePlayerDistance) {
+        this.hidePlayerDistance = hidePlayerDistance;
+
+        if (this.hidePlayerDistance != null) {
+            this.container.set(HIDE_PLAYER_DISTANCE, PersistentDataType.DOUBLE, this.hidePlayerDistance);
+        } else {
+            this.container.remove(HIDE_PLAYER_DISTANCE);
         }
     }
 
