@@ -27,3 +27,6 @@ commands:
   settings:
     usage: /settings
     permission: minesweeper.settings
+  minestats:
+    usage: /minestats <player/game> <player name/game id>
+    permission: minesweeper.stats

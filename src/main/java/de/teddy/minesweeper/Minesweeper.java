@@ -4,6 +4,7 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.moandjiezana.toml.Toml;
 import de.teddy.minesweeper.commands.BypassEventCommand;
+import de.teddy.minesweeper.commands.MineStatsCommand;
 import de.teddy.minesweeper.commands.MinesweeperCommand;
 import de.teddy.minesweeper.commands.SettingsCommand;
 import de.teddy.minesweeper.events.CancelableEvents;
@@ -21,6 +22,7 @@ import de.teddy.minesweeper.game.texture.pack.DisableResourceHandler;
 import de.teddy.minesweeper.game.texture.pack.ExternalWebServerHandler;
 import de.teddy.minesweeper.game.texture.pack.InternalWebServerHandler;
 import de.teddy.minesweeper.game.texture.pack.ResourcePackHandler;
+import de.teddy.minesweeper.util.ConnectionBuilder;
 import de.teddy.minesweeper.util.Language;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
@@ -31,6 +33,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +47,6 @@ public final class Minesweeper extends JavaPlugin {
     private String langPath;
     private ResourcePackHandler resourcePackHandler;
     private List<Game> games = new ArrayList<>();
-    private Game customGame;
 
     public List<Game> getGames() {
         return games;
@@ -62,8 +64,9 @@ public final class Minesweeper extends JavaPlugin {
         List<ModifierArea> modifierAreas = loadAreas();
         loadWorld();
         loadModifier(modifierAreas);
-        this.games = loadGames(language);
-        this.customGame = loadCustomGame(getConfig().getConfigurationSection("custom_game"), games, language);
+        ConnectionBuilder connectionBuilder = loadConnectionBuilder(getConfig().getConfigurationSection("database"));
+        this.games = loadGames(language, connectionBuilder);
+        Game customGame = loadCustomGame(getConfig().getConfigurationSection("custom_game"), connectionBuilder, games, language);
 
         if (customGame != null)
             this.games.add(customGame);
@@ -87,6 +90,7 @@ public final class Minesweeper extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("bypassEventCancellation")).setExecutor(new BypassEventCommand());
         Objects.requireNonNull(this.getCommand("minesweeper")).setExecutor(new MinesweeperCommand(games, customGame));
         Objects.requireNonNull(this.getCommand("settings")).setExecutor(new SettingsCommand(resourcePackHandler));
+        Objects.requireNonNull(this.getCommand("minestats")).setExecutor(new MineStatsCommand(games, connectionBuilder));
 
         getServer().getPluginManager().registerEvents(new CancelableEvents(getConfig().getConfigurationSection("events"), modifierAreas), this);
         getServer().getPluginManager().registerEvents(new GenericEvents(games, resourcePackHandler, customGame), this);
@@ -104,6 +108,20 @@ public final class Minesweeper extends JavaPlugin {
         });
 
         tasks.add(new HidePlayerScheduler(this).runTaskTimer(this, 20, 5));
+    }
+
+    private ConnectionBuilder loadConnectionBuilder(ConfigurationSection database) {
+        if (database == null)
+            return null;
+        try{
+            return new ConnectionBuilder(database.getString("host"),
+                                         database.getString("port"),
+                                         database.getString("user"),
+                                         database.getString("password"),
+                                         database.getString("database"));
+        }catch(SQLException e){
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -180,7 +198,7 @@ public final class Minesweeper extends JavaPlugin {
         WorldCreator.name("MineSweeper").type(WorldType.FLAT).createWorld();
     }
 
-    private List<Game> loadGames(Language language) {
+    private List<Game> loadGames(Language language, ConnectionBuilder connectionBuilder) {
         List<Game> gameList = new ArrayList<>();
 
         ConfigurationSection games = getConfig().getConfigurationSection("games");
@@ -206,6 +224,7 @@ public final class Minesweeper extends JavaPlugin {
             Game game = new Game(this,
                                  gameList,
                                  language,
+                                 connectionBuilder,
                                  corner,
                                  spawn,
                                  borderSize,
@@ -218,7 +237,7 @@ public final class Minesweeper extends JavaPlugin {
         return gameList;
     }
 
-    private Game loadCustomGame(ConfigurationSection section, List<Game> games, Language language) {
+    private Game loadCustomGame(ConfigurationSection section, ConnectionBuilder connectionBuilder, List<Game> games, Language language) {
         if (section == null || !section.getBoolean("enable", false))
             return null;
 
@@ -235,7 +254,7 @@ public final class Minesweeper extends JavaPlugin {
         int maxWidth = section.getInt("max-size.width");
         int maxHeight = section.getInt("max-size.height");
 
-        return new Game(this, games, language, corner, spawn, minWidth, minHeight, maxWidth, maxHeight, "custom");
+        return new Game(this, games, language, connectionBuilder, corner, spawn, minWidth, minHeight, maxWidth, maxHeight, "custom");
     }
 
     private List<ModifierArea> loadAreas() {

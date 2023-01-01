@@ -13,37 +13,39 @@ import org.bukkit.inventory.ItemStack;
 import java.util.Objects;
 
 public class GenericRightClickEvent implements Listener {
+
     @EventHandler
-    public void onPlayerInteractEvent(PlayerInteractEvent event){
-        if(Objects.equals(event.getHand(), EquipmentSlot.OFF_HAND) || event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK || event.getItem() == null)
+    public void onPlayerInteractEvent(PlayerInteractEvent event) {
+        if (Objects.equals(event.getHand(), EquipmentSlot.OFF_HAND) || event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK || event.getItem() == null)
             return;
         ItemStack itemStack = event.getItem();
 
         Game game = Game.getGame(event.getPlayer());
 
-        if(game != null){
-            if(itemStack.equals(Inventories.reload)){
+        if (game != null) {
+            if (itemStack.equals(Inventories.reload)) {
                 Board board = Game.getBoard(event.getPlayer());
-                if(board.isGenerated()){
-                    Game.finishGame(event.getPlayer());
-                    game.startGame(event.getPlayer(), false, board.getBombCount(), board.getWidth(), board.getHeight());
+                if (board.isGenerated()) {
+                    Game.finishGame(event.getPlayer(), false);
+                    game.startGame(event.getPlayer(), false, board.getBombCount(), board.getWidth(), board.getHeight(), false);
                     event.setCancelled(true);
                 }
                 return;
-            }else if(itemStack.equals(Inventories.barrier)){
-                Game.finishGame(event.getPlayer());
+            } else if (itemStack.equals(Inventories.barrier)) {
+                Game.finishGame(event.getPlayer(), false);
                 event.getPlayer().getInventory().setContents(Inventories.VIEWER_INVENTORY);
                 event.setCancelled(true);
                 return;
             }
         }
 
-        if(itemStack.equals(Inventories.compass)){
+        if (itemStack.equals(Inventories.compass)) {
             event.getPlayer().openInventory(Inventories.VIEW_GAMES.getInventory());
             event.setCancelled(true);
-        }else if(itemStack.equals(Inventories.hourGlass)){
+        } else if (itemStack.equals(Inventories.hourGlass)) {
             event.getPlayer().openInventory(Inventories.CHOOSE_GAME.getInventory());
             event.setCancelled(true);
         }
     }
+
 }

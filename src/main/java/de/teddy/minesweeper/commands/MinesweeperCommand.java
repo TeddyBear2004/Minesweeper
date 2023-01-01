@@ -7,6 +7,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
 public record MinesweeperCommand(List<Game> games, Game customGame) implements TabExecutor {
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!(sender instanceof Player player))
             return true;
 
@@ -60,9 +61,9 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
             }
             try{
                 if (args.length == 3)
-                    customGame.startGame(player, true, bombCount, w, h);
+                    customGame.startGame(player, true, bombCount, w, h, false);
                 else
-                    customGame.startGame(player, true, bombCount, w, h, Long.parseLong(args[3]));
+                    customGame.startGame(player, true, bombCount, w, h, Long.parseLong(args[3]), true);
             }catch(IllegalArgumentException e){
                 player.sendMessage(ChatColor.DARK_RED + "The bomb size is not valid for the given map size.");
             }
@@ -73,7 +74,7 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
             if (game.getDifficulty().replaceAll(" ", "_").equals(args[0])) {
                 if (args.length == 2) {
                     try{
-                        game.startGame(player, true, Integer.parseInt(args[1]));
+                        game.startGame(player, true, Integer.parseInt(args[1]), false);
                     }catch(NumberFormatException e){
                         player.sendMessage("Please write a whole number as second argument.");
                     }catch(IllegalArgumentException e){
@@ -86,14 +87,14 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
                             player.sendMessage(ChatColor.DARK_RED + "The number of bombs must be greater than 0.");
                             return true;
                         }
-                        game.startGame(player, true, bombCount, Long.parseLong(args[2]));
+                        game.startGame(player, true, bombCount, Long.parseLong(args[2]), true);
                     }catch(NumberFormatException ignored){
                         player.sendMessage("Please write a whole number as second and third argument.");
                     }catch(IllegalArgumentException e){
                         player.sendMessage("The provided bomb count is too large.");
                     }
                 } else
-                    game.startGame(player, true);
+                    game.startGame(player, true, false);
                 break;
             }
         }
@@ -102,7 +103,7 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         List<String> strings = new ArrayList<>();
         if (args.length == 1) {
             games.forEach(game -> {

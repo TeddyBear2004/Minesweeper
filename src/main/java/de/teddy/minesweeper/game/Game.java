@@ -6,6 +6,7 @@ import de.teddy.minesweeper.game.modifier.Modifier;
 import de.teddy.minesweeper.game.painter.ArmorStandPainter;
 import de.teddy.minesweeper.game.painter.BlockPainter;
 import de.teddy.minesweeper.game.painter.Painter;
+import de.teddy.minesweeper.util.ConnectionBuilder;
 import de.teddy.minesweeper.util.IsBetween;
 import de.teddy.minesweeper.util.Language;
 import org.bukkit.Bukkit;
@@ -45,13 +46,15 @@ public class Game {
     private final int minHeight;
     private final int maxWidth;
     private final int maxHeight;
+    private final ConnectionBuilder connectionBuilder;
 
-    public Game(Plugin plugin, List<Game> games, Language language, Location corner, Location spawn, int borderSize, int bombCount, String difficulty, Material material, int inventoryPosition) {
+    public Game(Plugin plugin, List<Game> games, Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int borderSize, int bombCount, String difficulty, Material material, int inventoryPosition) {
         this.minWidth = -1;
         this.minHeight = -1;
         this.maxWidth = -1;
         this.maxHeight = -1;
 
+        this.connectionBuilder = connectionBuilder;
         this.plugin = plugin;
         this.games = games;
         this.language = language;
@@ -71,7 +74,8 @@ public class Game {
         itemStack.setItemMeta(itemMeta);
     }
 
-    public Game(Minesweeper plugin, List<Game> games, Language language, Location corner, Location spawn, int minWidth, int minHeight, int maxWidth, int maxHeight, String difficulty) {
+    public Game(Minesweeper plugin, List<Game> games, Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int minWidth, int minHeight, int maxWidth, int maxHeight, String difficulty) {
+        this.connectionBuilder = connectionBuilder;
         this.size = -1;
         this.bombCount = -1;
         this.inventoryPosition = -1;
@@ -126,10 +130,14 @@ public class Game {
     }
 
     public static void stopGames(Player p) {
+        stopGames(p, true);
+    }
+
+    public static void stopGames(Player p, boolean saveStats) {
         Board b = runningGames.get(p);
         if (b != null) {
             b.drawBlancField();
-            b.finish();
+            b.finish(false, saveStats);
             b.getViewers().forEach(gameWatched::remove);
             b.clearViewers();
         } else {
@@ -151,7 +159,11 @@ public class Game {
     }
 
     public static void finishGame(Player p) {
-        Game.getGame(p).finish(p);
+        finishGame(p, true);
+    }
+
+    public static void finishGame(Player p, boolean saveStats) {
+        Game.getGame(p).finish(p, saveStats);
     }
 
     public static Map<Player, Board> getRunningGames() {
@@ -190,27 +202,23 @@ public class Game {
         return null;
     }
 
-    public void startGame(Player p) {
-        startGame(p, true);
+    public void startGame(Player p, boolean shouldTeleport, boolean setSeed) {
+        startGame(p, shouldTeleport, bombCount, setSeed);
     }
 
-    public void startGame(Player p, boolean shouldTeleport) {
-        startGame(p, shouldTeleport, bombCount);
+    public void startGame(Player p, boolean shouldTeleport, int bombCount, boolean setSeed) {
+        startGame(p, shouldTeleport, bombCount, size, size, setSeed);
     }
 
-    public void startGame(Player p, boolean shouldTeleport, int bombCount) {
-        startGame(p, shouldTeleport, bombCount, size, size);
+    public void startGame(Player p, boolean shouldTeleport, int bombCount, long seed, boolean setSeed) {
+        startGame(p, shouldTeleport, bombCount, size, size, seed, setSeed);
     }
 
-    public void startGame(Player p, boolean shouldTeleport, int bombCount, long seed) {
-        startGame(p, shouldTeleport, bombCount, size, size, seed);
+    public void startGame(Player p, boolean shouldTeleport, int bombCount, int width, int height, boolean setSeed) {
+        startGame(p, shouldTeleport, bombCount, width, height, new Random().nextLong(), setSeed);
     }
 
-    public void startGame(Player p, boolean shouldTeleport, int bombCount, int width, int height) {
-        startGame(p, shouldTeleport, bombCount, width, height, new Random().nextLong());
-    }
-
-    public void startGame(Player p, boolean shouldTeleport, int bombCount, int width, int height, long seed) {
+    public void startGame(Player p, boolean shouldTeleport, int bombCount, int width, int height, long seed, boolean setSeed) {
         if (minHeight != -1 || maxHeight != -1 || minWidth != -1 || maxWidth != -1)
             if (minHeight > height || height > maxHeight || minWidth > width || width > maxWidth)
                 return;
@@ -218,7 +226,7 @@ public class Game {
         stopGames(p);
         Board b;
 
-        b = new Board(plugin, language, this, width, height, bombCount, corner, p, seed);
+        b = new Board(plugin, language, connectionBuilder, this, width, height, bombCount, corner, p, seed, setSeed);
         b.drawBlancField(Collections.singletonList(p));
         startWatching(p, b);
         runningGames.put(p, b);
@@ -243,8 +251,8 @@ public class Game {
         }
     }
 
-    private void finish(Player p) {
-        stopGames(p);
+    private void finish(Player p, boolean saveStats) {
+        stopGames(p, saveStats);
         Board b = getRunningGame();
         if (b != null) {
             b.drawBlancField(Collections.singletonList(p));
@@ -266,6 +274,14 @@ public class Game {
 
     public String getDifficulty() {
         return difficulty;
+    }
+
+    public String getMap(){
+        return size + "x" + size;
+    }
+
+    public int getBombCount() {
+        return bombCount;
     }
 
 }

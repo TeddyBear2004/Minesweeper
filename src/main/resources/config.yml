@@ -12,6 +12,17 @@ resource_pack:
 
 allow_fly: true
 allow_default_watch: true
+#public GameStatistic(String uuid, long start, Long duration, int bombCount, String map, boolean setSeed, long seed, int x, int y) {
+
+database:
+  host: localhost
+  port: 3306
+  user: root
+  password: password
+  database: minesweeper
+
+stats:
+  enable: true
 
 events:
   cancelEntityDamage: true

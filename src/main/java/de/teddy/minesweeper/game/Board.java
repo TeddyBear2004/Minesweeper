@@ -3,6 +3,8 @@ package de.teddy.minesweeper.game;
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
 import de.teddy.minesweeper.game.modifier.PersonalModifier;
 import de.teddy.minesweeper.game.painter.Painter;
+import de.teddy.minesweeper.game.statistic.GameStatistic;
+import de.teddy.minesweeper.util.ConnectionBuilder;
 import de.teddy.minesweeper.util.IsBetween;
 import de.teddy.minesweeper.util.Language;
 import de.teddy.minesweeper.util.PacketUtil;
@@ -21,12 +23,12 @@ import java.util.*;
 
 public class Board {
 
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("mm:ss:SSS");
     public static boolean notTest = true;
     public final Game map;
     private final Plugin plugin;
     private final Language language;
     private final List<Player> viewers = new LinkedList<>();
-    private final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("mm:ss:SSS");
     private final int width;
     private final int height;
     private final int bombCount;
@@ -36,13 +38,20 @@ public class Board {
     private final Player player;
     private final Random random;
     private final long seed;
+    private final ConnectionBuilder connectionBuilder;
+    boolean setSeed;
     private boolean win = false;
     private long started;
     private boolean isGenerated;
     private boolean isFinished;
     private Scoreboard scoreboard;
+    private int startX;
+    private int startY;
 
-    public Board(Plugin plugin, Language language, Game map, int width, int height, int bombCount, Location corner, Player player, long seed) {
+
+    public Board(Plugin plugin, Language language, ConnectionBuilder connectionBuilder, Game map, int width, int height, int bombCount, Location corner, Player player, long seed, boolean setSeed) {
+        this.connectionBuilder = connectionBuilder;
+        this.setSeed = setSeed;
         this.plugin = plugin;
         this.language = language;
         this.map = map;
@@ -79,8 +88,21 @@ public class Board {
         return Math.abs(x + y) % 2 == 0;
     }
 
-    public void finish() {
+    public void finish(boolean won) {
+        this.finish(won, true);
+    }
+
+    public void finish(boolean won, boolean saveStats) {
+        this.finish(won, saveStats, getActualTimeNeeded());
+    }
+
+    public void finish(boolean won, boolean saveStats, long time) {
         this.isFinished = true;
+
+        if (saveStats && time != 0) {
+            GameStatistic gameStatistic = new GameStatistic(player.getUniqueId().toString(), started, time, bombCount, width + "x" + height, setSeed, seed, startX, startY, won);
+            gameStatistic.save(connectionBuilder);
+        }
     }
 
     public boolean isFinished() {
@@ -194,11 +216,19 @@ public class Board {
     }
 
     private long getActualTimeNeeded() {
-        return this.started == 0 ? 0 : System.currentTimeMillis() - this.started;
+        return this.getActualTimeNeeded(System.currentTimeMillis());
+    }
+
+    private long getActualTimeNeeded(long now) {
+        return this.started == 0 ? 0 : now - this.started;
     }
 
     private String getActualTimeNeededString() {
-        return dateTimeFormatter.format(new Date(getActualTimeNeeded()));
+        return SIMPLE_DATE_FORMAT.format(new Date(getActualTimeNeeded()));
+    }
+
+    private String getActualTimeNeededString(long now) {
+        return SIMPLE_DATE_FORMAT.format(new Date(getActualTimeNeeded(now)));
     }
 
     public int getWidth() {
@@ -244,16 +274,20 @@ public class Board {
 
     public void win() {
         this.win = true;
-        this.finish();
+        long now = System.currentTimeMillis();
+        long duration = getActualTimeNeeded(now);
+        String actualTimeNeededString = getActualTimeNeededString(now);
+
+        this.finish(true, true, duration);
 
         this.player.sendMessage(language.getString("message_win"));
         this.player.sendMessage(language.getString("field_desc", String.valueOf(this.width), String.valueOf(this.height), String.valueOf(this.bombCount)));
-        this.player.sendMessage(language.getString("message_time_needed", getActualTimeNeededString()));
+        this.player.sendMessage(language.getString("message_time_needed", actualTimeNeededString));
         this.player.sendMessage("Seed: " + seed);
 
         this.player.sendTitle(ChatColor.DARK_GREEN + language.getString("title_win"), ChatColor.GREEN + language.getString("message_time_needed", getActualTimeNeededString()), 10, 70, 20);
         PacketUtil.sendSoundEffect(this.player, Sound.UI_TOAST_CHALLENGE_COMPLETE, .5f, this.player.getLocation());
-        PacketUtil.sendActionBar(this.player, getActualTimeNeededString());
+        PacketUtil.sendActionBar(this.player, actualTimeNeededString);
     }
 
     public void checkIfWon() {
@@ -266,12 +300,12 @@ public class Board {
     }
 
     public void breakGame() {
-        finish();
+        finish(false);
     }
 
     public void lose() {
         this.win = false;
-        finish();
+        finish(false);
 
         getCurrentPlayerPainters().forEach((painter, players) -> {
             if (painter != null)
@@ -295,6 +329,9 @@ public class Board {
     private void generateBoard(int x, int y) {
         if (this.isGenerated)
             throw new RuntimeException(language.getString("error_already_generated"));
+
+        startX = x;
+        startY = y;
 
         boolean[][] cache = new boolean[this.width][this.height];
         int[][] ints = new int[this.width][this.height];
