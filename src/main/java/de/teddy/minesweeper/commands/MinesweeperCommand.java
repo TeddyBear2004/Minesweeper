@@ -60,10 +60,21 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
                 return true;
             }
             try{
-                if (args.length == 3)
-                    customGame.startGame(player, true, bombCount, w, h, false);
-                else
-                    customGame.startGame(player, true, bombCount, w, h, Long.parseLong(args[3]), true);
+                if (args.length == 3) {
+                    customGame.getStarter()
+                            .setBombCount(bombCount)
+                            .setWidth(w)
+                            .setHeight(h)
+                            .startGame(player);
+                } else {
+                    customGame.getStarter()
+                            .setBombCount(bombCount)
+                            .setWidth(w)
+                            .setHeight(h)
+                            .setSeed(Long.parseLong(args[3]))
+                            .setSetSeed(true)
+                            .startGame(player);
+                }
             }catch(IllegalArgumentException e){
                 player.sendMessage(ChatColor.DARK_RED + "The bomb size is not valid for the given map size.");
             }
@@ -71,10 +82,12 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
         }
 
         for (Game game : games) {
-            if (game.getDifficulty().replaceAll(" ", "_").equals(args[0])) {
+            if (game.getDifficulty().replaceAll(" ", "_").equalsIgnoreCase(args[0])) {
                 if (args.length == 2) {
                     try{
-                        game.startGame(player, true, Integer.parseInt(args[1]), false);
+                        game.getStarter()
+                                .setBombCount(Integer.parseInt(args[1]))
+                                .startGame(player);
                     }catch(NumberFormatException e){
                         player.sendMessage("Please write a whole number as second argument.");
                     }catch(IllegalArgumentException e){
@@ -87,14 +100,18 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
                             player.sendMessage(ChatColor.DARK_RED + "The number of bombs must be greater than 0.");
                             return true;
                         }
-                        game.startGame(player, true, bombCount, Long.parseLong(args[2]), true);
+                        game.getStarter()
+                                .setBombCount(bombCount)
+                                .setSeed(Long.parseLong(args[2]))
+                                .setSetSeed(true)
+                                .startGame(player);
                     }catch(NumberFormatException ignored){
                         player.sendMessage("Please write a whole number as second and third argument.");
                     }catch(IllegalArgumentException e){
                         player.sendMessage("The provided bomb count is too large.");
                     }
                 } else
-                    game.startGame(player, true, false);
+                    game.getStarter().startGame(player);
                 break;
             }
         }

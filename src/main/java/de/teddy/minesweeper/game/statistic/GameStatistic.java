@@ -1,10 +1,14 @@
 package de.teddy.minesweeper.game.statistic;
 
+import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.util.ConnectionBuilder;
 import de.teddy.minesweeper.util.HeadGenerator;
 import org.bukkit.ChatColor;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.profile.PlayerProfile;
 
 import java.sql.Connection;
@@ -20,7 +24,10 @@ import java.util.UUID;
 public class GameStatistic {
 
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("mm:ss:SSS");
-
+    public static final NamespacedKey MAP_KEY = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "map");
+    public static final NamespacedKey SEED_KEY = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "seed");
+    public static final NamespacedKey X_KEY = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "x");
+    public static final NamespacedKey Y_KEY = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "y");
     private final String uuid;
     private final long start;
     private final long duration;
@@ -78,17 +85,65 @@ public class GameStatistic {
         }
     }
 
+    public static GameStatistic retrieveNthPerMap(ConnectionBuilder connectionBuilder, String map, int bombCount, int n) {
+        if (connectionBuilder == null)
+            return null;
+
+        try(Connection connection = connectionBuilder.getConnection()){
+            PreparedStatement preparedStatement
+                    = connection.prepareStatement("SELECT * FROM minesweeper_stats WHERE map = ? and bomb_count = ? and won = 1 ORDER BY length(duration), duration LIMIT 1 OFFSET ?");
+
+            preparedStatement.setString(1, map);
+            preparedStatement.setObject(2, bombCount);
+            preparedStatement.setObject(3, n - 1);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next())
+                return new GameStatistic(
+                        resultSet.getString("uuid"),
+                        resultSet.getLong("start"),
+                        resultSet.getLong("duration"),
+                        resultSet.getInt("bomb_count"),
+                        resultSet.getString("map"),
+                        resultSet.getBoolean("set_seed"),
+                        resultSet.getLong("seed"),
+                        resultSet.getInt("x"),
+                        resultSet.getInt("y"),
+                        resultSet.getBoolean("won")
+                );
+            return null;
+        }catch(SQLException e){
+            throw new RuntimeException(e);
+        }
+    }
+
     public static List<GameStatistic> retrieveTopPerMap(ConnectionBuilder connectionBuilder, String map, int bombCount, int number) {
         if (connectionBuilder == null)
             return new ArrayList<>();
 
         try(Connection connection = connectionBuilder.getConnection()){
             PreparedStatement preparedStatement
-                    = connection.prepareStatement("SELECT * FROM minesweeper_stats WHERE map = ? and bomb_count = ? and won = 1 ORDER BY length(duration), duration LIMIT ?");
+                    = connection.prepareStatement("""
+            SELECT *
+            FROM minesweeper_stats s
+                     INNER JOIN (
+                SELECT uuid, MIN(CAST(duration AS INTEGER)) AS duration
+                FROM minesweeper_stats
+                WHERE map = ? AND bomb_count = ? AND won = 1
+                GROUP BY uuid
+            ) min_durations
+                                ON s.uuid = min_durations.uuid AND s.duration = min_durations.duration
+            WHERE s.map = ? AND s.bomb_count = ? AND s.won = 1
+            ORDER BY CAST(s.duration AS INTEGER)
+            LIMIT ?
+            """);
 
             preparedStatement.setString(1, map);
             preparedStatement.setObject(2, bombCount);
-            preparedStatement.setObject(3, number);
+            preparedStatement.setString(3, map);
+            preparedStatement.setObject(4, bombCount);
+            preparedStatement.setObject(5, number);
 
             ResultSet resultSet = preparedStatement.executeQuery();
             List<GameStatistic> list = new ArrayList<>();
@@ -110,6 +165,14 @@ public class GameStatistic {
             return list;
         }catch(SQLException e){
             throw new RuntimeException(e);
+        }
+    }
+
+    public String getName() {
+        try{
+            return HeadGenerator.getPlayerProfile(UUID.fromString(uuid)).getName();
+        }catch(Exception e){
+            return null;
         }
     }
 
@@ -168,15 +231,23 @@ public class GameStatistic {
         if (itemMeta != null) {
             itemMeta.setDisplayName((i + 1) + ". " + playerProfile.getName());
 
-            if (start != 0)
+            if (start != 0){
+                PersistentDataContainer persistentDataContainer = itemMeta.getPersistentDataContainer();
+                persistentDataContainer.set(MAP_KEY, PersistentDataType.STRING, map);
+                persistentDataContainer.set(SEED_KEY, PersistentDataType.LONG, seed);
+                persistentDataContainer.set(X_KEY, PersistentDataType.INTEGER, x);
+                persistentDataContainer.set(Y_KEY, PersistentDataType.INTEGER, y);
+
                 itemMeta.setLore(List.of(
                         ChatColor.GRAY + "Duration: "
                                 + ChatColor.YELLOW + SIMPLE_DATE_FORMAT.format(new Date(duration)),
                         ChatColor.GRAY + "Map Size: "
                                 + ChatColor.YELLOW + map,
                         ChatColor.GRAY + "Bomb count: "
-                                + ChatColor.YELLOW + bombCount
+                                + ChatColor.YELLOW + bombCount,
+                        ChatColor.YELLOW + "Click here to play it for yourself!"
                 ));
+            }
         }
 
         itemStack.setItemMeta(itemMeta);

@@ -276,6 +276,8 @@ public class ArmorStandPainter implements Painter {
         if (board.isFinished())
             return;
 
+        board.startStarted();
+
         if (field.isCovered())
             field.reverseMark();
 
@@ -316,6 +318,8 @@ public class ArmorStandPainter implements Painter {
             return;
 
         if (board.getPlayer().equals(player)) {
+            board.startStarted();
+
             try{
                 if (field == null) {
                     try{

@@ -37,6 +37,7 @@ public class Board {
     private final Point2D[] bombList;
     private final Player player;
     private final Random random;
+    private final boolean saveStats;
     private final long seed;
     private final ConnectionBuilder connectionBuilder;
     boolean setSeed;
@@ -49,7 +50,7 @@ public class Board {
     private int startY;
 
 
-    public Board(Plugin plugin, Language language, ConnectionBuilder connectionBuilder, Game map, int width, int height, int bombCount, Location corner, Player player, long seed, boolean setSeed) {
+    public Board(Plugin plugin, Language language, ConnectionBuilder connectionBuilder, Game map, int width, int height, int bombCount, Location corner, Player player, long seed, boolean setSeed, boolean saveStats) {
         this.connectionBuilder = connectionBuilder;
         this.setSeed = setSeed;
         this.plugin = plugin;
@@ -58,6 +59,7 @@ public class Board {
         this.player = player;
         this.seed = seed;
         this.random = new Random(seed);
+        this.saveStats = saveStats;
         if (width * height - 9 <= bombCount || width * height <= bombCount)
             throw new IllegalArgumentException("bombCount cannot be bigger than width * height");
 
@@ -99,7 +101,7 @@ public class Board {
     public void finish(boolean won, boolean saveStats, long time) {
         this.isFinished = true;
 
-        if (saveStats && time != 0) {
+        if (saveStats && this.saveStats) {
             GameStatistic gameStatistic = new GameStatistic(player.getUniqueId().toString(), started, time, bombCount, width + "x" + height, setSeed, seed, startX, startY, won);
             gameStatistic.save(connectionBuilder);
         }
@@ -194,6 +196,10 @@ public class Board {
     }
 
     public void checkField(int x, int y) throws BombExplodeException {
+        checkField(x, y, true);
+    }
+
+    public void checkField(int x, int y, boolean b) throws BombExplodeException {
         x = Math.abs(this.corner.getBlockX() - x);
         y = Math.abs(this.corner.getBlockZ() - y);
 
@@ -204,13 +210,20 @@ public class Board {
 
         SurfaceDiscoverer.uncoverFields(this, x, y);
 
-        if (!isGenerated1)
+        if (b)
+            startStarted();
+    }
+
+    public void startStarted() {
+        if (this.started == 0)
             this.started = System.currentTimeMillis();
     }
 
     public void checkNumber(int x, int y) throws BombExplodeException {
         x = Math.abs(this.corner.getBlockX() - x);
         y = Math.abs(this.corner.getBlockZ() - y);
+
+        startStarted();
 
         SurfaceDiscoverer.uncoverFieldsNextToNumber(this, x, y);
     }

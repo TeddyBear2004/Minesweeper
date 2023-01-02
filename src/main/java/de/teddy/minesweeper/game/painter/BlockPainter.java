@@ -269,6 +269,8 @@ public class BlockPainter implements Painter {
         if (board.isFinished() || packet.getHands().read(0) == EnumWrappers.Hand.OFF_HAND)
             return;
 
+        board.startStarted();
+
         if (field.isCovered())
             field.reverseMark();
 
@@ -329,6 +331,8 @@ public class BlockPainter implements Painter {
             return;
 
         if (board.getPlayer().equals(player)) {
+            board.startStarted();
+
             try{
                 if (field == null) {
                     try{

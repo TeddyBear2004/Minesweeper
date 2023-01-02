@@ -129,10 +129,6 @@ public class Game {
         }
     }
 
-    public static void stopGames(Player p) {
-        stopGames(p, true);
-    }
-
     public static void stopGames(Player p, boolean saveStats) {
         Board b = runningGames.get(p);
         if (b != null) {
@@ -202,31 +198,15 @@ public class Game {
         return null;
     }
 
-    public void startGame(Player p, boolean shouldTeleport, boolean setSeed) {
-        startGame(p, shouldTeleport, bombCount, setSeed);
-    }
-
-    public void startGame(Player p, boolean shouldTeleport, int bombCount, boolean setSeed) {
-        startGame(p, shouldTeleport, bombCount, size, size, setSeed);
-    }
-
-    public void startGame(Player p, boolean shouldTeleport, int bombCount, long seed, boolean setSeed) {
-        startGame(p, shouldTeleport, bombCount, size, size, seed, setSeed);
-    }
-
-    public void startGame(Player p, boolean shouldTeleport, int bombCount, int width, int height, boolean setSeed) {
-        startGame(p, shouldTeleport, bombCount, width, height, new Random().nextLong(), setSeed);
-    }
-
-    public void startGame(Player p, boolean shouldTeleport, int bombCount, int width, int height, long seed, boolean setSeed) {
+    private void startGame(Player p, boolean shouldTeleport, int bombCount, int width, int height, long seed, boolean setSeed, boolean saveStats) {
         if (minHeight != -1 || maxHeight != -1 || minWidth != -1 || maxWidth != -1)
             if (minHeight > height || height > maxHeight || minWidth > width || width > maxWidth)
                 return;
 
-        stopGames(p);
+        stopGames(p, true);
         Board b;
 
-        b = new Board(plugin, language, connectionBuilder, this, width, height, bombCount, corner, p, seed, setSeed);
+        b = new Board(plugin, language, connectionBuilder, this, width, height, bombCount, corner, p, seed, setSeed, saveStats);
         b.drawBlancField(Collections.singletonList(p));
         startWatching(p, b);
         runningGames.put(p, b);
@@ -276,12 +256,79 @@ public class Game {
         return difficulty;
     }
 
-    public String getMap(){
+    public String getMap() {
         return size + "x" + size;
     }
 
     public int getBombCount() {
         return bombCount;
+    }
+
+    public Starter getStarter() {
+        return new Starter(this);
+    }
+
+    public static class Starter {
+
+        private final Game game;
+        private boolean shouldTeleport;
+        private int bombCount;
+        private int width;
+        private int height;
+        private long seed;
+        private boolean setSeed;
+        private boolean saveStats;
+
+        private Starter(Game game) {
+            this.game = game;
+            this.shouldTeleport = true;
+            this.bombCount = game.bombCount;
+            this.width = game.size;
+            this.height = game.size;
+            this.seed = new Random().nextLong();
+            this.setSeed = false;
+            this.saveStats = true;
+        }
+
+        public Starter setShouldTeleport(boolean shouldTeleport) {
+            this.shouldTeleport = shouldTeleport;
+            return this;
+        }
+
+        public Starter setBombCount(int bombCount) {
+            this.bombCount = bombCount;
+            return this;
+        }
+
+        public Starter setWidth(int width) {
+            this.width = width;
+            return this;
+        }
+
+        public Starter setHeight(int height) {
+            this.height = height;
+            return this;
+        }
+
+        public Starter setSeed(long seed) {
+            this.seed = seed;
+            return this;
+        }
+
+        public Starter setSetSeed(boolean setSeed) {
+            this.setSeed = setSeed;
+            return this;
+        }
+
+        public Starter setSaveStats(boolean saveStats) {
+            this.saveStats = saveStats;
+            return this;
+        }
+
+        public void startGame(Player player) {
+            game.startGame(player, shouldTeleport, bombCount, width, height, seed, setSeed, saveStats);
+        }
+
     }
 
 }

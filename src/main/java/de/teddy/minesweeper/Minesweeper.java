@@ -96,7 +96,7 @@ public final class Minesweeper extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new CancelableEvents(getConfig().getConfigurationSection("events"), modifierAreas), this);
         getServer().getPluginManager().registerEvents(new GenericEvents(games, resourcePackHandler, customGame), this);
         getServer().getPluginManager().registerEvents(new GenericRightClickEvent(), this);
-        getServer().getPluginManager().registerEvents(new InventoryClickEvents(), this);
+        getServer().getPluginManager().registerEvents(new InventoryClickEvents(games), this);
 
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         protocolManager.addPacketListener(new RightClickEvent(this));
