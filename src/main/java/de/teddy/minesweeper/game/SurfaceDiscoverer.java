@@ -45,7 +45,7 @@ public class SurfaceDiscoverer {
                                 // Ignore fields outside the board
                                 if (x + i >= 0 && x + i < board.getBoard().length && y + j >= 0 && y + j < board.getBoard()[0].length) {
                                     Board.Field neighborField = board.getField(x + i, y + j);
-                                    if (neighborField.isCovered()) {
+                                    if (neighborField.isCovered() && !neighborField.isMarked()) {
                                         neighborField.setUncover();
                                         if (neighborField.getNeighborCount() == 0) {
                                             stack.push(new int[]{x + i, y + j});
