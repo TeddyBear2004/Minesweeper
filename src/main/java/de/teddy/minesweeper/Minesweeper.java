@@ -15,6 +15,7 @@ import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.events.packets.RightClickEvent;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.HidePlayerScheduler;
+import de.teddy.minesweeper.game.expansions.StatsExpansion;
 import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.game.modifier.Modifier;
 import de.teddy.minesweeper.game.modifier.ModifierArea;
@@ -108,6 +109,10 @@ public final class Minesweeper extends JavaPlugin {
         });
 
         tasks.add(new HidePlayerScheduler(this).runTaskTimer(this, 20, 5));
+
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new StatsExpansion(connectionBuilder).register();
+        }
     }
 
     private ConnectionBuilder loadConnectionBuilder(ConfigurationSection database) {
