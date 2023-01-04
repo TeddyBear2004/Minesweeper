@@ -91,11 +91,27 @@ public class GameStatistic {
 
         try(Connection connection = connectionBuilder.getConnection()){
             PreparedStatement preparedStatement
-                    = connection.prepareStatement("SELECT * FROM minesweeper_stats WHERE map = ? and bomb_count = ? and won = 1 ORDER BY length(duration), duration LIMIT 1 OFFSET ?");
+                    = connection.prepareStatement("""
+                                                          SELECT *
+                                                          FROM minesweeper_stats s
+                                                                   INNER JOIN (
+                                                              SELECT uuid, MIN(CAST(duration AS INTEGER)) AS duration
+                                                              FROM minesweeper_stats
+                                                              WHERE map = ? AND bomb_count = ? AND won = 1
+                                                              GROUP BY uuid
+                                                          ) min_durations
+                                                                              ON s.uuid = min_durations.uuid AND s.duration = min_durations.duration
+                                                          WHERE s.map = ? AND s.bomb_count = ? AND s.won = 1
+                                                          ORDER BY CAST(s.duration AS INTEGER)
+                                                          LIMIT 1
+                                                          OFFSET ?
+                                                          """);
 
             preparedStatement.setString(1, map);
             preparedStatement.setObject(2, bombCount);
-            preparedStatement.setObject(3, n - 1);
+            preparedStatement.setString(3, map);
+            preparedStatement.setObject(4, bombCount);
+            preparedStatement.setObject(5, n - 1);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -182,6 +198,10 @@ public class GameStatistic {
 
     public String getMap() {
         return map;
+    }
+
+    public int getBombCount() {
+        return bombCount;
     }
 
     public boolean isSetSeed() {
