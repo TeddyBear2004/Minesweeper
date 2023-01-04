@@ -12,15 +12,10 @@ public class SurfaceDiscoverer {
     private static final List<int[]> INTS = new ArrayList<>();
 
     static {
-        INTS.add(new int[]{-1, -1});
-        INTS.add(new int[]{-1, +0});
-        INTS.add(new int[]{-1, +1});
-        INTS.add(new int[]{+0, -1});
-        INTS.add(new int[]{+0, +0});
-        INTS.add(new int[]{+0, +1});
-        INTS.add(new int[]{+1, -1});
-        INTS.add(new int[]{+1, +0});
-        INTS.add(new int[]{+1, +1});
+        for (int i = -1; i <= 1; i++)
+            for (int j = -1; j <= 1; j++)
+                if (!(i == 0 && j == 0))
+                    INTS.add(new int[]{i, j});
     }
 
     /**
