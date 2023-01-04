@@ -39,37 +39,34 @@ public class SurfaceDiscoverer {
         }
 
         Board.Field field = board.getField(width, height);
-        if (field.isCovered()) {
-            field.setUncover();
+        if (!field.isCovered()) return;
 
-            if (field.isBomb()) {
-                throw new BombExplodeException("Bomb at " + width + " and " + height + " is exploded.");
+        field.setUncover();
+        if (field.isBomb())
+            throw new BombExplodeException("Bomb at " + width + " and " + height + " is exploded.");
 
-            }
+        if (field.getNeighborCount() != 0) return;
 
-            if (field.getNeighborCount() == 0) {
-                Stack<Board.Field> stack = new Stack<>();
-                stack.push(field);
+        Stack<Board.Field> stack = new Stack<>();
+        stack.push(field);
 
-                while (!stack.isEmpty()) {
-                    Board.Field current = stack.pop();
+        while (!stack.isEmpty()) {
+            Board.Field current = stack.pop();
 
-                    INTS.parallelStream().forEach(ints -> {
-                        int i = ints[0];
-                        int j = ints[1];
+            INTS.parallelStream().forEach(ints -> {
+                int i = ints[0];
+                int j = ints[1];
 
-                        Board.Field relativeTo = current.getRelativeTo(i, j);
-                        if (relativeTo == null || !relativeTo.isCovered() || relativeTo.isMarked())
-                            return;
+                Board.Field relativeTo = current.getRelativeTo(i, j);
+                if (relativeTo == null || !relativeTo.isCovered() || relativeTo.isMarked())
+                    return;
 
-                        relativeTo.setUncover();
-                        if (relativeTo.getNeighborCount() != 0)
-                            return;
+                relativeTo.setUncover();
+                if (relativeTo.getNeighborCount() != 0)
+                    return;
 
-                        stack.push(relativeTo);
-                    });
-                }
-            }
+                stack.push(relativeTo);
+            });
         }
     }
 
@@ -88,32 +85,37 @@ public class SurfaceDiscoverer {
         }
 
         Board.Field field = board.getField(width, height);
-        if (!field.isCovered()) {
-            AtomicInteger markedFields = new AtomicInteger(0);
+        if (field.isCovered())
+            return;
 
-            INTS.parallelStream().forEach(ints -> {
-                int i = ints[0];
-                int j = ints[1];
 
-                if (width + i >= 0 && width + i < board.getBoard().length && height + j >= 0 && height + j < board.getBoard()[0].length) {
-                    if (board.getBoard()[width + i][height + j].isMarked()) {
-                        markedFields.incrementAndGet();
-                    }
-                }
-            });
+        AtomicInteger markedFields = new AtomicInteger(0);
 
-            if (field.getNeighborCount() == markedFields.get()) {
-                for (int[] ints : INTS) {
-                    int i = ints[0];
-                    int j = ints[1];
+        INTS.parallelStream().forEach(ints -> {
+            int i = ints[0];
+            int j = ints[1];
 
-                    if (width + i >= 0 && width + i < board.getBoard().length && height + j >= 0 && height + j < board.getBoard()[0].length && !board.getBoard()[width + i][height + j].isMarked()) {
-                        uncoverFields(board, width + i, height + j);
-                    }
+            if (width + i >= 0 && width + i < board.getBoard().length && height + j >= 0 && height + j < board.getBoard()[0].length) {
+                if (board.getBoard()[width + i][height + j].isMarked()) {
+                    markedFields.incrementAndGet();
                 }
             }
+        });
+
+        if (field.getNeighborCount() != markedFields.get())
+            return;
+
+        for (int[] ints : INTS) {
+            int i = ints[0];
+            int j = ints[1];
+
+            if (width + i >= 0 && width + i < board.getBoard().length && height + j >= 0 && height + j < board.getBoard()[0].length && !board.getBoard()[width + i][height + j].isMarked()) {
+                uncoverFields(board, width + i, height + j);
+            }
         }
+
     }
+
 
     public static void flagFieldsNextToNumber(Board board, int width, int height, boolean place) {
         if (width < 0 || width >= board.getBoard().length || height < 0 || height >= board.getBoard()[0].length)
