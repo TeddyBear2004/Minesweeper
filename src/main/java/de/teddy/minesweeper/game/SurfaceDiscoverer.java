@@ -2,9 +2,26 @@ package de.teddy.minesweeper.game;
 
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SurfaceDiscoverer {
+
+    private static final List<int[]> INTS = new ArrayList<>();
+
+    static {
+        INTS.add(new int[]{-1, -1});
+        INTS.add(new int[]{-1, +0});
+        INTS.add(new int[]{-1, +1});
+        INTS.add(new int[]{+0, -1});
+        INTS.add(new int[]{+0, +0});
+        INTS.add(new int[]{+0, +1});
+        INTS.add(new int[]{+1, -1});
+        INTS.add(new int[]{+1, +0});
+        INTS.add(new int[]{+1, +1});
+    }
 
     /**
      * Uncovers a field on a Minesweeper board and, if the field is a number field with no neighboring bombs,
@@ -31,30 +48,26 @@ public class SurfaceDiscoverer {
             }
 
             if (field.getNeighborCount() == 0) {
-                Stack<int[]> stack = new Stack<>();
-                stack.push(new int[]{width, height});
+                Stack<Board.Field> stack = new Stack<>();
+                stack.push(field);
 
                 while (!stack.isEmpty()) {
-                    int[] coordinates = stack.pop();
-                    int x = coordinates[0];
-                    int y = coordinates[1];
+                    Board.Field current = stack.pop();
 
-                    for (int i = -1; i <= 1; i++) {
-                        for (int j = -1; j <= 1; j++) {
-                            if (!(i == 0 && j == 0)) {
-                                // Ignore fields outside the board
-                                if (x + i >= 0 && x + i < board.getBoard().length && y + j >= 0 && y + j < board.getBoard()[0].length) {
-                                    Board.Field neighborField = board.getField(x + i, y + j);
-                                    if (neighborField.isCovered() && !neighborField.isMarked()) {
-                                        neighborField.setUncover();
-                                        if (neighborField.getNeighborCount() == 0) {
-                                            stack.push(new int[]{x + i, y + j});
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    INTS.parallelStream().forEach(ints -> {
+                        int i = ints[0];
+                        int j = ints[1];
+
+                        Board.Field relativeTo = current.getRelativeTo(i, j);
+                        if (relativeTo == null || !relativeTo.isCovered() || relativeTo.isMarked())
+                            return;
+
+                        relativeTo.setUncover();
+                        if (relativeTo.getNeighborCount() != 0)
+                            return;
+
+                        stack.push(relativeTo);
+                    });
                 }
             }
         }
@@ -76,31 +89,26 @@ public class SurfaceDiscoverer {
 
         Board.Field field = board.getField(width, height);
         if (!field.isCovered()) {
-            int markedFields = 0;
+            AtomicInteger markedFields = new AtomicInteger(0);
 
-            // Check the surrounding fields for marked fields
-            for (int i = -1; i <= 1; i++) {
-                for (int j = -1; j <= 1; j++) {
-                    if (!(i == 0 && j == 0)) {
-                        // Ignore fields outside the board
-                        if (width + i >= 0 && width + i < board.getBoard().length && height + j >= 0 && height + j < board.getBoard()[0].length) {
-                            if (board.getBoard()[width + i][height + j].isMarked()) {
-                                markedFields++;
-                            }
-                        }
+            INTS.parallelStream().forEach(ints -> {
+                int i = ints[0];
+                int j = ints[1];
+
+                if (width + i >= 0 && width + i < board.getBoard().length && height + j >= 0 && height + j < board.getBoard()[0].length) {
+                    if (board.getBoard()[width + i][height + j].isMarked()) {
+                        markedFields.incrementAndGet();
                     }
                 }
-            }
+            });
 
-            if (field.getNeighborCount() == markedFields) {
-                for (int i = -1; i <= 1; i++) {
-                    for (int j = -1; j <= 1; j++) {
-                        if (!(i == 0 && j == 0)) {
-                            // Ignore fields outside the board and already marked fields
-                            if (width + i >= 0 && width + i < board.getBoard().length && height + j >= 0 && height + j < board.getBoard()[0].length && !board.getBoard()[width + i][height + j].isMarked()) {
-                                uncoverFields(board, width + i, height + j);
-                            }
-                        }
+            if (field.getNeighborCount() == markedFields.get()) {
+                for (int[] ints : INTS) {
+                    int i = ints[0];
+                    int j = ints[1];
+
+                    if (width + i >= 0 && width + i < board.getBoard().length && height + j >= 0 && height + j < board.getBoard()[0].length && !board.getBoard()[width + i][height + j].isMarked()) {
+                        uncoverFields(board, width + i, height + j);
                     }
                 }
             }
