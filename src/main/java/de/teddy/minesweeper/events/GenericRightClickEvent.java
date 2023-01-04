@@ -32,7 +32,7 @@ public class GenericRightClickEvent implements Listener {
                             .setShouldTeleport(false)
                             .setWidth(board.getWidth())
                             .setHeight(board.getHeight())
-                            .startGame(event.getPlayer());
+                            .build(event.getPlayer());
                     event.setCancelled(true);
                 }
                 return;

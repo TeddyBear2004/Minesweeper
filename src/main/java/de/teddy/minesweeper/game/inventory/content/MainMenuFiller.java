@@ -45,7 +45,7 @@ public class MainMenuFiller implements ContentFiller {
             inventory.setItem(game.getInventoryPosition(), game.getItemStack());
             itemStackFunctionHashMap.put(game.getItemStack(), player -> {
                 game.getStarter()
-                        .startGame(player);
+                        .build(player);
                 return null;
             });
         }

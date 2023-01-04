@@ -267,11 +267,11 @@ public class Game {
         return bombCount;
     }
 
-    public Starter getStarter() {
-        return new Starter(this);
+    public Builder getStarter() {
+        return new Builder(this);
     }
 
-    public static class Starter {
+    public static class Builder {
 
         private final Game game;
         private boolean shouldTeleport;
@@ -282,7 +282,7 @@ public class Game {
         private boolean setSeed;
         private boolean saveStats;
 
-        private Starter(Game game) {
+        private Builder(Game game) {
             this.game = game;
             this.shouldTeleport = true;
             this.bombCount = game.bombCount;
@@ -293,42 +293,42 @@ public class Game {
             this.saveStats = true;
         }
 
-        public Starter setShouldTeleport(boolean shouldTeleport) {
+        public Builder setShouldTeleport(boolean shouldTeleport) {
             this.shouldTeleport = shouldTeleport;
             return this;
         }
 
-        public Starter setBombCount(int bombCount) {
+        public Builder setBombCount(int bombCount) {
             this.bombCount = bombCount;
             return this;
         }
 
-        public Starter setWidth(int width) {
+        public Builder setWidth(int width) {
             this.width = width;
             return this;
         }
 
-        public Starter setHeight(int height) {
+        public Builder setHeight(int height) {
             this.height = height;
             return this;
         }
 
-        public Starter setSeed(long seed) {
+        public Builder setSeed(long seed) {
             this.seed = seed;
             return this;
         }
 
-        public Starter setSetSeed(boolean setSeed) {
+        public Builder setSetSeed(boolean setSeed) {
             this.setSeed = setSeed;
             return this;
         }
 
-        public Starter setSaveStats(boolean saveStats) {
+        public Builder setSaveStats(boolean saveStats) {
             this.saveStats = saveStats;
             return this;
         }
 
-        public void startGame(Player player) {
+        public void build(Player player) {
             game.startGame(player, shouldTeleport, bombCount, width, height, seed, setSeed, saveStats);
         }
 

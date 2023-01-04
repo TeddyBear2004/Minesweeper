@@ -151,7 +151,7 @@ public class GenericEvents implements Listener {
 
             game.getStarter()
                     .setShouldTeleport(false)
-                    .startGame(event.getPlayer());
+                    .build(event.getPlayer());
             break;
         }
     }

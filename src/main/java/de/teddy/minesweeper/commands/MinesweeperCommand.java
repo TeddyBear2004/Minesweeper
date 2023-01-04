@@ -65,7 +65,7 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
                             .setBombCount(bombCount)
                             .setWidth(w)
                             .setHeight(h)
-                            .startGame(player);
+                            .build(player);
                 } else {
                     customGame.getStarter()
                             .setBombCount(bombCount)
@@ -73,7 +73,7 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
                             .setHeight(h)
                             .setSeed(Long.parseLong(args[3]))
                             .setSetSeed(true)
-                            .startGame(player);
+                            .build(player);
                 }
             }catch(IllegalArgumentException e){
                 player.sendMessage(ChatColor.DARK_RED + "The bomb size is not valid for the given map size.");
@@ -87,7 +87,7 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
                     try{
                         game.getStarter()
                                 .setBombCount(Integer.parseInt(args[1]))
-                                .startGame(player);
+                                .build(player);
                     }catch(NumberFormatException e){
                         player.sendMessage("Please write a whole number as second argument.");
                     }catch(IllegalArgumentException e){
@@ -104,14 +104,14 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
                                 .setBombCount(bombCount)
                                 .setSeed(Long.parseLong(args[2]))
                                 .setSetSeed(true)
-                                .startGame(player);
+                                .build(player);
                     }catch(NumberFormatException ignored){
                         player.sendMessage("Please write a whole number as second and third argument.");
                     }catch(IllegalArgumentException e){
                         player.sendMessage("The provided bomb count is too large.");
                     }
                 } else
-                    game.getStarter().startGame(player);
+                    game.getStarter().build(player);
                 break;
             }
         }

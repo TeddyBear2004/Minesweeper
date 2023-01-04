@@ -71,7 +71,7 @@ public class InventoryClickEvents implements Listener {
                         .setSeed(seed)
                         .setSetSeed(true)
                         .setSaveStats(false)
-                        .startGame(player);
+                        .build(player);
                 Board board = Game.getBoard(player);
                 try{
                     board.checkField(x + board.getCorner().getBlockX(), y + board.getCorner().getBlockZ(), false);
