@@ -13,8 +13,8 @@ import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.click.ClickHandler;
 import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.util.PacketUtil;
-import de.teddy.minesweeper.util.Tuple2;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -62,13 +62,13 @@ public class BlockPainter implements Painter {
         this.clickHandler = clickHandler;
     }
 
-    private static void sendMultiBlockChange(List<Player> players, Map<BlockPosition, Tuple2<List<Short>, List<WrappedBlockData>>> subChunkMap) {
+    private static void sendMultiBlockChange(List<Player> players, Map<BlockPosition, Pair<List<Short>, List<WrappedBlockData>>> subChunkMap) {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         subChunkMap.forEach((blockPosition, listListTuple) -> {
             PacketContainer multiBlockChange = PacketUtil.getMultiBlockChange(
-                    ArrayUtils.toPrimitive(listListTuple.a().toArray(new Short[0])),
+                    ArrayUtils.toPrimitive(listListTuple.getLeft().toArray(new Short[0])),
                     blockPosition,
-                    listListTuple.b().toArray(new WrappedBlockData[0]),
+                    listListTuple.getRight().toArray(new WrappedBlockData[0]),
                     true);
             for (Player p : players) {
                 try{
@@ -89,7 +89,7 @@ public class BlockPainter implements Painter {
     public void drawBlancField(Board board, List<Player> players) {
         if (board == null || !Board.notTest)
             return;
-        Map<BlockPosition, Tuple2<List<Short>, List<WrappedBlockData>>> subChunkMap = new HashMap<>();
+        Map<BlockPosition, Pair<List<Short>, List<WrappedBlockData>>> subChunkMap = new HashMap<>();
 
         for (int i = 0; i < board.getWidth(); i++) {
             for (int j = 0; j < board.getHeight(); j++) {
@@ -103,20 +103,20 @@ public class BlockPainter implements Painter {
                 BlockPosition subChunkTuplePlusOne = new BlockPosition(location.getChunk().getX(), chunkHeightPlusOne, location.getChunk().getZ());
 
                 if (!subChunkMap.containsKey(subChunkTuple))
-                    subChunkMap.put(subChunkTuple, new Tuple2<>(new ArrayList<>(), new ArrayList<>()));
+                    subChunkMap.put(subChunkTuple, Pair.of(new ArrayList<>(), new ArrayList<>()));
                 if (!subChunkMap.containsKey(subChunkTuplePlusOne))
-                    subChunkMap.put(subChunkTuplePlusOne, new Tuple2<>(new ArrayList<>(), new ArrayList<>()));
+                    subChunkMap.put(subChunkTuplePlusOne, Pair.of(new ArrayList<>(), new ArrayList<>()));
                 boolean b = Board.isLightField(i, j);
                 Material m;
                 m = (b ? LIGHT_DEFAULT : DARK_DEFAULT);
 
-                Tuple2<List<Short>, List<WrappedBlockData>> listListTuple2 = subChunkMap.get(subChunkTuple);
-                listListTuple2.a().add(Board.convertToLocal(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
-                listListTuple2.b().add(WrappedBlockData.createData(m));
+                Pair<List<Short>, List<WrappedBlockData>> listListTuple2 = subChunkMap.get(subChunkTuple);
+                listListTuple2.getLeft().add(Board.convertToLocal(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+                listListTuple2.getRight().add(WrappedBlockData.createData(m));
 
-                Tuple2<List<Short>, List<WrappedBlockData>> listListTuple2PlusOne = subChunkMap.get(subChunkTuplePlusOne);
-                listListTuple2PlusOne.a().add(Board.convertToLocal(location.getBlockX(), location.getBlockY() + 1, location.getBlockZ()));
-                listListTuple2PlusOne.b().add(WrappedBlockData.createData(Material.AIR));
+                Pair<List<Short>, List<WrappedBlockData>> listListTuple2PlusOne = subChunkMap.get(subChunkTuplePlusOne);
+                listListTuple2PlusOne.getLeft().add(Board.convertToLocal(location.getBlockX(), location.getBlockY() + 1, location.getBlockZ()));
+                listListTuple2PlusOne.getRight().add(WrappedBlockData.createData(Material.AIR));
             }
         }
 
@@ -128,7 +128,7 @@ public class BlockPainter implements Painter {
     @Override
     public void drawField(Board board, List<Player> players) {
         if (board == null) return;
-        Map<BlockPosition, Tuple2<List<Short>, List<WrappedBlockData>>> subChunkMap = new HashMap<>();
+        Map<BlockPosition, Pair<List<Short>, List<WrappedBlockData>>> subChunkMap = new HashMap<>();
 
         for (int i = 0; i < board.getWidth(); i++) {
             for (int j = 0; j < board.getHeight(); j++) {
@@ -142,9 +142,9 @@ public class BlockPainter implements Painter {
                 BlockPosition subChunkTuplePlusOne = new BlockPosition(location.getChunk().getX(), chunkHeightPlusOne, location.getChunk().getZ());
 
                 if (!subChunkMap.containsKey(subChunkTuple))
-                    subChunkMap.put(subChunkTuple, new Tuple2<>(new ArrayList<>(), new ArrayList<>()));
+                    subChunkMap.put(subChunkTuple, Pair.of(new ArrayList<>(), new ArrayList<>()));
                 if (!subChunkMap.containsKey(subChunkTuplePlusOne))
-                    subChunkMap.put(subChunkTuplePlusOne, new Tuple2<>(new ArrayList<>(), new ArrayList<>()));
+                    subChunkMap.put(subChunkTuplePlusOne, Pair.of(new ArrayList<>(), new ArrayList<>()));
 
                 Board.Field field = board.getBoard()[i][j];
 
@@ -157,19 +157,19 @@ public class BlockPainter implements Painter {
                     m = getActualMaterial(field);
                 }
 
-                Tuple2<List<Short>, List<WrappedBlockData>> listListTuple2 = subChunkMap.get(subChunkTuple);
+                Pair<List<Short>, List<WrappedBlockData>> listListTuple2 = subChunkMap.get(subChunkTuple);
 
-                listListTuple2.a().add(Board.convertToLocal(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
-                listListTuple2.b().add(WrappedBlockData.createData(m));
+                listListTuple2.getLeft().add(Board.convertToLocal(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+                listListTuple2.getRight().add(WrappedBlockData.createData(m));
 
-                Tuple2<List<Short>, List<WrappedBlockData>> listListTuple2PlusOne = subChunkMap.get(subChunkTuplePlusOne);
+                Pair<List<Short>, List<WrappedBlockData>> listListTuple2PlusOne = subChunkMap.get(subChunkTuplePlusOne);
 
-                listListTuple2PlusOne.a().add(Board.convertToLocal(location.getBlockX(), location.getBlockY() + 1, location.getBlockZ()));
+                listListTuple2PlusOne.getLeft().add(Board.convertToLocal(location.getBlockX(), location.getBlockY() + 1, location.getBlockZ()));
 
                 if (field != null && field.isMarked()) {
-                    listListTuple2PlusOne.b().add(WrappedBlockData.createData(field.getMark()));
+                    listListTuple2PlusOne.getRight().add(WrappedBlockData.createData(field.getMark()));
                 } else
-                    listListTuple2PlusOne.b().add(WrappedBlockData.createData(Material.AIR));
+                    listListTuple2PlusOne.getRight().add(WrappedBlockData.createData(Material.AIR));
             }
         }
 
