@@ -15,6 +15,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.*;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.ScoreboardManager;
+import org.bukkit.scoreboard.Team;
 
 import java.util.List;
 
@@ -23,11 +26,20 @@ public class GenericEvents implements Listener {
     private final List<Game> games;
     private final Game customGame;
     private final ResourcePackHandler resourcePackHandler;
+    private final Team noCollision;
 
     public GenericEvents(List<Game> games, ResourcePackHandler resourcePackHandler, Game customGame) {
         this.games = games;
         this.resourcePackHandler = resourcePackHandler;
         this.customGame = customGame;
+        ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
+        if (scoreboardManager != null) {
+            Scoreboard newScoreboard = scoreboardManager.getNewScoreboard();
+            this.noCollision = newScoreboard.registerNewTeam("no_collision");
+            this.noCollision.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+        } else {
+            noCollision = null;
+        }
     }
 
     @EventHandler
@@ -38,6 +50,11 @@ public class GenericEvents implements Listener {
                 || !Modifier.getInstance().isTemporaryFlightEnabled()
                 || Modifier.getInstance().isInside(event.getPlayer().getLocation()))
             event.getPlayer().setAllowFlight(true);
+
+        event.getPlayer().setCollidable(false);
+        if (noCollision != null) {
+            noCollision.addEntry(event.getPlayer().getName());
+        }
 
         PersonalModifier modifier = PersonalModifier.getPersonalModifier(event.getPlayer());
 
@@ -60,7 +77,7 @@ public class GenericEvents implements Listener {
     public void onPlayerQuitEvent(PlayerQuitEvent event) {
         Game game = Game.getGame(event.getPlayer());
         if (game != null) {
-            Game.finishGame(event.getPlayer());
+            Game.finishGame(event.getPlayer(), false);
             Board board = Game.getBoard(event.getPlayer());
             if (board != null)
                 board.breakGame();
