@@ -1,6 +1,7 @@
 package de.teddy.minesweeper.game;
 
 import de.teddy.minesweeper.Minesweeper;
+import de.teddy.minesweeper.game.click.ClickHandler;
 import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.game.modifier.Modifier;
 import de.teddy.minesweeper.game.painter.ArmorStandPainter;
@@ -28,8 +29,10 @@ public class Game {
     private static final Map<Player, Game> playerLocation = new HashMap<>();
 
     static {
-        PAINTER_MAP.put(BlockPainter.class, new BlockPainter(Minesweeper.getPlugin(Minesweeper.class)));
-        PAINTER_MAP.put(ArmorStandPainter.class, new ArmorStandPainter(Minesweeper.getPlugin(Minesweeper.class)));
+        ClickHandler clickHandler = new ClickHandler();
+
+        PAINTER_MAP.put(BlockPainter.class, new BlockPainter(Minesweeper.getPlugin(Minesweeper.class), clickHandler));
+        PAINTER_MAP.put(ArmorStandPainter.class, new ArmorStandPainter(Minesweeper.getPlugin(Minesweeper.class), clickHandler));
     }
 
     private final Plugin plugin;
@@ -203,7 +206,7 @@ public class Game {
             if (minHeight > height || height > maxHeight || minWidth > width || width > maxWidth)
                 return;
 
-        stopGames(p, true);
+        stopGames(p, saveStats);
         Board b;
 
         b = new Board(plugin, language, connectionBuilder, this, width, height, bombCount, corner, p, seed, setSeed, saveStats);

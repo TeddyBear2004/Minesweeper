@@ -16,7 +16,9 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.List;
 
 public interface Painter {
+
     NamespacedKey PAINTER_KEY = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "painter_class");
+
     Class<? extends Painter> DEFAULT_PAINTER = BlockPainter.class;
 
     static void storePainterClass(PersistentDataContainer container, Class<? extends Painter> clazz) {
@@ -28,7 +30,7 @@ public interface Painter {
         try{
             String name = container.get(PAINTER_KEY, PersistentDataType.STRING);
 
-            if(name != null)
+            if (name != null)
                 clazz = Class.forName(name).asSubclass(Painter.class);
             else
                 clazz = DEFAULT_PAINTER;
@@ -58,5 +60,7 @@ public interface Painter {
     void onRightClick(Player player, PacketEvent event, Game game, PacketContainer packet);
 
     void onLeftClick(Player player, PacketEvent event, Game game, PacketContainer packet);
+
+    void highlightField(Board.Field field, List<Player> players);
 
 }

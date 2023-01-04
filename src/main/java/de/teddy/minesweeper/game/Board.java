@@ -443,6 +443,11 @@ public class Board {
             player.setScoreboard(scoreboardManager.getNewScoreboard());
     }
 
+    public void highlightBlocksAround(Field field) {
+        getCurrentPlayerPainters().forEach((painter, players) -> {
+            painter.highlightField(field, players);
+        });
+    }
 
     public static class Field {
 
@@ -490,6 +495,10 @@ public class Board {
 
         }
 
+        public void setMark(MarkType markType){
+            this.markType = markType;
+        }
+
         public Material getMark() {
             return markType.getMaterial();
         }
@@ -508,6 +517,10 @@ public class Board {
 
         public Board getBoard() {
             return board;
+        }
+
+        public Location getLocation() {
+            return board.getCorner().clone().add(x, 0, y);
         }
 
     }

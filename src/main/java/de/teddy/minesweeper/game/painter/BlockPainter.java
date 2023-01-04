@@ -8,12 +8,10 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
-import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
-import de.teddy.minesweeper.game.exceptions.BombExplodeException;
+import de.teddy.minesweeper.game.click.ClickHandler;
 import de.teddy.minesweeper.game.inventory.Inventories;
-import de.teddy.minesweeper.game.modifier.PersonalModifier;
 import de.teddy.minesweeper.util.PacketUtil;
 import de.teddy.minesweeper.util.Tuple2;
 import org.apache.commons.lang3.ArrayUtils;
@@ -21,6 +19,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -55,10 +54,12 @@ public class BlockPainter implements Painter {
     public static final Material LIGHT_DEFAULT = Material.LIME_CONCRETE_POWDER;
     public static final Material DARK_DEFAULT = Material.GREEN_CONCRETE_POWDER;
     private final Plugin plugin;
+    private final ClickHandler clickHandler;
     private BukkitTask bombTask;
 
-    public BlockPainter(Plugin plugin) {
+    public BlockPainter(Plugin plugin, ClickHandler clickHandler) {
         this.plugin = plugin;
+        this.clickHandler = clickHandler;
     }
 
     private static void sendMultiBlockChange(List<Player> players, Map<BlockPosition, Tuple2<List<Short>, List<WrappedBlockData>>> subChunkMap) {
@@ -259,22 +260,13 @@ public class BlockPainter implements Painter {
         }
 
         Board.Field field = board.getField(location);
-
-        if (field == null)
+        if (packet.getHands().read(0) == EnumWrappers.Hand.OFF_HAND) {
+            event.setCancelled(true);
             return;
+        }
 
-        event.setCancelled(true);
-        player.getInventory().setContents(Inventories.GAME_INVENTORY);
 
-        if (board.isFinished() || packet.getHands().read(0) == EnumWrappers.Hand.OFF_HAND)
-            return;
-
-        board.startStarted();
-
-        if (field.isCovered())
-            field.reverseMark();
-
-        board.draw();
+        clickHandler.rightClick(player, board, field, event);
     }
 
     @Override
@@ -326,52 +318,27 @@ public class BlockPainter implements Painter {
         if (digType != EnumWrappers.PlayerDigType.START_DESTROY_BLOCK)
             return;
 
+        clickHandler.leftClick(player, game, blockPosition, board, field, location);
+    }
 
-        if (board.isFinished())
-            return;
+    @Override
+    public void highlightField(Board.Field field, List<Player> players) {
+        PacketContainer spawnEntityContainer = PacketUtil.getSpawnEntityContainer(field.getLocation().clone().add(0.5, 0, 0.5), EntityType.SLIME);
+        int entityId = spawnEntityContainer.getIntegers().read(0);
 
-        if (board.getPlayer().equals(player)) {
-            board.startStarted();
+        PacketContainer slimeMetadata = PacketUtil.getSlimeMetadata(entityId);
+        PacketContainer noCollision = PacketUtil.joinTeam("no_collision", Collections.singletonList(spawnEntityContainer.getUUIDs().read(0)));
 
+        ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
+        players.forEach(player -> {
             try{
-                if (field == null) {
-                    try{
-                        board.checkField(location.getBlockX(), location.getBlockZ());
-                    }catch(IllegalArgumentException ignore){
-                    }
-
-                    board.draw();
-                    return;
-                }
-
-                if (field.isMarked()) {
-                    if (location.getBlockY() - game.getFieldHeight() == 1)
-                        PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(field.getMark()));
-
-                    return;
-                }
-
-                PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
-
-                if (field.isCovered()) {
-                    board.checkField(location.getBlockX(), location.getBlockZ());
-                } else if (System.currentTimeMillis() - LeftClickEvent.LAST_CLICKED.getOrDefault(player, (long) -1000) <= personalModifier.getDoubleClickDuration().orElse(350)) {
-                    try{
-                        board.checkNumber(location.getBlockX(), location.getBlockZ());
-                    }catch(ArrayIndexOutOfBoundsException ignore){
-                    }
-                }
-
-                if (personalModifier.isEnableDoubleClick().orElse(false))
-                    LeftClickEvent.LAST_CLICKED.put(player, System.currentTimeMillis());
-            }catch(BombExplodeException e){
-                board.lose();
+                protocolManager.sendServerPacket(player, spawnEntityContainer);
+                protocolManager.sendServerPacket(player, slimeMetadata);
+                protocolManager.sendServerPacket(player, noCollision);
+            }catch(InvocationTargetException e){
+                throw new RuntimeException(e);
             }
-            board.checkIfWon();
-        }
-
-        board.draw();
-
+        });
     }
 
 }

@@ -22,6 +22,8 @@ public class PersonalModifier {
     private final static NamespacedKey ENABLE_DOUBLE_CLICK = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "enable_double_click");
     private final static NamespacedKey HIDE_PLAYER = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "hide_player");
     private final static NamespacedKey HIDE_PLAYER_DISTANCE = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "hide_player_distance");
+    private final static NamespacedKey REVEAL_ON_DOUBLE_CLICK = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "reveal_on_double_click");
+    private final static NamespacedKey USE_MULTI_FLAG = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "use_multi_flag");
     private final Player player;
     private final PersistentDataContainer container;
     private String resourcePackUrl;
@@ -32,8 +34,21 @@ public class PersonalModifier {
     private Boolean enableDoubleClick;
     private Boolean hidePlayer;
     private Double hidePlayerDistance;
+    private Boolean revealOnDoubleClick;
+    private Boolean useMultiFlag;
 
-    private PersonalModifier(Player player, PersistentDataContainer container, String resourcePackUrl, Integer doubleClickDuration, String painterClass, Boolean enableQuestionMark, Boolean enableMarks, Boolean enableDoubleClick, Boolean hidePlayer, Double hidePlayerDistance) {
+    private PersonalModifier(Player player,
+                             PersistentDataContainer container,
+                             String resourcePackUrl,
+                             Integer doubleClickDuration,
+                             String painterClass,
+                             Boolean enableQuestionMark,
+                             Boolean enableMarks,
+                             Boolean enableDoubleClick,
+                             Boolean hidePlayer,
+                             Double hidePlayerDistance,
+                             Boolean revealOnDoubleClick,
+                             Boolean useMultiFlag) {
         this.player = player;
         this.container = container;
         this.resourcePackUrl = resourcePackUrl;
@@ -44,6 +59,8 @@ public class PersonalModifier {
         this.enableDoubleClick = enableDoubleClick;
         this.hidePlayer = hidePlayer;
         this.hidePlayerDistance = hidePlayerDistance;
+        this.revealOnDoubleClick = revealOnDoubleClick;
+        this.useMultiFlag = useMultiFlag;
     }
 
     public static PersonalModifier getPersonalModifier(Player player) {
@@ -59,6 +76,8 @@ public class PersonalModifier {
         Byte enableDoubleClick = container.get(ENABLE_DOUBLE_CLICK, PersistentDataType.BYTE);
         Byte hidePlayer = container.get(HIDE_PLAYER, PersistentDataType.BYTE);
         Double hidePlayerDistance = container.get(HIDE_PLAYER_DISTANCE, PersistentDataType.DOUBLE);
+        Byte revealOnDoubleClick = container.get(REVEAL_ON_DOUBLE_CLICK, PersistentDataType.BYTE);
+        Byte useMultiFlag = container.get(USE_MULTI_FLAG, PersistentDataType.BYTE);
 
         return new PersonalModifier(player,
                                     container,
@@ -69,7 +88,9 @@ public class PersonalModifier {
                                     enableMarks == null ? null : enableMarks == 0b1,
                                     enableDoubleClick == null ? null : enableDoubleClick == 0b1,
                                     hidePlayer == null ? null : hidePlayer == 0b1,
-                                    hidePlayerDistance);
+                                    hidePlayerDistance,
+                                    revealOnDoubleClick == null ? null : revealOnDoubleClick == 0b1,
+                                    useMultiFlag == null ? null : useMultiFlag == 0b1);
     }
 
     public Optional<String> getResourcePackUrl() {
@@ -175,7 +196,7 @@ public class PersonalModifier {
         }
     }
 
-    public Optional<Boolean> isHidePlayer(){
+    public Optional<Boolean> isHidePlayer() {
         return Optional.ofNullable(hidePlayer);
     }
 
@@ -189,7 +210,7 @@ public class PersonalModifier {
         }
     }
 
-    public Optional<Double> getHidePlayerDistance(){
+    public Optional<Double> getHidePlayerDistance() {
         return Optional.ofNullable(hidePlayerDistance);
     }
 
@@ -200,6 +221,34 @@ public class PersonalModifier {
             this.container.set(HIDE_PLAYER_DISTANCE, PersistentDataType.DOUBLE, this.hidePlayerDistance);
         } else {
             this.container.remove(HIDE_PLAYER_DISTANCE);
+        }
+    }
+
+    public Optional<Boolean> isRevealOnDoubleClick() {
+        return Optional.ofNullable(revealOnDoubleClick);
+    }
+
+    public void setRevealOnDoubleClick(Boolean revealOnDoubleClick) {
+        this.revealOnDoubleClick = revealOnDoubleClick;
+
+        if (this.revealOnDoubleClick != null) {
+            this.container.set(REVEAL_ON_DOUBLE_CLICK, PersistentDataType.BYTE, this.revealOnDoubleClick ? (byte) 1 : (byte) 0);
+        } else {
+            this.container.remove(REVEAL_ON_DOUBLE_CLICK);
+        }
+    }
+
+    public Optional<Boolean> isUseMultiFlag() {
+        return Optional.ofNullable(useMultiFlag);
+    }
+
+    public void setUseMultiFlag(Boolean useMultiFlag) {
+        this.useMultiFlag = useMultiFlag;
+
+        if (this.useMultiFlag != null) {
+            this.container.set(USE_MULTI_FLAG, PersistentDataType.BYTE, this.useMultiFlag ? (byte) 1 : (byte) 0);
+        } else {
+            this.container.remove(USE_MULTI_FLAG);
         }
     }
 

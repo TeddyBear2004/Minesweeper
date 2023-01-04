@@ -7,20 +7,17 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.EnumWrappers;
-import com.comphenix.protocol.wrappers.WrappedBlockData;
 import com.comphenix.protocol.wrappers.WrappedEnumEntityUseAction;
-import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
-import de.teddy.minesweeper.game.exceptions.BombExplodeException;
-import de.teddy.minesweeper.game.inventory.Inventories;
-import de.teddy.minesweeper.game.modifier.PersonalModifier;
+import de.teddy.minesweeper.game.click.ClickHandler;
 import de.teddy.minesweeper.util.HeadGenerator;
 import de.teddy.minesweeper.util.PacketUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -46,13 +43,15 @@ public class ArmorStandPainter implements Painter {
     public static final Material LIGHT_DEFAULT = Material.LIME_CONCRETE_POWDER;
     public static final Material DARK_DEFAULT = Material.GREEN_CONCRETE_POWDER;
     private final Plugin plugin;
+    private final ClickHandler clickHandler;
     private Map<Integer, ItemStack> currentItemStackPerEntityId = new HashMap<>();
     private Map<Integer, int[]> armorStandEntityIds;
     private Map<int[], Integer> locationEntityIds;
     private BukkitTask bombTask;
 
-    public ArmorStandPainter(Plugin plugin) {
+    public ArmorStandPainter(Plugin plugin, ClickHandler clickHandler) {
         this.plugin = plugin;
+        this.clickHandler = clickHandler;
     }
 
     @Override
@@ -111,10 +110,10 @@ public class ArmorStandPainter implements Painter {
                     Location location = board.getCorner().clone().add(i, 0, j).add(0.5, -0.775, 0.5);
 
                     // Create the spawn and metadata packets for the armor stand
-                    PacketContainer spawnEntityContainer = PacketUtil.getSpawnEntityContainer(location);
+                    PacketContainer spawnEntityContainer = PacketUtil.getSpawnEntityContainer(location, EntityType.ARMOR_STAND);
                     int id = spawnEntityContainer.getIntegers().read(0);
 
-                    PacketContainer entityMetadata = PacketUtil.getEntityMetadata(id);
+                    PacketContainer entityMetadata = PacketUtil.getArmorStandMetadata(id);
 
                     // Add the packets to the list
                     packets.add(spawnEntityContainer);
@@ -267,21 +266,9 @@ public class ArmorStandPainter implements Painter {
             return;
 
         Board.Field field = board.getField(location);
-        if (field == null)
-            return;
 
-        event.setCancelled(true);
-        player.getInventory().setContents(Inventories.GAME_INVENTORY);
 
-        if (board.isFinished())
-            return;
-
-        board.startStarted();
-
-        if (field.isCovered())
-            field.reverseMark();
-
-        board.draw();
+        clickHandler.rightClick(player, board, field, event);
     }
 
     @Override
@@ -313,48 +300,12 @@ public class ArmorStandPainter implements Painter {
 
         Board.Field field = board.getField(location);
 
+        clickHandler.leftClick(player, game, blockPosition, board, field, location);
+    }
 
-        if (board.isFinished())
-            return;
+    @Override
+    public void highlightField(Board.Field field, List<Player> players) {
 
-        if (board.getPlayer().equals(player)) {
-            board.startStarted();
-
-            try{
-                if (field == null) {
-                    try{
-                        board.checkField(location.getBlockX(), location.getBlockZ());
-                    }catch(IllegalArgumentException ignore){
-                    }
-
-                    board.draw();
-                    return;
-                }
-
-                if (field.isMarked()) {
-                    if (location.getBlockY() - game.getFieldHeight() == 1)
-                        PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(field.getMark()));
-
-                    return;
-                }
-
-                PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
-
-                if (field.isCovered()) {
-                    board.checkField(location.getBlockX(), location.getBlockZ());
-                } else if (System.currentTimeMillis() - LeftClickEvent.LAST_CLICKED.getOrDefault(player, (long) -1000) <= personalModifier.getDoubleClickDuration().orElse(350)) {
-                    board.checkNumber(location.getBlockX(), location.getBlockZ());
-                }
-
-                if (personalModifier.isEnableDoubleClick().orElse(false))
-                    LeftClickEvent.LAST_CLICKED.put(player, System.currentTimeMillis());
-            }catch(BombExplodeException e){
-                board.lose();
-            }
-
-            board.checkIfWon();
-        }
-        board.draw();
     }
 
     public Location getLocation(Board board, int entityId) {

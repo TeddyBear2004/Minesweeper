@@ -25,6 +25,8 @@ public class SettingsCommand implements TabExecutor {
     private static final String QUICK_REVEAL = "quick_reveal";
     private static final String HIDE_PLAYER = "hide_player";
     private static final String HIDE_PLAYER_DISTANCE = "hide_player_distance";
+    private static final String REVEAL_ON_DOUBLE_CLICK = "reveal_on_double_click";
+    private static final String USE_MULTI_FLAG = "use_multi_flag";
     private final ResourcePackHandler packHandler;
 
     public SettingsCommand(ResourcePackHandler packHandler) {
@@ -204,6 +206,48 @@ public class SettingsCommand implements TabExecutor {
                     player.sendMessage(ChatColor.DARK_RED + "Please make sure that you provide a valid number.");
                 }
             }
+            case REVEAL_ON_DOUBLE_CLICK -> {
+                if (args.length == 1) {
+                    player.sendMessage(ChatColor.GREEN + "Currently reveal on double click " + (modifier.isRevealOnDoubleClick().isPresent() ? modifier.isRevealOnDoubleClick().get() ? "enabled." : "disabled." : "default setting."));
+                    break;
+                }
+                if (args[1].equalsIgnoreCase("default")) {
+                    modifier.setRevealOnDoubleClick(null);
+                    return true;
+                }
+                if (args[1].equalsIgnoreCase("true")) {
+                    modifier.setRevealOnDoubleClick(true);
+                    player.sendMessage(ChatColor.GREEN + "Applied setting: reveal on double click.");
+                    break;
+                }
+                if (args[1].equalsIgnoreCase("false")) {
+                    modifier.setRevealOnDoubleClick(false);
+                    player.sendMessage(ChatColor.GREEN + "Applied setting: don't reveal on double click.");
+                    break;
+                }
+                player.sendMessage(ChatColor.DARK_RED + "No true or false could be found as an argument, so the command is ignored.");
+            }
+            case USE_MULTI_FLAG -> {
+                if (args.length == 1) {
+                    player.sendMessage(ChatColor.GREEN + "Currently multi flag is " + (modifier.isUseMultiFlag().isPresent() ? modifier.isUseMultiFlag().get() ? "enabled." : "disabled." : "default setting."));
+                    break;
+                }
+                if (args[1].equalsIgnoreCase("default")) {
+                    modifier.setUseMultiFlag(null);
+                    return true;
+                }
+                if (args[1].equalsIgnoreCase("true")) {
+                    modifier.setUseMultiFlag(true);
+                    player.sendMessage(ChatColor.GREEN + "Applied setting: enabled multi flag.");
+                    break;
+                }
+                if (args[1].equalsIgnoreCase("false")) {
+                    modifier.setUseMultiFlag(false);
+                    player.sendMessage(ChatColor.GREEN + "Applied setting: disabled multi flag.");
+                    break;
+                }
+                player.sendMessage(ChatColor.DARK_RED + "No true or false could be found as an argument, so the command is ignored.");
+            }
         }
 
         return true;
@@ -220,7 +264,7 @@ public class SettingsCommand implements TabExecutor {
             return strings;
 
         if (args.length == 1) {
-            Arrays.asList(CUSTOM_RESOURCE_PACK_URL, QUICK_REVEAL_DURATION, BOARD_STYLE, ENABLE_QUESTION_MARK, ENABLE_FLAG, QUICK_REVEAL, HIDE_PLAYER, HIDE_PLAYER_DISTANCE).forEach(s -> {
+            Arrays.asList(CUSTOM_RESOURCE_PACK_URL, QUICK_REVEAL_DURATION, BOARD_STYLE, ENABLE_QUESTION_MARK, ENABLE_FLAG, QUICK_REVEAL, HIDE_PLAYER, HIDE_PLAYER_DISTANCE, REVEAL_ON_DOUBLE_CLICK, USE_MULTI_FLAG).forEach(s -> {
                 if (s.startsWith(args[0]))
                     strings.add(s);
             });
@@ -246,7 +290,7 @@ public class SettingsCommand implements TabExecutor {
                     if ("default".startsWith(args[1].toLowerCase()))
                         strings.add("default");
                 }
-                case ENABLE_QUESTION_MARK, QUICK_REVEAL, ENABLE_FLAG, HIDE_PLAYER -> {
+                case ENABLE_QUESTION_MARK, QUICK_REVEAL, ENABLE_FLAG, HIDE_PLAYER, REVEAL_ON_DOUBLE_CLICK, USE_MULTI_FLAG -> {
                     if ("true".startsWith(args[1].toLowerCase()))
                         strings.add("true");
                     if ("false".startsWith(args[1].toLowerCase()))

@@ -107,4 +107,31 @@ public class SurfaceDiscoverer {
         }
     }
 
+    public static void flagFieldsNextToNumber(Board board, int width, int height, boolean place) {
+        if (width < 0 || width >= board.getBoard().length || height < 0 || height >= board.getBoard()[0].length) {
+            throw new IllegalArgumentException();
+        }
+
+        Board.Field field = board.getField(width, height);
+        if (!field.isCovered()) {
+            for (int i = -1; i <= 1; i++) {
+                for (int j = -1; j <= 1; j++) {
+                    if (!(i == 0 && j == 0)) {
+                        // Ignore fields outside the board
+                        if (width + i >= 0 && width + i < board.getBoard().length && height + j >= 0 && height + j < board.getBoard()[0].length) {
+                            Board.Field field1 = board.getField(width + i, height + j);
+
+                            if (field1.isCovered()) {
+                                if (place)
+                                    field1.setMark(MarkType.BOMB_MARK);
+                                else
+                                    field1.setMark(MarkType.NONE);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 }
