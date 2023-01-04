@@ -17,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -24,7 +25,10 @@ import java.util.stream.Collectors;
 public class PacketUtil {
 
     private static final AtomicInteger ATOMIC_INTEGER = new AtomicInteger(Integer.MIN_VALUE + 1000);
+    private static final WrappedDataWatcher.Serializer INT_SERIALIZER = WrappedDataWatcher.Registry.get(Integer.class);
+    private static final WrappedDataWatcher.Serializer BYTE_SERIALIZER = WrappedDataWatcher.Registry.get(Byte.class);
     private static WrappedDataWatcher armorStandDataWatcher;
+    private static WrappedDataWatcher slimeDataWatcher;
 
     public static void sendActionBar(Player player, String message) {
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
@@ -81,7 +85,7 @@ public class PacketUtil {
         return packet;
     }
 
-    public static PacketContainer getSpawnEntityContainer(Location location) {
+    public static PacketContainer getSpawnEntityContainer(Location location, EntityType type) {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.SPAWN_ENTITY, true);
 
@@ -96,7 +100,7 @@ public class PacketUtil {
                 .write(0, UUID.randomUUID());
 
         packet.getEntityTypeModifier()
-                .write(0, EntityType.ARMOR_STAND);
+                .write(0, type);
 
 
         packet.getDoubles()
@@ -108,7 +112,7 @@ public class PacketUtil {
         return packet;
     }
 
-    public static PacketContainer getEntityMetadata(int entityId) {
+    public static PacketContainer getArmorStandMetadata(int entityId) {
         WrappedDataWatcher dataWatcher = getDefaultWrappedDataWatcherForArmorStands();
 
         PacketContainer metadataPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
@@ -125,18 +129,16 @@ public class PacketUtil {
             return armorStandDataWatcher;
         WrappedDataWatcher wrappedDataWatcher = new WrappedDataWatcher();
 
-        WrappedDataWatcher.Serializer intSerializer = WrappedDataWatcher.Registry.get(Integer.class);
-        WrappedDataWatcher.Serializer byteSerializer = WrappedDataWatcher.Registry.get(Byte.class);
 
-        wrappedDataWatcher.setObject(0, byteSerializer, (byte) 0x20);
-        wrappedDataWatcher.setObject(1, intSerializer, 300);
-        wrappedDataWatcher.setObject(7, intSerializer, 0);
-        wrappedDataWatcher.setObject(8, byteSerializer, (byte) 0);
-        wrappedDataWatcher.setObject(9, intSerializer, 20);
-        wrappedDataWatcher.setObject(10, intSerializer, 0);
-        wrappedDataWatcher.setObject(12, intSerializer, 0);
-        wrappedDataWatcher.setObject(13, intSerializer, 0);
-        wrappedDataWatcher.setObject(15, byteSerializer, (byte) 0x08);
+        wrappedDataWatcher.setObject(0, BYTE_SERIALIZER, (byte) 0x20);
+        wrappedDataWatcher.setObject(1, INT_SERIALIZER, 300);
+        wrappedDataWatcher.setObject(7, INT_SERIALIZER, 0);
+        wrappedDataWatcher.setObject(8, BYTE_SERIALIZER, (byte) 0);
+        wrappedDataWatcher.setObject(9, INT_SERIALIZER, 20);
+        wrappedDataWatcher.setObject(10, INT_SERIALIZER, 0);
+        wrappedDataWatcher.setObject(12, INT_SERIALIZER, 0);
+        wrappedDataWatcher.setObject(13, INT_SERIALIZER, 0);
+        wrappedDataWatcher.setObject(15, BYTE_SERIALIZER, (byte) 0x08);
 
         armorStandDataWatcher = wrappedDataWatcher;
         return wrappedDataWatcher;
@@ -153,6 +155,44 @@ public class PacketUtil {
         return packet;
     }
 
+    public static PacketContainer getSlimeMetadata(int entityId) {
+        WrappedDataWatcher dataWatcher = getDefaultWrappedDataWatcherForSlimes();
+
+        PacketContainer metadataPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
+
+        metadataPacket.getIntegers().write(0, entityId);
+
+        metadataPacket.getWatchableCollectionModifier().write(0, dataWatcher.getWatchableObjects());
+
+        return metadataPacket;
+    }
+
+    public static PacketContainer joinTeam(String teamName, List<UUID> uuids) {
+        PacketContainer scoreboardTeamPacket = new PacketContainer(PacketType.Play.Server.SCOREBOARD_TEAM);
+        List<String> strings = uuids.stream().map(UUID::toString).toList();
+
+        /*scoreboardTeamPacket.getStrings().write(0, teamName);
+        scoreboardTeamPacket.getIntegers().write(0, 3);
+        scoreboardTeamPacket.getSpecificModifier(List.class).write(0, strings);*/
+
+        return scoreboardTeamPacket;
+    }
+
+    private static WrappedDataWatcher getDefaultWrappedDataWatcherForSlimes() {
+        if (slimeDataWatcher != null)
+            return slimeDataWatcher;
+        WrappedDataWatcher wrappedDataWatcher = new WrappedDataWatcher();
+
+
+        wrappedDataWatcher.setObject(0, BYTE_SERIALIZER, (byte) (/*0x20 | */0x40));
+        wrappedDataWatcher.setObject(9, INT_SERIALIZER, 20);
+        wrappedDataWatcher.setObject(15, BYTE_SERIALIZER, (byte) 0x01);
+        wrappedDataWatcher.setObject(16, INT_SERIALIZER, 0);
+
+        slimeDataWatcher = wrappedDataWatcher;
+        return wrappedDataWatcher;
+    }
+
     public static PacketContainer getRemoveEntity(int... entityId) {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.ENTITY_DESTROY, true);
@@ -163,5 +203,6 @@ public class PacketUtil {
 
         return packet;
     }
+
 
 }
