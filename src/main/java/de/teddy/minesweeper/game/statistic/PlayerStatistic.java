@@ -31,7 +31,7 @@ public class PlayerStatistic {
         Map<Game, List<GameStatistic>> gameStatisticMap = new HashMap<>();
 
         this.stats.forEach(gameStatistic -> games.forEach(game -> {
-            if (!gameStatistic.getMap().equals(game.getMap()))
+            if (!gameStatistic.getMap().equals(game.getMap()) || gameStatistic.getBombCount() != game.getBombCount())
                 return;
 
             gameStatisticMap.putIfAbsent(game, new ArrayList<>());
