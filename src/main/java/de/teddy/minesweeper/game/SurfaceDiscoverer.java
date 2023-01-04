@@ -127,12 +127,10 @@ public class SurfaceDiscoverer {
             int i = ints[0];
             int j = ints[1];
 
-            if (width + i >= 0 && width + i < board.getBoard().length && height + j >= 0 && height + j < board.getBoard()[0].length) {
-                Board.Field field1 = field.getRelativeTo(i, j);
 
-                if (field1.isCovered())
-                    field1.setMark(place ? MarkType.BOMB_MARK : MarkType.NONE);
-            }
+            Board.Field field1 = field.getRelativeTo(i, j);
+            if (field1 != null && field1.isCovered())
+                field1.setMark(place ? MarkType.BOMB_MARK : MarkType.NONE);
         });
 
     }
