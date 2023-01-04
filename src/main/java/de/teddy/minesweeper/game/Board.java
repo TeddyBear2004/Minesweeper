@@ -15,8 +15,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
 
-import java.awt.*;
-import java.awt.geom.Point2D;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.*;
@@ -34,7 +32,7 @@ public class Board {
     private final int bombCount;
     private final Location corner;
     private final Field[][] board;
-    private final Point2D[] bombList;
+    private final int[][] bombList;
     private final Player player;
     private final Random random;
     private final boolean saveStats;
@@ -64,7 +62,7 @@ public class Board {
             throw new IllegalArgumentException("bombCount cannot be bigger than width * height");
 
         this.isFinished = this.isGenerated = false;
-        this.bombList = new Point2D[bombCount];
+        this.bombList = new int[bombCount][2];
         this.corner = corner;
         this.width = width;
         this.height = height;
@@ -181,9 +179,9 @@ public class Board {
 
 
     public Field getField(int x, int y) {
-        try{
+        if (x >= 0 && x < board.length && y >= 0 && y < board[0].length) {
             return this.board[x][y];
-        }catch(ArrayIndexOutOfBoundsException e){
+        } else {
             return null;
         }
     }
@@ -256,7 +254,7 @@ public class Board {
         return this.corner;
     }
 
-    public Point2D[] getBombList() {
+    public int[][] getBombList() {
         return bombList;
     }
 
@@ -358,15 +356,16 @@ public class Board {
             }while (cache[randWidth][randHeight] || couldBombSpawn(x, y, randWidth, randHeight));
 
             cache[randWidth][randHeight] = true;
-            this.bombList[i] = new Point(randWidth, randHeight);
+            this.bombList[i][0] = randWidth;
+            this.bombList[i][1] = randHeight;
         }
 
-        for (Point2D point2D : this.bombList) {
+        for (int[] ints1 : this.bombList) {
             for (int j = -1; j < 2; j++) {
                 for (int k = -1; k < 2; k++) {
                     if (!(j == 0 && k == 0)) {
-                        int xCoord = (int) (point2D.getX() + j);
-                        int yCoord = (int) (point2D.getY() + k);
+                        int xCoord = ints1[0] + j;
+                        int yCoord = ints1[1] + k;
 
                         if (xCoord >= 0 && xCoord < this.width && yCoord >= 0 && yCoord < this.height) {
                             ints[xCoord][yCoord]++;
@@ -444,9 +443,7 @@ public class Board {
     }
 
     public void highlightBlocksAround(Field field) {
-        getCurrentPlayerPainters().forEach((painter, players) -> {
-            painter.highlightField(field, players);
-        });
+        getCurrentPlayerPainters().forEach((painter, players) -> painter.highlightField(field, players));
     }
 
     public static class Field {
@@ -495,12 +492,12 @@ public class Board {
 
         }
 
-        public void setMark(MarkType markType){
-            this.markType = markType;
-        }
-
         public Material getMark() {
             return markType.getMaterial();
+        }
+
+        public void setMark(MarkType markType) {
+            this.markType = markType;
         }
 
         public boolean isCovered() {
@@ -517,6 +514,10 @@ public class Board {
 
         public Board getBoard() {
             return board;
+        }
+
+        public Field getRelativeTo(int i, int j) {
+            return board.getField(x + i, y + j);
         }
 
         public Location getLocation() {

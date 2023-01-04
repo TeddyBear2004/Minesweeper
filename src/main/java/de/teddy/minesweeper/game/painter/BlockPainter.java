@@ -25,7 +25,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.awt.geom.Point2D;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
@@ -180,11 +179,11 @@ public class BlockPainter implements Painter {
     public void drawBombs(Board board, List<Player> players) {
         double explodeDuration = 0.5d;
 
-        for (Point2D point2D : board.getBombList()) {
+        for (int[] point2D : board.getBombList()) {
             Location clone = board.getCorner().clone();
 
-            clone.setX(board.getCorner().getBlockX() + point2D.getX());
-            clone.setZ(board.getCorner().getBlockZ() + point2D.getY());
+            clone.setX(board.getCorner().getBlockX() + point2D[0]);
+            clone.setZ(board.getCorner().getBlockZ() + point2D[1]);
 
             if (bombTask != null)
                 bombTask.cancel();

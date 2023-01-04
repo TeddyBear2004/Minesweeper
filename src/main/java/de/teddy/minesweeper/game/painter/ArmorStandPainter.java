@@ -23,7 +23,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.awt.geom.Point2D;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
@@ -187,17 +186,17 @@ public class ArmorStandPainter implements Painter {
         double explodeDuration = 0.5d;
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
 
-        for (Point2D point2D : board.getBombList()) {
+        for (int[] ints : board.getBombList()) {
             Location clone = board.getCorner().clone();
 
-            clone.setX(board.getCorner().getBlockX() + point2D.getX());
-            clone.setZ(board.getCorner().getBlockZ() + point2D.getY());
+            clone.setX(board.getCorner().getBlockX() + ints[0]);
+            clone.setZ(board.getCorner().getBlockZ() + ints[1]);
 
             if (bombTask != null)
                 bombTask.cancel();
 
             bombTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                Integer integer = this.locationEntityIds.get(new int[]{(int) point2D.getX(), (int) point2D.getY()});
+                Integer integer = this.locationEntityIds.get(ints);
                 if (integer == null)
                     return;
                 PacketContainer itemOnEntityHead = PacketUtil.getItemOnEntityHead(integer, new ItemStack(Material.COAL_BLOCK));
