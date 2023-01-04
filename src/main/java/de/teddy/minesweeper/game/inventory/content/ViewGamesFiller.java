@@ -10,10 +10,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -103,6 +100,7 @@ public class ViewGamesFiller implements ContentFiller {
 
         map.put(itemStack, player1 -> inventory -> {
             board.map.startViewing(player1, board);
+            board.draw(Collections.singletonList(player1));
             player1.closeInventory();
         });
 
