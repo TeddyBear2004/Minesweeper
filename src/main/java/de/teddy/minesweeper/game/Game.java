@@ -45,18 +45,9 @@ public class Game {
     private final String difficulty;
     private final int inventoryPosition;
     private final ItemStack itemStack;
-    private final int minWidth;
-    private final int minHeight;
-    private final int maxWidth;
-    private final int maxHeight;
     private final ConnectionBuilder connectionBuilder;
 
     public Game(Plugin plugin, List<Game> games, Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int borderSize, int bombCount, String difficulty, Material material, int inventoryPosition) {
-        this.minWidth = -1;
-        this.minHeight = -1;
-        this.maxWidth = -1;
-        this.maxHeight = -1;
-
         this.connectionBuilder = connectionBuilder;
         this.plugin = plugin;
         this.games = games;
@@ -70,34 +61,13 @@ public class Game {
 
         this.itemStack = new ItemStack(material);
         ItemMeta itemMeta = itemStack.getItemMeta();
-        assert itemMeta != null;
 
-        itemMeta.setDisplayName(difficulty);
-        itemMeta.setLore(Collections.singletonList(language.getString("field_desc", String.valueOf(size), String.valueOf(size), String.valueOf(bombCount))));
+        if (itemMeta != null) {
+            itemMeta.setDisplayName(difficulty);
+            itemMeta.setLore(Collections.singletonList(language.getString("field_desc", String.valueOf(size), String.valueOf(size), String.valueOf(bombCount))));
+        }
+
         itemStack.setItemMeta(itemMeta);
-    }
-
-    public Game(Minesweeper plugin, List<Game> games, Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int minWidth, int minHeight, int maxWidth, int maxHeight, String difficulty) {
-        this.connectionBuilder = connectionBuilder;
-        this.size = -1;
-        this.bombCount = -1;
-        this.inventoryPosition = -1;
-        this.itemStack = new ItemStack(Material.AIR);
-
-        if (minWidth > maxWidth || minHeight > maxHeight)
-            throw new IllegalArgumentException("Min size cannot be bigger max size in custom game.");
-
-        this.minWidth = minWidth;
-        this.minHeight = minHeight;
-        this.maxWidth = maxWidth;
-        this.maxHeight = maxHeight;
-
-        this.plugin = plugin;
-        this.games = games;
-        this.language = language;
-        this.corner = corner;
-        this.spawn = spawn;
-        this.difficulty = difficulty;
     }
 
     private static void switchToMap(Player p, Game g) {
@@ -201,11 +171,7 @@ public class Game {
         return null;
     }
 
-    private void startGame(Player p, boolean shouldTeleport, int bombCount, int width, int height, long seed, boolean setSeed, boolean saveStats) {
-        if (minHeight != -1 || maxHeight != -1 || minWidth != -1 || maxWidth != -1)
-            if (minHeight > height || height > maxHeight || minWidth > width || width > maxWidth)
-                return;
-
+    public void startGame(Player p, boolean shouldTeleport, int bombCount, int width, int height, long seed, boolean setSeed, boolean saveStats) {
         stopGames(p, saveStats);
         Board b;
 

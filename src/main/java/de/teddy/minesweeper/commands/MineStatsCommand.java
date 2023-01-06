@@ -1,5 +1,6 @@
 package de.teddy.minesweeper.commands;
 
+import de.teddy.minesweeper.game.CustomGame;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.statistic.GameStatistic;
 import de.teddy.minesweeper.game.statistic.MapStatistic;
@@ -65,7 +66,7 @@ public class MineStatsCommand implements TabExecutor {
             }
 
             for (Game game : games) {
-                if (game.getDifficulty().equalsIgnoreCase(args[1])) {
+                if (!(game instanceof CustomGame) && game.getDifficulty().equalsIgnoreCase(args[1])) {
                     MapStatistic mapStatistic = new MapStatistic(GameStatistic.retrieveTopPerMap(connectionBuilder, game.getMap(), game.getBombCount(), 45));
 
                     player.openInventory(mapStatistic.getInventory());
@@ -109,6 +110,9 @@ public class MineStatsCommand implements TabExecutor {
                 });
             } else if (f.equalsIgnoreCase("game")) {
                 games.forEach(game -> {
+                    if(game instanceof CustomGame)
+                        return;
+
                     String id = game.getDifficulty();
 
                     if (id.startsWith(s)) {

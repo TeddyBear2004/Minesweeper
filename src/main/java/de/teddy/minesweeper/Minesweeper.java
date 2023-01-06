@@ -13,6 +13,7 @@ import de.teddy.minesweeper.events.GenericRightClickEvent;
 import de.teddy.minesweeper.events.InventoryClickEvents;
 import de.teddy.minesweeper.events.packets.LeftClickEvent;
 import de.teddy.minesweeper.events.packets.RightClickEvent;
+import de.teddy.minesweeper.game.CustomGame;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.HidePlayerScheduler;
 import de.teddy.minesweeper.game.expansions.StatsExpansion;
@@ -259,7 +260,7 @@ public final class Minesweeper extends JavaPlugin {
         int maxWidth = section.getInt("max-size.width");
         int maxHeight = section.getInt("max-size.height");
 
-        return new Game(this, games, language, connectionBuilder, corner, spawn, minWidth, minHeight, maxWidth, maxHeight, "custom");
+        return new CustomGame(this, games, language, connectionBuilder, corner, spawn, minWidth, minHeight, maxWidth, maxHeight, "custom");
     }
 
     private List<ModifierArea> loadAreas() {
