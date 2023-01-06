@@ -1,5 +1,6 @@
 package de.teddy.minesweeper.events;
 
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
@@ -21,9 +22,11 @@ import java.util.function.Consumer;
 public class InventoryClickEvents implements Listener {
 
     private final List<Game> games;
+    private final GameManager gameManager;
 
-    public InventoryClickEvents(List<Game> games) {
+    public InventoryClickEvents(List<Game> games, GameManager gameManager) {
         this.games = games;
+        this.gameManager = gameManager;
     }
 
     @EventHandler
@@ -72,7 +75,7 @@ public class InventoryClickEvents implements Listener {
                         .setSetSeed(true)
                         .setSaveStats(false)
                         .build(player);
-                Board board = Game.getBoard(player);
+                Board board = gameManager.getBoard(player);
                 try{
                     board.checkField(x + board.getCorner().getBlockX(), y + board.getCorner().getBlockZ(), false);
                     board.draw();

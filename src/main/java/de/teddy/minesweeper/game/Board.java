@@ -269,7 +269,7 @@ public class Board {
         map1.computeIfAbsent(playerClass, p -> new ArrayList<>()).add(player);
 
         Map<Painter, List<Player>> map2 = new HashMap<>();
-        map1.forEach((painterClass, players) -> map2.put(Game.PAINTER_MAP.get(painterClass), players));
+        map1.forEach((painterClass, players) -> map2.put(Painter.PAINTER_MAP.get(painterClass), players));
         return map2;
     }
 

@@ -1,6 +1,7 @@
 package de.teddy.minesweeper.game.inventory;
 
 import de.teddy.minesweeper.Minesweeper;
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.inventory.content.ContentFiller;
 import de.teddy.minesweeper.game.inventory.content.MainMenuFiller;
 import de.teddy.minesweeper.game.inventory.content.ViewGamesFiller;
@@ -41,8 +42,10 @@ public enum Inventories {
     public static ItemStack hourGlass;
     public static ItemStack barrier;
     public static ItemStack reload;
+    private static GameManager gameManager;
 
-    public static void initialise(int availableGamesInventoryLines, Language language) {
+    public static void initialise(int availableGamesInventoryLines, Language language, GameManager gameManager) {
+        Inventories.gameManager = gameManager;
         loadGameInventory(language);
         loadViewerInventory(language);
 
@@ -67,7 +70,7 @@ public enum Inventories {
     }
 
     private static List<ContentFiller> getIContentFillers() {
-        return List.of(new MainMenuFiller(Minesweeper.getPlugin(Minesweeper.class).getGames()), new ViewGamesFiller());
+        return List.of(new MainMenuFiller(Minesweeper.getPlugin(Minesweeper.class).getGames()), new ViewGamesFiller(gameManager));
     }
 
     private static void loadGameInventory(Language language) {

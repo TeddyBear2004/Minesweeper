@@ -1,7 +1,7 @@
 package de.teddy.minesweeper.game.inventory.content;
 
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.Board;
-import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.util.HeadGenerator;
 import org.bukkit.Material;
@@ -19,6 +19,11 @@ public class ViewGamesFiller implements ContentFiller {
     private static final int INVENTORY_SIZE = 54;
     private final static int START_SLOT = 0;
     private final static int END_SLOT = INVENTORY_SIZE - 9 - 1;
+    private final GameManager gameManager;
+
+    public ViewGamesFiller(GameManager gameManager){
+        this.gameManager = gameManager;
+    }
 
     @Override
     public Inventories getEInventory() {
@@ -34,7 +39,7 @@ public class ViewGamesFiller implements ContentFiller {
     public Map<ItemStack, Function<Player, Consumer<Inventory>>> insertConsumerItems(Inventory inventory) {
         Map<ItemStack, Function<Player, Consumer<Inventory>>> map = new HashMap<>();
 
-        Map<Player, Board> runningGames = Game.getRunningGames();
+        Map<Player, Board> runningGames = gameManager.getRunningGames();
         List<Player> players = new ArrayList<>(runningGames.keySet());
 
         ItemStack itemStack = new ItemStack(Material.AIR);

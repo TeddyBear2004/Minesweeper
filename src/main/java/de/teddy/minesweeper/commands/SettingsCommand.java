@@ -1,6 +1,5 @@
 package de.teddy.minesweeper.commands;
 
-import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.modifier.PersonalModifier;
 import de.teddy.minesweeper.game.painter.Painter;
 import de.teddy.minesweeper.game.texture.pack.ResourcePackHandler;
@@ -81,7 +80,7 @@ public class SettingsCommand implements TabExecutor {
                 if (args.length == 1) {
                     if (modifier.getPainterClass().isPresent()) {
                         try{
-                            Painter painter = Game.PAINTER_MAP.get(Class.forName(modifier.getPainterClass().get()));
+                            Painter painter = Painter.PAINTER_MAP.get(Class.forName(modifier.getPainterClass().get()));
 
                             player.sendMessage(ChatColor.GREEN + "Your current board style is: " + painter.getName());
                         }catch(ClassNotFoundException e){
@@ -95,7 +94,7 @@ public class SettingsCommand implements TabExecutor {
                     modifier.setPainterClass(null);
                     return true;
                 }
-                for (Painter painter : Game.PAINTER_MAP.values()) {
+                for (Painter painter : Painter.PAINTER_MAP.values()) {
                     if (painter.getName().equalsIgnoreCase(args[1])) {
                         modifier.setPainterClass(painter.getClass().getName());
                         player.sendMessage(ChatColor.GREEN + "The specified board style was applied.");
@@ -278,7 +277,7 @@ public class SettingsCommand implements TabExecutor {
                         strings.add("default");
                 }
                 case BOARD_STYLE -> {
-                    Game.PAINTER_MAP.values().forEach(painter -> {
+                    Painter.PAINTER_MAP.values().forEach(painter -> {
                         if (painter.getName().toLowerCase().startsWith(args[1].toLowerCase()))
                             strings.add(painter.getName());
 

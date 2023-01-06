@@ -1,8 +1,8 @@
 package de.teddy.minesweeper.game.modifier;
 
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.game.Board;
-import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.painter.Painter;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -128,11 +128,14 @@ public class PersonalModifier {
     public void setPainterClass(String painterClass) {
         this.painterClass = painterClass;
 
-        Board board = Game.getBoard(player);
-        if (board == null) board = Game.getBoardWatched(player);
+        GameManager gameManager = Minesweeper.getPlugin(Minesweeper.class).getGameManager();
+        Board board = gameManager.getBoard(player);
+        if (board == null) {
+            board = gameManager.getBoardWatched(player);
+        }
 
         if (board != null) {
-            Painter painter = Game.PAINTER_MAP.get(Painter.loadPainterClass(player.getPersistentDataContainer()));
+            Painter painter = Painter.PAINTER_MAP.get(Painter.loadPainterClass(player.getPersistentDataContainer()));
             painter.drawBlancField(board, Collections.singletonList(player));
         }
 
@@ -149,7 +152,7 @@ public class PersonalModifier {
         }
 
         if (board != null) {
-            Painter painter = Game.PAINTER_MAP.get(Painter.loadPainterClass(player.getPersistentDataContainer()));
+            Painter painter = Painter.PAINTER_MAP.get(Painter.loadPainterClass(player.getPersistentDataContainer()));
             painter.drawField(board, Collections.singletonList(player));
         }
     }

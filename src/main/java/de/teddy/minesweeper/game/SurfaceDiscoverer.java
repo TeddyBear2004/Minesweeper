@@ -2,9 +2,7 @@ package de.teddy.minesweeper.game;
 
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SurfaceDiscoverer {
@@ -132,4 +130,17 @@ public class SurfaceDiscoverer {
 
     }
 
+    public static int calculate3BV(Board board){
+        Set<Board.Field> checked = new HashSet<>();
+
+        for (Board.Field[] fields : board.getBoard()) {
+            for (Board.Field field : fields) {
+                if(checked.contains(field))
+                    continue;
+
+
+            }
+        }
+        return -1; //todo implement me
+    }
 }

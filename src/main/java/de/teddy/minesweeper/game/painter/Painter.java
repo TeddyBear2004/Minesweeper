@@ -13,13 +13,17 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public interface Painter {
 
     NamespacedKey PAINTER_KEY = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "painter_class");
 
     Class<? extends Painter> DEFAULT_PAINTER = BlockPainter.class;
+
+    Map<Class<? extends Painter>, Painter> PAINTER_MAP = new HashMap<>();
 
     static void storePainterClass(PersistentDataContainer container, Class<? extends Painter> clazz) {
         container.set(PAINTER_KEY, PersistentDataType.STRING, clazz.getName());
@@ -39,6 +43,10 @@ public interface Painter {
         }
 
         return clazz;
+    }
+
+    static Painter getPainter(Player player) {
+        return PAINTER_MAP.get(loadPainterClass(player.getPersistentDataContainer()));
     }
 
     String getName();

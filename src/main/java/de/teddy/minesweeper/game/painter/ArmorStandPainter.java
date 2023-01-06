@@ -8,6 +8,7 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedEnumEntityUseAction;
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.click.ClickHandler;
@@ -43,14 +44,16 @@ public class ArmorStandPainter implements Painter {
     public static final Material DARK_DEFAULT = Material.GREEN_CONCRETE_POWDER;
     private final Plugin plugin;
     private final ClickHandler clickHandler;
+    private final GameManager gameManager;
     private Map<Integer, ItemStack> currentItemStackPerEntityId = new HashMap<>();
     private Map<Integer, int[]> armorStandEntityIds;
     private Map<int[], Integer> locationEntityIds;
     private BukkitTask bombTask;
 
-    public ArmorStandPainter(Plugin plugin, ClickHandler clickHandler) {
+    public ArmorStandPainter(Plugin plugin, ClickHandler clickHandler, GameManager gameManager) {
         this.plugin = plugin;
         this.clickHandler = clickHandler;
+        this.gameManager = gameManager;
     }
 
     @Override
@@ -246,7 +249,7 @@ public class ArmorStandPainter implements Painter {
     @Override
     public void onRightClick(Player player, PacketEvent event, Game game, PacketContainer packet) {
         if (packet.getType() == PacketType.Play.Client.USE_ITEM) {
-            Game.PAINTER_MAP.get(BlockPainter.class).onRightClick(player, event, game, packet);
+            Painter.PAINTER_MAP.get(BlockPainter.class).onRightClick(player, event, game, packet);
             return;
         }
 
@@ -257,7 +260,7 @@ public class ArmorStandPainter implements Painter {
 
         Integer entityId = event.getPacket().getIntegers().read(0);
 
-        Board board = Game.getBoard(player);
+        Board board = gameManager.getBoard(player);
         if (board == null) return;
 
         Location location = getLocation(board, entityId);
@@ -273,7 +276,7 @@ public class ArmorStandPainter implements Painter {
     @Override
     public void onLeftClick(Player player, PacketEvent event, Game game, PacketContainer packet) {
         if (packet.getType() == PacketType.Play.Client.BLOCK_DIG) {
-            Game.PAINTER_MAP.get(BlockPainter.class).onLeftClick(player, event, game, packet);
+            Painter.PAINTER_MAP.get(BlockPainter.class).onLeftClick(player, event, game, packet);
             return;
         }
 
@@ -283,7 +286,7 @@ public class ArmorStandPainter implements Painter {
             return;
 
         Integer entityId = event.getPacket().getIntegers().read(0);
-        Board board = Game.getBoard(player);
+        Board board = gameManager.getBoard(player);
 
         if (board == null)
             return;

@@ -1,5 +1,6 @@
 package de.teddy.minesweeper.events;
 
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.inventory.Inventories;
@@ -25,13 +26,15 @@ public class GenericEvents implements Listener {
 
     private final List<Game> games;
     private final Game customGame;
+    private final GameManager gameManager;
     private final ResourcePackHandler resourcePackHandler;
     private final Team noCollision;
 
-    public GenericEvents(List<Game> games, ResourcePackHandler resourcePackHandler, Game customGame) {
+    public GenericEvents(List<Game> games, ResourcePackHandler resourcePackHandler, Game customGame, GameManager gameManager) {
         this.games = games;
         this.resourcePackHandler = resourcePackHandler;
         this.customGame = customGame;
+        this.gameManager = gameManager;
         ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
         if (scoreboardManager != null) {
             Scoreboard newScoreboard = scoreboardManager.getNewScoreboard();
@@ -75,10 +78,10 @@ public class GenericEvents implements Listener {
 
     @EventHandler
     public void onPlayerQuitEvent(PlayerQuitEvent event) {
-        Game game = Game.getGame(event.getPlayer());
+        Game game = gameManager.getGame(event.getPlayer());
         if (game != null) {
-            Game.finishGame(event.getPlayer(), false);
-            Board board = Game.getBoard(event.getPlayer());
+            gameManager.finishGame(event.getPlayer(), false);
+            Board board = gameManager.getBoard(event.getPlayer());
             if (board != null)
                 board.breakGame();
         }
@@ -143,7 +146,7 @@ public class GenericEvents implements Listener {
 
         Block block = event.getClickedBlock();
 
-        if (Game.getBoard(event.getPlayer()) != null || Game.getBoardWatched(event.getPlayer()) != null)
+        if (gameManager.getBoard(event.getPlayer()) != null || gameManager.getBoardWatched(event.getPlayer()) != null)
             return;
 
         for (Game game : games) {

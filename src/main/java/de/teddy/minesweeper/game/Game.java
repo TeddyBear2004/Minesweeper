@@ -23,16 +23,7 @@ import java.util.*;
 
 public class Game {
 
-    public static final Map<Class<? extends Painter>, Painter> PAINTER_MAP = new HashMap<>();
-    private static final Map<Player, Board> gameWatched = new HashMap<>();
-    private static final Map<Player, Board> runningGames = new HashMap<>();
-    private static final Map<Player, Game> playerLocation = new HashMap<>();
-
     static {
-        ClickHandler clickHandler = new ClickHandler();
-
-        PAINTER_MAP.put(BlockPainter.class, new BlockPainter(Minesweeper.getPlugin(Minesweeper.class), clickHandler));
-        PAINTER_MAP.put(ArmorStandPainter.class, new ArmorStandPainter(Minesweeper.getPlugin(Minesweeper.class), clickHandler));
     }
 
     private final Plugin plugin;
@@ -45,9 +36,11 @@ public class Game {
     private final String difficulty;
     private final int inventoryPosition;
     private final ItemStack itemStack;
+    private final GameManager gameManager;
     private final ConnectionBuilder connectionBuilder;
 
-    public Game(Plugin plugin, List<Game> games, Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int borderSize, int bombCount, String difficulty, Material material, int inventoryPosition) {
+    public Game(Plugin plugin, GameManager gameManager, List<Game> games, Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int borderSize, int bombCount, String difficulty, Material material, int inventoryPosition) {
+        this.gameManager = gameManager;
         this.connectionBuilder = connectionBuilder;
         this.plugin = plugin;
         this.games = games;
@@ -68,79 +61,6 @@ public class Game {
         }
 
         itemStack.setItemMeta(itemMeta);
-    }
-
-    private static void switchToMap(Player p, Game g) {
-        Game.stopWatching(p);
-        Board b = runningGames.get(p);
-        if (b != null) {
-            Game.finishGame(p);
-        }
-        playerLocation.put(p, g);
-        if (Modifier.getInstance().allowFly() || Modifier.getInstance().isInside(g.getViewingSpawn())) {
-            p.setAllowFlight(true);
-            p.setFlying(true);
-        }
-        p.teleport(g.getViewingSpawn());
-    }
-
-    private static void startWatching(Player p, Board b) {
-        stopWatching(p);
-        Game cur = playerLocation.get(p);
-        if (cur != b.map) {
-            switchToMap(p, b.map);
-        }
-        b.draw(Collections.singletonList(p));
-        gameWatched.put(p, b);
-        b.addViewer(p);
-    }
-
-    private static void stopWatching(Player p) {
-        Board b = gameWatched.remove(p);
-        if (b != null) {
-            b.removeViewer(p);
-        }
-    }
-
-    public static void stopGames(Player p, boolean saveStats) {
-        Board b = runningGames.get(p);
-        if (b != null) {
-            b.drawBlancField();
-            b.finish(false, saveStats);
-            b.getViewers().forEach(gameWatched::remove);
-            b.clearViewers();
-        } else {
-            stopWatching(p);
-        }
-        runningGames.remove(p);
-    }
-
-    public static Game getGame(Player player) {
-        return playerLocation.get(player);
-    }
-
-    public static Board getBoard(Player Player) {
-        return runningGames.get(Player);
-    }
-
-    public static Board getBoardWatched(Player player) {
-        return gameWatched.get(player);
-    }
-
-    public static void finishGame(Player p) {
-        finishGame(p, true);
-    }
-
-    public static void finishGame(Player p, boolean saveStats) {
-        Game.getGame(p).finish(p, saveStats);
-    }
-
-    public static Map<Player, Board> getRunningGames() {
-        return runningGames;
-    }
-
-    public static Painter getPainter(Player player) {
-        return PAINTER_MAP.get(Painter.loadPainterClass(player.getPersistentDataContainer()));
     }
 
     public boolean isBlockOutsideGame(Block block) {
@@ -165,24 +85,24 @@ public class Game {
     }
 
     public Board getRunningGame() {
-        for (Board b : runningGames.values())
+        for (Board b : gameManager.runningGames.values())
             if (b.map == this)
                 return b;
         return null;
     }
 
-    public void startGame(Player p, boolean shouldTeleport, int bombCount, int width, int height, long seed, boolean setSeed, boolean saveStats) {
-        stopGames(p, saveStats);
+    public Board startGame(Player p, boolean shouldTeleport, int bombCount, int width, int height, long seed, boolean setSeed, boolean saveStats) {
+        gameManager.stopGames(p, saveStats);
         Board b;
 
         b = new Board(plugin, language, connectionBuilder, this, width, height, bombCount, corner, p, seed, setSeed, saveStats);
         b.drawBlancField(Collections.singletonList(p));
-        startWatching(p, b);
-        runningGames.put(p, b);
+        gameManager.startWatching(p, b);
+        gameManager.runningGames.put(p, b);
 
         Bukkit.getOnlinePlayers().forEach(onPlayer -> {
-            if (gameWatched.get(onPlayer) == null && b.map == playerLocation.get(onPlayer)) {
-                startWatching(onPlayer, b);
+            if (gameManager.gameWatched.get(onPlayer) == null && b.map == gameManager.playerLocation.get(onPlayer)) {
+                gameManager.startWatching(onPlayer, b);
                 b.setScoreBoard(onPlayer);
             }
         });
@@ -198,16 +118,18 @@ public class Game {
                 p.setFlying(true);
             p.teleport(this.getViewingSpawn());
         }
+
+        return b;
     }
 
-    private void finish(Player p, boolean saveStats) {
-        stopGames(p, saveStats);
+    protected void finish(Player p, boolean saveStats) {
+        gameManager.stopGames(p, saveStats);
         Board b = getRunningGame();
         if (b != null) {
             b.drawBlancField(Collections.singletonList(p));
             Bukkit.getOnlinePlayers().forEach(onPlayer -> {
-                if (gameWatched.get(onPlayer) == null && b.map == playerLocation.get(onPlayer)) {
-                    startWatching(onPlayer, b);
+                if (gameManager.gameWatched.get(onPlayer) == null && b.map == gameManager.playerLocation.get(onPlayer)) {
+                    gameManager.startWatching(onPlayer, b);
                 }
             });
         }
@@ -215,9 +137,9 @@ public class Game {
 
     public void startViewing(Player player, Board runningGame) {
         if (runningGame == null) {
-            Game.switchToMap(player, games.get(0));
+            gameManager.switchToMap(player, games.get(0));
         } else {
-            Game.startWatching(player, runningGame);
+            gameManager.startWatching(player, runningGame);
         }
     }
 

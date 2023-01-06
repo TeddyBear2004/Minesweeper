@@ -8,6 +8,7 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.click.ClickHandler;
@@ -54,11 +55,13 @@ public class BlockPainter implements Painter {
     public static final Material DARK_DEFAULT = Material.GREEN_CONCRETE_POWDER;
     private final Plugin plugin;
     private final ClickHandler clickHandler;
+    private final GameManager gameManager;
     private BukkitTask bombTask;
 
-    public BlockPainter(Plugin plugin, ClickHandler clickHandler) {
+    public BlockPainter(Plugin plugin, ClickHandler clickHandler, GameManager gameManager) {
         this.plugin = plugin;
         this.clickHandler = clickHandler;
+        this.gameManager = gameManager;
     }
 
     private static void sendMultiBlockChange(List<Player> players, Map<BlockPosition, Pair<List<Short>, List<WrappedBlockData>>> subChunkMap) {
@@ -232,13 +235,13 @@ public class BlockPainter implements Painter {
         BlockPosition blockPosition = packet.getMovingBlockPositions().read(0).getBlockPosition();
         Location location = blockPosition.toLocation(player.getWorld());
 
-        Board board = Game.getBoard(player);
+        Board board = gameManager.getBoard(player);
 
         if (board != null && board.isBlockOutsideGame(location.getBlock()))
             return;
 
         if (board == null) {
-            Board watching = Game.getBoardWatched(player);
+            Board watching = gameManager.getBoardWatched(player);
 
             if (watching != null) {
                 Board.Field field = watching.getField(location);
@@ -273,15 +276,15 @@ public class BlockPainter implements Painter {
         BlockPosition blockPosition = packet.getBlockPositionModifier().read(0);
         Location location = blockPosition.toLocation(player.getWorld());
 
-        Board board = Game.getBoard(player);
+        Board board = gameManager.getBoard(player);
         if (board != null && board.isBlockOutsideGame(location.getBlock()))
             return;
 
         if (board == null)
-            board = Game.getBoardWatched(player);
+            board = gameManager.getBoardWatched(player);
 
         if (board == null) {
-            Board watching = Game.getBoardWatched(player);
+            Board watching = gameManager.getBoardWatched(player);
 
             if (watching != null) {
                 Board.Field field = watching.getField(location);

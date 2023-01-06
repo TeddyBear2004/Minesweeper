@@ -2,6 +2,7 @@ package de.teddy.minesweeper.events;
 
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.inventory.Inventories;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,19 +15,25 @@ import java.util.Objects;
 
 public class GenericRightClickEvent implements Listener {
 
+    private final GameManager gameManager;
+
+    public GenericRightClickEvent(GameManager gameManager) {
+        this.gameManager = gameManager;
+    }
+
     @EventHandler
     public void onPlayerInteractEvent(PlayerInteractEvent event) {
         if (Objects.equals(event.getHand(), EquipmentSlot.OFF_HAND) || event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK || event.getItem() == null)
             return;
         ItemStack itemStack = event.getItem();
 
-        Game game = Game.getGame(event.getPlayer());
+        Game game = gameManager.getGame(event.getPlayer());
 
         if (game != null) {
             if (itemStack.equals(Inventories.reload)) {
-                Board board = Game.getBoard(event.getPlayer());
+                Board board = gameManager.getBoard(event.getPlayer());
                 if (board.isGenerated()) {
-                    Game.finishGame(event.getPlayer(), false);
+                    gameManager.finishGame(event.getPlayer(), false);
                     game.getStarter()
                             .setBombCount(board.getBombCount())
                             .setShouldTeleport(false)
@@ -37,7 +44,7 @@ public class GenericRightClickEvent implements Listener {
                 }
                 return;
             } else if (itemStack.equals(Inventories.barrier)) {
-                Game.finishGame(event.getPlayer(), false);
+                gameManager.finishGame(event.getPlayer(), false);
                 event.getPlayer().getInventory().setContents(Inventories.VIEWER_INVENTORY);
                 event.setCancelled(true);
                 return;

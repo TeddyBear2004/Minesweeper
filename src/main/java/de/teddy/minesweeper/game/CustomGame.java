@@ -15,8 +15,8 @@ public class CustomGame extends Game {
     private final int maxWidth;
     private final int maxHeight;
 
-    public CustomGame(Minesweeper plugin, List<Game> games, Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int minWidth, int minHeight, int maxWidth, int maxHeight, String difficulty) {
-        super(plugin, games, language, connectionBuilder, corner, spawn, -1, -1, difficulty, Material.AIR, -1);
+    public CustomGame(Minesweeper plugin, GameManager gameManager, List<Game> games, Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int minWidth, int minHeight, int maxWidth, int maxHeight, String difficulty) {
+        super(plugin, gameManager,games, language, connectionBuilder, corner, spawn, -1, -1, difficulty, Material.AIR, -1);
 
         if (minWidth > maxWidth || minHeight > maxHeight)
             throw new IllegalArgumentException("Min size cannot be bigger max size in custom game.");
@@ -29,11 +29,11 @@ public class CustomGame extends Game {
 
 
     @Override
-    public void startGame(Player p, boolean shouldTeleport, int bombCount, int width, int height, long seed, boolean setSeed, boolean saveStats) {
+    public Board startGame(Player p, boolean shouldTeleport, int bombCount, int width, int height, long seed, boolean setSeed, boolean saveStats) {
         if (minHeight > height || height > maxHeight || minWidth > width || width > maxWidth)
-            return;
+            return null;
 
-        super.startGame(p, shouldTeleport, bombCount, width, height, seed, setSeed, saveStats);
+        return super.startGame(p, shouldTeleport, bombCount, width, height, seed, setSeed, saveStats);
     }
 
 }
