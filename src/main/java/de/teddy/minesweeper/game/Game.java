@@ -1,12 +1,7 @@
 package de.teddy.minesweeper.game;
 
-import de.teddy.minesweeper.Minesweeper;
-import de.teddy.minesweeper.game.click.ClickHandler;
 import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.game.modifier.Modifier;
-import de.teddy.minesweeper.game.painter.ArmorStandPainter;
-import de.teddy.minesweeper.game.painter.BlockPainter;
-import de.teddy.minesweeper.game.painter.Painter;
 import de.teddy.minesweeper.util.ConnectionBuilder;
 import de.teddy.minesweeper.util.IsBetween;
 import de.teddy.minesweeper.util.Language;
@@ -19,12 +14,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 public class Game {
-
-    static {
-    }
 
     private final Plugin plugin;
     private final List<Game> games;
