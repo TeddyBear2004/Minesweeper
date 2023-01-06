@@ -1,8 +1,8 @@
 package de.teddy.minesweeper.game.modifier;
 
-import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.game.Board;
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.painter.Painter;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -37,30 +37,9 @@ public class PersonalModifier {
     private Boolean revealOnDoubleClick;
     private Boolean useMultiFlag;
 
-    private PersonalModifier(Player player,
-                             PersistentDataContainer container,
-                             String resourcePackUrl,
-                             Integer doubleClickDuration,
-                             String painterClass,
-                             Boolean enableQuestionMark,
-                             Boolean enableMarks,
-                             Boolean enableDoubleClick,
-                             Boolean hidePlayer,
-                             Double hidePlayerDistance,
-                             Boolean revealOnDoubleClick,
-                             Boolean useMultiFlag) {
+    private PersonalModifier(Player player, PersistentDataContainer container) {
         this.player = player;
         this.container = container;
-        this.resourcePackUrl = resourcePackUrl;
-        this.doubleClickDuration = doubleClickDuration;
-        this.painterClass = painterClass;
-        this.enableQuestionMark = enableQuestionMark;
-        this.enableMarks = enableMarks;
-        this.enableDoubleClick = enableDoubleClick;
-        this.hidePlayer = hidePlayer;
-        this.hidePlayerDistance = hidePlayerDistance;
-        this.revealOnDoubleClick = revealOnDoubleClick;
-        this.useMultiFlag = useMultiFlag;
     }
 
     public static PersonalModifier getPersonalModifier(Player player) {
@@ -68,6 +47,8 @@ public class PersonalModifier {
     }
 
     public static PersonalModifier getPersonalModifier(Player player, PersistentDataContainer container) {
+        PersonalModifier modifier = new PersonalModifier(player, container);
+
         String resourcePackUrl = container.get(RESOURCE_PACK_URL_KEY, PersistentDataType.STRING);
         Integer doubleClickDuration = container.get(DOUBLE_CLICK_DURATION_KEY, PersistentDataType.INTEGER);
         String painterClass = container.get(PAINTER_CLASS_KEY, PersistentDataType.STRING);
@@ -79,18 +60,18 @@ public class PersonalModifier {
         Byte revealOnDoubleClick = container.get(REVEAL_ON_DOUBLE_CLICK, PersistentDataType.BYTE);
         Byte useMultiFlag = container.get(USE_MULTI_FLAG, PersistentDataType.BYTE);
 
-        return new PersonalModifier(player,
-                                    container,
-                                    resourcePackUrl,
-                                    doubleClickDuration == null ? 350 : doubleClickDuration,
-                                    painterClass,
-                                    enableQuestionMark == null ? null : enableQuestionMark == 0b1,
-                                    enableMarks == null ? null : enableMarks == 0b1,
-                                    enableDoubleClick == null ? null : enableDoubleClick == 0b1,
-                                    hidePlayer == null ? null : hidePlayer == 0b1,
-                                    hidePlayerDistance,
-                                    revealOnDoubleClick == null ? null : revealOnDoubleClick == 0b1,
-                                    useMultiFlag == null ? null : useMultiFlag == 0b1);
+        modifier.resourcePackUrl = resourcePackUrl;
+        modifier.doubleClickDuration = doubleClickDuration;
+        modifier.painterClass = painterClass;
+        modifier.enableQuestionMark = enableQuestionMark == null ? null : enableQuestionMark == 1;
+        modifier.enableMarks = enableMarks == null ? null : enableMarks == 1;
+        modifier.enableDoubleClick = enableDoubleClick == null ? null : enableDoubleClick == 1;
+        modifier.hidePlayer = hidePlayer == null ? null : hidePlayer == 1;
+        modifier.hidePlayerDistance = hidePlayerDistance;
+        modifier.revealOnDoubleClick = revealOnDoubleClick == null ? null : revealOnDoubleClick == 1;
+        modifier.useMultiFlag = useMultiFlag == null ? null : useMultiFlag == 1;
+
+        return modifier;
     }
 
     public Optional<String> getResourcePackUrl() {
