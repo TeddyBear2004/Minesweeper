@@ -1,4 +1,4 @@
-package de.teddy.minesweeper.game;
+package de.teddy.minesweeper.scheduler;
 
 import de.teddy.minesweeper.game.modifier.PersonalModifier;
 import org.bukkit.Bukkit;
