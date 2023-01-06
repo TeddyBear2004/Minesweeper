@@ -296,7 +296,7 @@ public class Board {
         this.player.sendMessage(language.getString("message_time_needed", actualTimeNeededString));
         this.player.sendMessage("Seed: " + seed);
 
-        this.player.sendTitle(ChatColor.DARK_GREEN + language.getString("title_win"), ChatColor.GREEN + language.getString("message_time_needed", getActualTimeNeededString()), 10, 70, 20);
+        this.player.sendTitle(ChatColor.DARK_GREEN + language.getString("title_win"), ChatColor.GREEN + language.getString("message_time_needed", actualTimeNeededString), 10, 70, 20);
         PacketUtil.sendSoundEffect(this.player, Sound.UI_TOAST_CHALLENGE_COMPLETE, .5f, this.player.getLocation());
         PacketUtil.sendActionBar(this.player, actualTimeNeededString);
     }
