@@ -302,16 +302,10 @@ public class BlockPainter implements Painter {
         EnumWrappers.PlayerDigType digType = packet.getPlayerDigTypes().read(0);
         if (field != null && digType == EnumWrappers.PlayerDigType.START_DESTROY_BLOCK) {
             if (location.getBlockY() - game.getFieldHeight() == 0) {
-                board.draw();
                 event.setCancelled(true);
             } else if (location.getBlockY() - game.getFieldHeight() == 1) {
                 PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(field.getMark()));
             }
-        }
-
-        if (digType == EnumWrappers.PlayerDigType.STOP_DESTROY_BLOCK && field != null) {
-            board.draw();
-            return;
         }
 
         if (digType != EnumWrappers.PlayerDigType.START_DESTROY_BLOCK)
