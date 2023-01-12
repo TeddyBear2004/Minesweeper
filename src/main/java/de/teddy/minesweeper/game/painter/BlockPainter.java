@@ -89,7 +89,7 @@ public class BlockPainter implements Painter {
 
     @Override
     public void drawBlancField(Board board, List<Player> players) {
-        if (board == null || !Board.notTest)
+        if (board == null)
             return;
         Map<BlockPosition, Pair<List<Short>, List<WrappedBlockData>>> subChunkMap = new HashMap<>();
 

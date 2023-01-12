@@ -21,7 +21,6 @@ import java.util.*;
 public class Board {
 
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("mm:ss:SSS");
-    public static boolean notTest = true;
     private final Game game;
     private final Plugin plugin;
     private final Language language;
@@ -70,10 +69,9 @@ public class Board {
         if (Bukkit.getScoreboardManager() != null)
             this.scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
 
-        if (notTest) {
-            new BoardScheduler(this).runTaskTimer(plugin, 0, 1);
-            draw();
-        }
+        new BoardScheduler(this).runTaskTimer(plugin, 0, 1);
+        draw();
+
     }
 
     public static short convertToLocal(int x, int y, int z) {

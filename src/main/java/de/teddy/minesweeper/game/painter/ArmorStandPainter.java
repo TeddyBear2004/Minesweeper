@@ -63,7 +63,7 @@ public class ArmorStandPainter implements Painter {
 
     @Override
     public void drawBlancField(Board board, List<Player> players) {
-        if (board == null || !Board.notTest)
+        if (board == null)
             return;
 
         if (armorStandEntityIds != null) {
