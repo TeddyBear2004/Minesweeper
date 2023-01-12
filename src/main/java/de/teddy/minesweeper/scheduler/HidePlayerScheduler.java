@@ -19,8 +19,8 @@ public class HidePlayerScheduler extends BukkitRunnable {
         Bukkit.getOnlinePlayers().forEach(player -> {
             PersonalModifier modifier = PersonalModifier.getPersonalModifier(player);
 
-            boolean hidePlayer = modifier.isHidePlayer().orElse(false);
-            double distance = modifier.getHidePlayerDistance().orElse((double) 3);
+            boolean hidePlayer = modifier.<Boolean>get(PersonalModifier.ModifierType.HIDE_PLAYER).orElse(false);
+            double distance = modifier.<Double>get(PersonalModifier.ModifierType.HIDE_PLAYER_DISTANCE).orElse(3.0);
             Location location = player.getLocation();
 
             player.getWorld().getPlayers().forEach(other -> {

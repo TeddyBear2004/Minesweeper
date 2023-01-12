@@ -53,15 +53,15 @@ public class ClickHandler {
 
                 if (field.isCovered()) {
                     board.checkField(location.getBlockX(), location.getBlockZ());
-                } else if (l - lastLeftClick.getOrDefault(player, (long) -1000) <= personalModifier.getDoubleClickDuration().orElse(350)) {
-                    if (personalModifier.isRevealOnDoubleClick().orElse(true)) {
+                } else if (l - lastLeftClick.getOrDefault(player, (long) -1000) <= personalModifier.<Integer>get(PersonalModifier.ModifierType.DOUBLE_CLICK_DURATION).orElse(350)) {
+                    if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.REVEAL_ON_DOUBLE_CLICK).orElse(true)) {
                         board.checkNumber(location.getBlockX(), location.getBlockZ());
                     } else {
                         board.highlightBlocksAround(field);
                     }
                 }
 
-                if (personalModifier.isEnableDoubleClick().orElse(false))
+                if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_DOUBLE_CLICK).orElse(false))
                     lastLeftClick.put(player, l);
             }catch(BombExplodeException e){
                 board.lose();
@@ -89,15 +89,15 @@ public class ClickHandler {
 
         if (field.isCovered())
             field.reverseMark();
-        else if (personalModifier.isUseMultiFlag().orElse(false)) {
+        else if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.USE_MULTI_FLAG).orElse(false)) {
             if (l - lastLastRightClick.getOrDefault(player, (long) -1000) <= 700)
                 SurfaceDiscoverer.flagFieldsNextToNumber(board, field.getX(), field.getY(), false);
-            else if (l - lastRightClick.getOrDefault(player, (long) -1000) <= personalModifier.getDoubleClickDuration().orElse(350))
+            else if (l - lastRightClick.getOrDefault(player, (long) -1000) <= personalModifier.<Integer>get(PersonalModifier.ModifierType.DOUBLE_CLICK_DURATION).orElse(350))
                 SurfaceDiscoverer.flagFieldsNextToNumber(board, field.getX(), field.getY(), true);
 
         }
 
-        if (personalModifier.isEnableDoubleClick().orElse(false)) {
+        if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_DOUBLE_CLICK).orElse(false)) {
             lastLastRightClick.put(player, lastRightClick.getOrDefault(player, (long) -1000));
             lastRightClick.put(player, l);
         }

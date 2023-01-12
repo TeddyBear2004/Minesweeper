@@ -20,7 +20,7 @@ public class ExternalWebServerHandler implements ResourcePackHandler {
     public String getUrl(Player player) {
         PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
 
-        return personalModifier.getResourcePackUrl().orElse(link);
+        return personalModifier.<String>get(PersonalModifier.ModifierType.RESOURCE_PACK_URL).orElse(link);
     }
 
     @Override

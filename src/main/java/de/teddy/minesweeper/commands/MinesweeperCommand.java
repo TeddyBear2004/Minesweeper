@@ -104,6 +104,7 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
                                 .setBombCount(bombCount)
                                 .setSeed(Long.parseLong(args[2]))
                                 .setSetSeed(true)
+                                .setSaveStats(false)
                                 .build(player);
                     }catch(NumberFormatException ignored){
                         player.sendMessage("Please write a whole number as second and third argument.");

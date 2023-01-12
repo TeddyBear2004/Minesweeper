@@ -6,6 +6,7 @@ import com.comphenix.protocol.events.PacketEvent;
 import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
+import de.teddy.minesweeper.game.modifier.PersonalModifier;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -16,6 +17,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface Painter {
 
@@ -29,16 +31,17 @@ public interface Painter {
         container.set(PAINTER_KEY, PersistentDataType.STRING, clazz.getName());
     }
 
-    static Class<? extends Painter> loadPainterClass(PersistentDataContainer container) {
+    @SuppressWarnings("unchecked")
+    static Class<? extends Painter> loadPainterClass(Player player) {
+        PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
+
         Class<? extends Painter> clazz;
         try{
-            String name = container.get(PAINTER_KEY, PersistentDataType.STRING);
+            Optional<String> cl = personalModifier.get(PersonalModifier.ModifierType.PAINTER_CLASS);
 
-            if (name != null)
-                clazz = Class.forName(name).asSubclass(Painter.class);
-            else
-                clazz = DEFAULT_PAINTER;
-        }catch(ClassNotFoundException | ClassCastException e){
+            clazz = cl.isPresent() ? (Class<? extends Painter>) Class.forName(cl.get()) : DEFAULT_PAINTER;
+        }catch(ClassCastException | ClassNotFoundException e){
+            e.printStackTrace();
             clazz = DEFAULT_PAINTER;
         }
 
@@ -46,7 +49,7 @@ public interface Painter {
     }
 
     static Painter getPainter(Player player) {
-        return PAINTER_MAP.get(loadPainterClass(player.getPersistentDataContainer()));
+        return PAINTER_MAP.get(loadPainterClass(player));
     }
 
     String getName();

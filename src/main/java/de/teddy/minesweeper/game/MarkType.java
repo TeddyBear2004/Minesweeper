@@ -29,7 +29,7 @@ public enum MarkType {
 
         if (player != null) {
             PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
-            if (!personalModifier.isEnableQuestionMark().orElse(false) && values.length > 2 && nextId == 2) {
+            if (!personalModifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_QUESTION_MARK).orElse(false) && values.length > 2 && nextId == 2) {
                 nextId = 0;
             }
         }

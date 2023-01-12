@@ -1,5 +1,8 @@
 package de.teddy.minesweeper.commands;
 
+import de.teddy.minesweeper.Minesweeper;
+import de.teddy.minesweeper.game.Board;
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.modifier.PersonalModifier;
 import de.teddy.minesweeper.game.painter.Painter;
 import de.teddy.minesweeper.game.texture.pack.ResourcePackHandler;
@@ -10,9 +13,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class SettingsCommand implements TabExecutor {
 
@@ -42,11 +43,11 @@ public class SettingsCommand implements TabExecutor {
         switch(args[0].toLowerCase()){
             case CUSTOM_RESOURCE_PACK_URL -> {
                 if (args.length == 1) {
-                    player.sendMessage(ChatColor.GREEN + "Your current resource pack url is: " + modifier.getResourcePackUrl().orElse("default"));
+                    player.sendMessage(ChatColor.GREEN + "Your current resource pack url is: " + modifier.get(PersonalModifier.ModifierType.RESOURCE_PACK_URL).orElse("default"));
                     break;
                 }
                 if (args[1].equalsIgnoreCase("default")) {
-                    modifier.setResourcePackUrl(null);
+                    modifier.set(PersonalModifier.ModifierType.RESOURCE_PACK_URL, null);
                     return true;
                 }
                 String url = args[1];
@@ -54,23 +55,23 @@ public class SettingsCommand implements TabExecutor {
                     player.sendMessage(ChatColor.DARK_RED + "Please make sure that the url starts with http:// or https://");
                     return true;
                 }
-                modifier.setResourcePackUrl(url);
+                modifier.set(PersonalModifier.ModifierType.RESOURCE_PACK_URL, url);
                 player.sendMessage(ChatColor.GREEN + "The specified resource pack url was applied.");
                 packHandler.apply(player);
             }
             case QUICK_REVEAL_DURATION -> {
                 if (args.length == 1) {
-                    player.sendMessage(ChatColor.GREEN + "Your current quick reveal duration (time between double clicks) is: " + (modifier.getDoubleClickDuration().isPresent() ? modifier.getDoubleClickDuration().get() : "default"));
+                    player.sendMessage(ChatColor.GREEN + "Your current quick reveal duration (time between double clicks) is: " + (modifier.get(PersonalModifier.ModifierType.DOUBLE_CLICK_DURATION).isPresent() ? modifier.<Integer>get(PersonalModifier.ModifierType.DOUBLE_CLICK_DURATION).orElse(0) : "default"));
                     break;
                 }
                 if (args[1].equalsIgnoreCase("default")) {
-                    modifier.setDoubleClickDuration(null);
+                    modifier.set(PersonalModifier.ModifierType.DOUBLE_CLICK_DURATION, null);
                     return true;
                 }
                 try{
                     int number = Integer.parseInt(args[1]);
 
-                    modifier.setDoubleClickDuration(number);
+                    modifier.set(PersonalModifier.ModifierType.DOUBLE_CLICK_DURATION, number);
                     player.sendMessage(ChatColor.GREEN + "The specified quick reveal duration was applied.");
                 }catch(NumberFormatException e){
                     player.sendMessage(ChatColor.DARK_RED + "Please make sure that you provide a valid number.");
@@ -78,26 +79,64 @@ public class SettingsCommand implements TabExecutor {
             }
             case BOARD_STYLE -> {
                 if (args.length == 1) {
-                    if (modifier.getPainterClass().isPresent()) {
+                    Optional<String> painterClass = modifier.get(PersonalModifier.ModifierType.PAINTER_CLASS);
+                    if (painterClass.isPresent()) {
                         try{
-                            Painter painter = Painter.PAINTER_MAP.get(Class.forName(modifier.getPainterClass().get()));
+                            Painter painter = Painter.PAINTER_MAP.get(Class.forName(painterClass.get()));
 
                             player.sendMessage(ChatColor.GREEN + "Your current board style is: " + painter.getName());
                         }catch(ClassNotFoundException e){
                             player.sendMessage(ChatColor.DARK_RED + "An unknown error has occurred.");
                         }
                     } else
-                        player.sendMessage(ChatColor.GREEN + "Your current board style is: " + modifier.getPainterClass().orElse("default"));
+                        player.sendMessage(ChatColor.GREEN + "Your current board style is: " + painterClass.orElse("default"));
                     break;
                 }
                 if (args[1].equalsIgnoreCase("default")) {
-                    modifier.setPainterClass(null);
+                    GameManager gameManager = Minesweeper.getPlugin(Minesweeper.class).getGameManager();
+                    Board board = gameManager.getBoard(player);
+                    if (board == null) {
+                        board = gameManager.getBoardWatched(player);
+                    }
+
+                    if (board != null) {
+                        Painter painter = Painter.PAINTER_MAP.get(Painter.loadPainterClass(player));
+                        painter.drawBlancField(board, Collections.singletonList(player));
+                    }
+
+
+                    modifier.set(PersonalModifier.ModifierType.PAINTER_CLASS, null);
+                    Painter.storePainterClass(player.getPersistentDataContainer(), Painter.DEFAULT_PAINTER);
+
+
+                    if (board != null)
+                        Painter.getPainter(player).drawField(board, Collections.singletonList(player));
+
                     return true;
                 }
                 for (Painter painter : Painter.PAINTER_MAP.values()) {
                     if (painter.getName().equalsIgnoreCase(args[1])) {
-                        modifier.setPainterClass(painter.getClass().getName());
                         player.sendMessage(ChatColor.GREEN + "The specified board style was applied.");
+
+                        GameManager gameManager = Minesweeper.getPlugin(Minesweeper.class).getGameManager();
+                        Board board = gameManager.getBoard(player);
+                        if (board == null) {
+                            board = gameManager.getBoardWatched(player);
+                        }
+
+                        if (board != null) {
+                            Painter painter2 = Painter.PAINTER_MAP.get(Painter.loadPainterClass(player));
+                            painter2.drawBlancField(board, Collections.singletonList(player));
+                        }
+
+
+                        modifier.set(PersonalModifier.ModifierType.PAINTER_CLASS, painter.getClass().getName());
+                        Painter.storePainterClass(player.getPersistentDataContainer(), painter.getClass());
+
+
+                        if (board != null)
+                            painter.drawField(board, Collections.singletonList(player));
+
                         return true;
                     }
                 }
@@ -105,20 +144,20 @@ public class SettingsCommand implements TabExecutor {
             }
             case ENABLE_QUESTION_MARK -> {
                 if (args.length == 1) {
-                    player.sendMessage(ChatColor.GREEN + "Currently question marks are " + (modifier.isEnableQuestionMark().isPresent() ? modifier.isEnableQuestionMark().get() ? "enabled." : "disabled." : "default setting."));
+                    player.sendMessage(ChatColor.GREEN + "Currently question marks are " + (modifier.get(PersonalModifier.ModifierType.ENABLE_QUESTION_MARK).isPresent() ? modifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_QUESTION_MARK).orElse(false) ? "enabled." : "disabled." : "default setting."));
                     break;
                 }
                 if (args[1].equalsIgnoreCase("default")) {
-                    modifier.setEnableQuestionMark(null);
+                    modifier.set(PersonalModifier.ModifierType.ENABLE_QUESTION_MARK, null);
                     return true;
                 }
                 if (args[1].equalsIgnoreCase("true")) {
-                    modifier.setEnableQuestionMark(true);
+                    modifier.set(PersonalModifier.ModifierType.ENABLE_QUESTION_MARK, true);
                     player.sendMessage(ChatColor.GREEN + "Enabled question mark.");
                     break;
                 }
                 if (args[1].equalsIgnoreCase("false")) {
-                    modifier.setEnableQuestionMark(false);
+                    modifier.set(PersonalModifier.ModifierType.ENABLE_QUESTION_MARK, false);
                     player.sendMessage(ChatColor.GREEN + "Disabled question mark.");
                     break;
                 }
@@ -126,20 +165,20 @@ public class SettingsCommand implements TabExecutor {
             }
             case ENABLE_FLAG -> {
                 if (args.length == 1) {
-                    player.sendMessage(ChatColor.GREEN + "Currently flags are " + (modifier.isEnableMarks().isPresent() ? modifier.isEnableMarks().get() ? "enabled." : "disabled." : "default setting."));
+                    player.sendMessage(ChatColor.GREEN + "Currently flags are " + (modifier.get(PersonalModifier.ModifierType.ENABLE_MARKS).isPresent() ? modifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_MARKS).orElse(true) ? "enabled." : "disabled." : "default setting."));
                     break;
                 }
                 if (args[1].equalsIgnoreCase("default")) {
-                    modifier.setEnableMarks(null);
+                    modifier.set(PersonalModifier.ModifierType.ENABLE_MARKS, null);
                     return true;
                 }
                 if (args[1].equalsIgnoreCase("true")) {
-                    modifier.setEnableMarks(true);
+                    modifier.set(PersonalModifier.ModifierType.ENABLE_MARKS, true);
                     player.sendMessage(ChatColor.GREEN + "Enabled marks.");
                     break;
                 }
                 if (args[1].equalsIgnoreCase("false")) {
-                    modifier.setEnableMarks(false);
+                    modifier.set(PersonalModifier.ModifierType.ENABLE_MARKS, false);
                     player.sendMessage(ChatColor.GREEN + "Disabled marks.");
                     break;
                 }
@@ -147,20 +186,20 @@ public class SettingsCommand implements TabExecutor {
             }
             case QUICK_REVEAL -> {
                 if (args.length == 1) {
-                    player.sendMessage(ChatColor.GREEN + "Currently quick reveal is " + (modifier.isEnableDoubleClick().isPresent() ? modifier.isEnableDoubleClick().get() ? "enabled." : "disabled." : "default setting."));
+                    player.sendMessage(ChatColor.GREEN + "Currently quick reveal is " + (modifier.get(PersonalModifier.ModifierType.ENABLE_DOUBLE_CLICK).isPresent() ? modifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_DOUBLE_CLICK).orElse(false) ? "enabled." : "disabled." : "default setting."));
                     break;
                 }
                 if (args[1].equalsIgnoreCase("default")) {
-                    modifier.setEnableDoubleClick(null);
+                    modifier.set(PersonalModifier.ModifierType.ENABLE_DOUBLE_CLICK, null);
                     return true;
                 }
                 if (args[1].equalsIgnoreCase("true")) {
-                    modifier.setEnableDoubleClick(true);
+                    modifier.set(PersonalModifier.ModifierType.ENABLE_DOUBLE_CLICK, true);
                     player.sendMessage(ChatColor.GREEN + "Enabled double click.");
                     break;
                 }
                 if (args[1].equalsIgnoreCase("false")) {
-                    modifier.setEnableDoubleClick(false);
+                    modifier.set(PersonalModifier.ModifierType.ENABLE_DOUBLE_CLICK, false);
                     player.sendMessage(ChatColor.GREEN + "Disabled double click.");
                     break;
                 }
@@ -168,20 +207,20 @@ public class SettingsCommand implements TabExecutor {
             }
             case HIDE_PLAYER -> {
                 if (args.length == 1) {
-                    player.sendMessage(ChatColor.GREEN + "Currently hide player is " + (modifier.isEnableDoubleClick().isPresent() ? modifier.isEnableDoubleClick().get() ? "enabled." : "disabled." : "default setting."));
+                    player.sendMessage(ChatColor.GREEN + "Currently hide player is " + (modifier.get(PersonalModifier.ModifierType.ENABLE_DOUBLE_CLICK).isPresent() ? modifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_DOUBLE_CLICK).orElse(false) ? "enabled." : "disabled." : "default setting."));
                     break;
                 }
                 if (args[1].equalsIgnoreCase("default")) {
-                    modifier.setHidePlayer(null);
+                    modifier.set(PersonalModifier.ModifierType.HIDE_PLAYER, null);
                     return true;
                 }
                 if (args[1].equalsIgnoreCase("true")) {
-                    modifier.setHidePlayer(true);
+                    modifier.set(PersonalModifier.ModifierType.HIDE_PLAYER, true);
                     player.sendMessage(ChatColor.GREEN + "Applied setting: hide player.");
                     break;
                 }
                 if (args[1].equalsIgnoreCase("false")) {
-                    modifier.setHidePlayer(false);
+                    modifier.set(PersonalModifier.ModifierType.HIDE_PLAYER, false);
                     player.sendMessage(ChatColor.GREEN + "Applied setting: show player.");
                     break;
                 }
@@ -189,17 +228,17 @@ public class SettingsCommand implements TabExecutor {
             }
             case HIDE_PLAYER_DISTANCE -> {
                 if (args.length == 1) {
-                    player.sendMessage(ChatColor.GREEN + "Your current hide player distance " + (modifier.getHidePlayerDistance().isPresent() ? modifier.getHidePlayerDistance().get() : "default"));
+                    player.sendMessage(ChatColor.GREEN + "Your current hide player distance " + (modifier.get(PersonalModifier.ModifierType.HIDE_PLAYER_DISTANCE).isPresent() ? modifier.get(PersonalModifier.ModifierType.HIDE_PLAYER_DISTANCE).get() : "default"));
                     break;
                 }
                 if (args[1].equalsIgnoreCase("default")) {
-                    modifier.setDoubleClickDuration(null);
+                    modifier.set(PersonalModifier.ModifierType.HIDE_PLAYER_DISTANCE, null);
                     return true;
                 }
                 try{
                     double number = Double.parseDouble(args[1]);
 
-                    modifier.setHidePlayerDistance(number);
+                    modifier.set(PersonalModifier.ModifierType.HIDE_PLAYER_DISTANCE, number);
                     player.sendMessage(ChatColor.GREEN + "The specified hide player distance was applied.");
                 }catch(NumberFormatException e){
                     player.sendMessage(ChatColor.DARK_RED + "Please make sure that you provide a valid number.");
@@ -207,20 +246,20 @@ public class SettingsCommand implements TabExecutor {
             }
             case REVEAL_ON_DOUBLE_CLICK -> {
                 if (args.length == 1) {
-                    player.sendMessage(ChatColor.GREEN + "Currently reveal on double click " + (modifier.isRevealOnDoubleClick().isPresent() ? modifier.isRevealOnDoubleClick().get() ? "enabled." : "disabled." : "default setting."));
+                    player.sendMessage(ChatColor.GREEN + "Currently reveal on double click " + (modifier.get(PersonalModifier.ModifierType.REVEAL_ON_DOUBLE_CLICK).isPresent() ? modifier.<Boolean>get(PersonalModifier.ModifierType.REVEAL_ON_DOUBLE_CLICK).orElse(false) ? "enabled." : "disabled." : "default setting."));
                     break;
                 }
                 if (args[1].equalsIgnoreCase("default")) {
-                    modifier.setRevealOnDoubleClick(null);
+                    modifier.set(PersonalModifier.ModifierType.REVEAL_ON_DOUBLE_CLICK, null);
                     return true;
                 }
                 if (args[1].equalsIgnoreCase("true")) {
-                    modifier.setRevealOnDoubleClick(true);
+                    modifier.set(PersonalModifier.ModifierType.REVEAL_ON_DOUBLE_CLICK, true);
                     player.sendMessage(ChatColor.GREEN + "Applied setting: reveal on double click.");
                     break;
                 }
                 if (args[1].equalsIgnoreCase("false")) {
-                    modifier.setRevealOnDoubleClick(false);
+                    modifier.set(PersonalModifier.ModifierType.REVEAL_ON_DOUBLE_CLICK, false);
                     player.sendMessage(ChatColor.GREEN + "Applied setting: don't reveal on double click.");
                     break;
                 }
@@ -228,20 +267,20 @@ public class SettingsCommand implements TabExecutor {
             }
             case USE_MULTI_FLAG -> {
                 if (args.length == 1) {
-                    player.sendMessage(ChatColor.GREEN + "Currently multi flag is " + (modifier.isUseMultiFlag().isPresent() ? modifier.isUseMultiFlag().get() ? "enabled." : "disabled." : "default setting."));
+                    player.sendMessage(ChatColor.GREEN + "Currently multi flag is " + (modifier.get(PersonalModifier.ModifierType.USE_MULTI_FLAG).isPresent() ? modifier.<Boolean>get(PersonalModifier.ModifierType.USE_MULTI_FLAG).orElse(false) ? "enabled." : "disabled." : "default setting."));
                     break;
                 }
                 if (args[1].equalsIgnoreCase("default")) {
-                    modifier.setUseMultiFlag(null);
+                    modifier.set(PersonalModifier.ModifierType.USE_MULTI_FLAG, null);
                     return true;
                 }
                 if (args[1].equalsIgnoreCase("true")) {
-                    modifier.setUseMultiFlag(true);
+                    modifier.set(PersonalModifier.ModifierType.USE_MULTI_FLAG, true);
                     player.sendMessage(ChatColor.GREEN + "Applied setting: enabled multi flag.");
                     break;
                 }
                 if (args[1].equalsIgnoreCase("false")) {
-                    modifier.setUseMultiFlag(false);
+                    modifier.set(PersonalModifier.ModifierType.USE_MULTI_FLAG, false);
                     player.sendMessage(ChatColor.GREEN + "Applied setting: disabled multi flag.");
                     break;
                 }

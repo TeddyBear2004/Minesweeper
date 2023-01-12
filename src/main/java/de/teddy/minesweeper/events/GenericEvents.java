@@ -10,6 +10,7 @@ import de.teddy.minesweeper.game.painter.ArmorStandPainter;
 import de.teddy.minesweeper.game.painter.BlockPainter;
 import de.teddy.minesweeper.game.painter.Painter;
 import de.teddy.minesweeper.game.texture.pack.ResourcePackHandler;
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,6 +22,7 @@ import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
 
 import java.util.List;
+import java.util.Optional;
 
 public class GenericEvents implements Listener {
 
@@ -61,19 +63,39 @@ public class GenericEvents implements Listener {
 
         PersonalModifier modifier = PersonalModifier.getPersonalModifier(event.getPlayer());
 
-        if (modifier.getPainterClass().isPresent()) {
+        Optional<String> o = modifier.get(PersonalModifier.ModifierType.PAINTER_CLASS);
+        if (o.isPresent()) {
             try{
-                Class<? extends Painter> aClass = Class.forName(modifier.getPainterClass().get()).asSubclass(Painter.class);
+                Class<? extends Painter> aClass = Class.forName(o.get()).asSubclass(Painter.class);
 
                 if (aClass != BlockPainter.class) {
                     Painter.storePainterClass(event.getPlayer().getPersistentDataContainer(), aClass);
+                    handleWatching(event.getPlayer());
                     return;
                 }
             }catch(ClassNotFoundException | ClassCastException ignored){
             }
         }
+        handleWatching(event.getPlayer());
         resourcePackHandler.apply(event.getPlayer());
+    }
 
+    private void handleWatching(Player player) {
+        if (Modifier.getInstance().allowDefaultWatch()) {
+            boolean watching = false;
+            for (Game map : games) {
+                Board runningGame = map.getRunningGame();
+                if (runningGame != null) {
+                    map.startViewing(player, runningGame);
+                    watching = true;
+                    break;
+                }
+            }
+            if (!watching) {
+                if (games.size() != 0)
+                    games.get(0).startViewing(player, null);
+            }
+        }
     }
 
     @EventHandler
@@ -93,28 +115,12 @@ public class GenericEvents implements Listener {
         Player player = event.getPlayer();
         PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
 
-        if (personalModifier.getPainterClass().isEmpty()) {
+        if (personalModifier.get(PersonalModifier.ModifierType.PAINTER_CLASS).isEmpty()) {
             switch(event.getStatus()){
                 case DECLINED, FAILED_DOWNLOAD ->
                         Painter.storePainterClass(player.getPersistentDataContainer(), ArmorStandPainter.class);
                 case SUCCESSFULLY_LOADED ->
                         Painter.storePainterClass(player.getPersistentDataContainer(), BlockPainter.class);
-            }
-        }
-
-        if (Modifier.getInstance().allowDefaultWatch()) {
-            boolean watching = false;
-            for (Game map : games) {
-                Board runningGame = map.getRunningGame();
-                if (runningGame != null) {
-                    map.startViewing(event.getPlayer(), runningGame);
-                    watching = true;
-                    break;
-                }
-            }
-            if (!watching) {
-                if (games.size() != 0)
-                    games.get(0).startViewing(event.getPlayer(), null);
             }
         }
     }

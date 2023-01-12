@@ -50,7 +50,7 @@ public class InternalWebServerHandler implements ResourcePackHandler {
     public String getUrl(Player player) {
         PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
 
-        return personalModifier.getResourcePackUrl().orElse("http://" + this.host + ":" + this.port + "/");
+        return personalModifier.<String>get(PersonalModifier.ModifierType.RESOURCE_PACK_URL).orElse("http://" + this.host + ":" + this.port + "/");
     }
 
 

@@ -261,11 +261,11 @@ public class Board {
     public Map<Painter, List<Player>> getCurrentPlayerPainters(List<Player> viewers) {
         Map<Class<? extends Painter>, List<Player>> map1 = new HashMap<>();
         viewers.forEach(player -> {
-            Class<? extends Painter> painterClass = Painter.loadPainterClass(player.getPersistentDataContainer());
+            Class<? extends Painter> painterClass = Painter.loadPainterClass(player);
             map1.computeIfAbsent(painterClass, p -> new ArrayList<>()).add(player);
         });
 
-        Class<? extends Painter> playerClass = Painter.loadPainterClass(player.getPersistentDataContainer());
+        Class<? extends Painter> playerClass = Painter.loadPainterClass(player);
         map1.computeIfAbsent(playerClass, p -> new ArrayList<>()).add(player);
 
         Map<Painter, List<Player>> map2 = new HashMap<>();
@@ -485,7 +485,7 @@ public class Board {
 
         public void reverseMark() {
             PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(board.player);
-            if (personalModifier.isEnableMarks().orElse(true))
+            if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_MARKS).orElse(true))
                 this.markType = this.markType.next(board.getPlayer());
             else
                 this.markType = MarkType.NONE;
