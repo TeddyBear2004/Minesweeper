@@ -79,7 +79,7 @@ public class Game {
     }
 
     public Board getRunningGame() {
-        for (Board b : gameManager.runningGames.values())
+        for (Board b : gameManager.getRunningGames().values())
             if (b.map == this)
                 return b;
         return null;
@@ -92,10 +92,10 @@ public class Game {
         b = new Board(plugin, language, connectionBuilder, this, width, height, bombCount, corner, p, seed, setSeed, saveStats);
         b.drawBlancField(Collections.singletonList(p));
         gameManager.startWatching(p, b);
-        gameManager.runningGames.put(p, b);
+        gameManager.getRunningGames().put(p, b);
 
         Bukkit.getOnlinePlayers().forEach(onPlayer -> {
-            if (gameManager.gameWatched.get(onPlayer) == null && b.map == gameManager.playerLocation.get(onPlayer)) {
+            if (gameManager.getGameWatched().get(onPlayer) == null && b.map == gameManager.getPlayerLocation().get(onPlayer)) {
                 gameManager.startWatching(onPlayer, b);
                 b.setScoreBoard(onPlayer);
             }
@@ -122,7 +122,7 @@ public class Game {
         if (b != null) {
             b.drawBlancField(Collections.singletonList(p));
             Bukkit.getOnlinePlayers().forEach(onPlayer -> {
-                if (gameManager.gameWatched.get(onPlayer) == null && b.map == gameManager.playerLocation.get(onPlayer)) {
+                if (gameManager.getGameWatched().get(onPlayer) == null && b.map == gameManager.getPlayerLocation().get(onPlayer)) {
                     gameManager.startWatching(onPlayer, b);
                 }
             });

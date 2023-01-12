@@ -9,17 +9,17 @@ import java.util.Map;
 
 public class GameManager {
 
-    public final Map<Player, Board> gameWatched = new HashMap<>();
-    public final Map<Player, Board> runningGames = new HashMap<>();
-    public final Map<Player, Game> playerLocation = new HashMap<>();
+    private final Map<Player, Board> gameWatched = new HashMap<>();
+    private final Map<Player, Board> runningGames = new HashMap<>();
+    private final Map<Player, Game> playerLocation = new HashMap<>();
 
     public void switchToMap(Player p, Game g) {
         stopWatching(p);
-        Board b = runningGames.get(p);
+        Board b = getRunningGames().get(p);
         if (b != null) {
             finishGame(p);
         }
-        playerLocation.put(p, g);
+        getPlayerLocation().put(p, g);
         if (Modifier.getInstance().allowFly() || Modifier.getInstance().isInside(g.getViewingSpawn())) {
             p.setAllowFlight(true);
             p.setFlying(true);
@@ -29,45 +29,45 @@ public class GameManager {
 
     public void startWatching(Player p, Board b) {
         stopWatching(p);
-        Game cur = playerLocation.get(p);
+        Game cur = getPlayerLocation().get(p);
         if (cur != b.map) {
             switchToMap(p, b.map);
         }
         b.draw(Collections.singletonList(p));
-        gameWatched.put(p, b);
+        getGameWatched().put(p, b);
         b.addViewer(p);
     }
 
     private void stopWatching(Player p) {
-        Board b = gameWatched.remove(p);
+        Board b = getGameWatched().remove(p);
         if (b != null) {
             b.removeViewer(p);
         }
     }
 
     public void stopGames(Player p, boolean saveStats) {
-        Board b = runningGames.get(p);
+        Board b = getRunningGames().get(p);
         if (b != null) {
             b.drawBlancField();
             b.finish(false, saveStats);
-            b.getViewers().forEach(gameWatched::remove);
+            b.getViewers().forEach(getGameWatched()::remove);
             b.clearViewers();
         } else {
             stopWatching(p);
         }
-        runningGames.remove(p);
+        getRunningGames().remove(p);
     }
 
     public Game getGame(Player player) {
-        return playerLocation.get(player);
+        return getPlayerLocation().get(player);
     }
 
     public Board getBoard(Player Player) {
-        return runningGames.get(Player);
+        return getRunningGames().get(Player);
     }
 
     public Board getBoardWatched(Player player) {
-        return gameWatched.get(player);
+        return getGameWatched().get(player);
     }
 
     public void finishGame(Player p) {
@@ -80,6 +80,14 @@ public class GameManager {
 
     public Map<Player, Board> getRunningGames() {
         return runningGames;
+    }
+
+    public Map<Player, Board> getGameWatched() {
+        return gameWatched;
+    }
+
+    public Map<Player, Game> getPlayerLocation() {
+        return playerLocation;
     }
 
 }
