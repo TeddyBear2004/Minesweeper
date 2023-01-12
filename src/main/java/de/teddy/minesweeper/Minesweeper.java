@@ -71,13 +71,20 @@ public final class Minesweeper extends JavaPlugin {
         saveDefaultConfig();
         reloadConfig();
         saveResource(langPath, false);
+        this.gameManager = new GameManager();
+
+        ClickHandler clickHandler = new ClickHandler();
+
+        Painter.PAINTER_MAP.put(BlockPainter.class, new BlockPainter(Minesweeper.getPlugin(Minesweeper.class), clickHandler, gameManager));
+        Painter.PAINTER_MAP.put(ArmorStandPainter.class, new ArmorStandPainter(Minesweeper.getPlugin(Minesweeper.class), clickHandler, gameManager));
+
 
         Language language = loadLanguage();
         List<ModifierArea> modifierAreas = loadAreas();
         loadWorld();
         loadModifier(modifierAreas);
         ConnectionBuilder connectionBuilder = loadConnectionBuilder(getConfig().getConfigurationSection("database"));
-        this.gameManager = new GameManager();
+
         this.games = loadGames(language, connectionBuilder, gameManager);
         Game customGame = loadCustomGame(getConfig().getConfigurationSection("custom_game"), connectionBuilder, gameManager, games, language);
 
