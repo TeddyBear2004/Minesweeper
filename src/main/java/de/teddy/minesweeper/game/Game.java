@@ -160,7 +160,7 @@ public class Game {
         private int bombCount;
         private int width;
         private int height;
-        private long seed;
+        private Long seed;
         private boolean setSeed;
         private boolean saveStats;
 
@@ -170,7 +170,7 @@ public class Game {
             this.bombCount = game.bombCount;
             this.width = game.size;
             this.height = game.size;
-            this.seed = new Random().nextLong();
+            this.seed = null;
             this.setSeed = false;
             this.saveStats = true;
         }
@@ -211,6 +211,9 @@ public class Game {
         }
 
         public void build(Player player) {
+            if (seed == null)
+                seed = new Random().nextLong();
+
             game.startGame(player, shouldTeleport, bombCount, width, height, seed, setSeed, saveStats);
         }
 
