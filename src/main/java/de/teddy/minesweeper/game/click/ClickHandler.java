@@ -12,6 +12,8 @@ import de.teddy.minesweeper.util.PacketUtil;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +24,16 @@ public class ClickHandler {
     private final Map<Player, Long> lastRightClick = new HashMap<>();
     private final Map<Player, Long> lastLastRightClick = new HashMap<>();
 
-    public void leftClick(Player player, Game game, BlockPosition blockPosition, Board board, Board.Field field, Location location) {
+    /**
+     * This method performs a left click action on the given board.
+     * @param player The player who clicked.
+     * @param game The game this happened on.
+     * @param blockPosition The position of the clicked block
+     * @param board The board this click happened on.
+     * @param field The field on the board where the click happened.
+     * @param location The location where this click happened.
+     */
+    public void leftClick(@Nullable Player player, @NotNull Game game, @NotNull BlockPosition blockPosition, @NotNull Board board, @Nullable Board.Field field, @NotNull Location location) {
         if (board.isFinished())
             return;
 
@@ -73,7 +84,14 @@ public class ClickHandler {
         board.draw();
     }
 
-    public void rightClick(Player player, Board board, Board.Field field, Cancellable cancellable) {
+    /**
+     * This method performs a right click action on the given board.
+     * @param player The player who clicked
+     * @param board The board this click happened on
+     * @param field The field this happened on.
+     * @param cancellable A cancellable which is most likely an event.
+     */
+    public void rightClick(@NotNull Player player, @NotNull Board board, @Nullable Board.Field field, @NotNull Cancellable cancellable) {
         if (field == null)
             return;
 
