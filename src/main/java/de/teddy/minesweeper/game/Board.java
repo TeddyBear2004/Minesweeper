@@ -16,7 +16,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
 
 import java.text.SimpleDateFormat;
-import java.util.List;
 import java.util.*;
 
 public class Board {
@@ -335,6 +334,14 @@ public class Board {
                                               this.width * this.height);
             }
         }, 20);
+    }
+
+    protected void generateBoard(Field[][] board) {
+        if (this.isGenerated)
+            throw new RuntimeException(language.getString("error_already_generated"));
+
+        System.arraycopy(board, 0, this.board, 0, board.length);
+        this.isGenerated = true;
     }
 
     private void generateBoard(int x, int y) {
