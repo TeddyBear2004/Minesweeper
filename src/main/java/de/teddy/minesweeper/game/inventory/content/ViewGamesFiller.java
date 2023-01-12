@@ -95,7 +95,7 @@ public class ViewGamesFiller implements ContentFiller {
         if (itemMeta != null) {
             itemMeta.setDisplayName(player.getDisplayName() + "'s Game");
 
-            ItemStack stack = board.map.getItemStack();
+            ItemStack stack = board.getGame().getItemStack();
 
             ItemMeta itemMeta1 = stack.getItemMeta();
             if (itemMeta1 != null)
@@ -104,7 +104,7 @@ public class ViewGamesFiller implements ContentFiller {
         itemStack.setItemMeta(itemMeta);
 
         map.put(itemStack, player1 -> inventory -> {
-            board.map.startViewing(player1, board);
+            board.getGame().startViewing(player1, board);
             board.draw(Collections.singletonList(player1));
             player1.closeInventory();
         });

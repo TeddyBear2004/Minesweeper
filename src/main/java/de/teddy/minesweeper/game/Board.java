@@ -22,7 +22,7 @@ public class Board {
 
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("mm:ss:SSS");
     public static boolean notTest = true;
-    public final Game map;
+    private final Game game;
     private final Plugin plugin;
     private final Language language;
     private final List<Player> viewers = new LinkedList<>();
@@ -47,12 +47,12 @@ public class Board {
     private int startY;
 
 
-    public Board(Plugin plugin, Language language, ConnectionBuilder connectionBuilder, Game map, int width, int height, int bombCount, Location corner, Player player, long seed, boolean setSeed, boolean saveStats) {
+    public Board(Plugin plugin, Language language, ConnectionBuilder connectionBuilder, Game game, int width, int height, int bombCount, Location corner, Player player, long seed, boolean setSeed, boolean saveStats) {
         this.connectionBuilder = connectionBuilder;
         this.setSeed = setSeed;
         this.plugin = plugin;
         this.language = language;
-        this.map = map;
+        this.game = game;
         this.player = player;
         this.seed = seed;
         this.random = new Random(seed);
@@ -408,9 +408,9 @@ public class Board {
             objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
             Team difficulty = scoreboard.registerNewTeam("difficulty");
-            difficulty.addEntry(ChatColor.GREEN + map.getDifficulty());
+            difficulty.addEntry(ChatColor.GREEN + getGame().getDifficulty());
             difficulty.setPrefix(ChatColor.GRAY + "Difficulty:     ");
-            objective.getScore(ChatColor.GREEN + map.getDifficulty()).setScore(15);
+            objective.getScore(ChatColor.GREEN + getGame().getDifficulty()).setScore(15);
 
             Team size = scoreboard.registerNewTeam("size");
             size.addEntry(ChatColor.GREEN + " " + width + "x" + height);
@@ -451,6 +451,10 @@ public class Board {
 
     public void highlightBlocksAround(Field field) {
         getCurrentPlayerPainters().forEach((painter, players) -> painter.highlightField(field, players));
+    }
+
+    public Game getGame() {
+        return game;
     }
 
     public static class Field {

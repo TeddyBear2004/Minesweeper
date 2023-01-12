@@ -80,7 +80,7 @@ public class Game {
 
     public Board getRunningGame() {
         for (Board b : gameManager.getRunningGames().values())
-            if (b.map == this)
+            if (b.getGame() == this)
                 return b;
         return null;
     }
@@ -95,7 +95,7 @@ public class Game {
         gameManager.getRunningGames().put(p, b);
 
         Bukkit.getOnlinePlayers().forEach(onPlayer -> {
-            if (gameManager.getGameWatched().get(onPlayer) == null && b.map == gameManager.getPlayerLocation().get(onPlayer)) {
+            if (gameManager.getGameWatched().get(onPlayer) == null && b.getGame() == gameManager.getPlayerLocation().get(onPlayer)) {
                 gameManager.startWatching(onPlayer, b);
                 b.setScoreBoard(onPlayer);
             }
@@ -122,7 +122,7 @@ public class Game {
         if (b != null) {
             b.drawBlancField(Collections.singletonList(p));
             Bukkit.getOnlinePlayers().forEach(onPlayer -> {
-                if (gameManager.getGameWatched().get(onPlayer) == null && b.map == gameManager.getPlayerLocation().get(onPlayer)) {
+                if (gameManager.getGameWatched().get(onPlayer) == null && b.getGame() == gameManager.getPlayerLocation().get(onPlayer)) {
                     gameManager.startWatching(onPlayer, b);
                 }
             });

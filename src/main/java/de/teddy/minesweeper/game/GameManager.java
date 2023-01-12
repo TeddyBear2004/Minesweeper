@@ -30,8 +30,8 @@ public class GameManager {
     public void startWatching(Player p, Board b) {
         stopWatching(p);
         Game cur = getPlayerLocation().get(p);
-        if (cur != b.map) {
-            switchToMap(p, b.map);
+        if (cur != b.getGame()) {
+            switchToMap(p, b.getGame());
         }
         b.draw(Collections.singletonList(p));
         getGameWatched().put(p, b);
