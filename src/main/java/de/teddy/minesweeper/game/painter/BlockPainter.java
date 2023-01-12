@@ -211,7 +211,7 @@ public class BlockPainter implements Painter {
     public Material getActualMaterial(Board.Field field) {
         boolean lightField = Board.isLightField(field.getX(), field.getY());
 
-        if (field.getBoard().isFinished() && field.isBomb() && (!field.isCovered() || !field.getBoard().isWin()))
+        if (field.getBoard().isFinished() && field.isBomb() && (!field.isCovered() || field.getBoard().isLose()))
             return Material.COAL_BLOCK;
 
         if (field.isCovered())

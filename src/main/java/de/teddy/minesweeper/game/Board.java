@@ -109,8 +109,8 @@ public class Board {
         return this.isFinished;
     }
 
-    public boolean isWin() {
-        return win;
+    public boolean isLose() {
+        return !win;
     }
 
     public Field[][] getBoard() {
