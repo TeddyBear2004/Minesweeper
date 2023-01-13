@@ -16,6 +16,7 @@ import de.teddy.minesweeper.events.packets.RightClickEvent;
 import de.teddy.minesweeper.game.CustomGame;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.GameManager;
+import de.teddy.minesweeper.game.TutorialGame;
 import de.teddy.minesweeper.game.click.ClickHandler;
 import de.teddy.minesweeper.game.expansions.StatsExpansion;
 import de.teddy.minesweeper.game.inventory.Inventories;
@@ -253,6 +254,7 @@ public final class Minesweeper extends JavaPlugin {
                                  corner,
                                  spawn,
                                  borderSize,
+                                 borderSize,
                                  bombCount,
                                  language.getString(difficultyLangPath),
                                  material,
@@ -280,6 +282,11 @@ public final class Minesweeper extends JavaPlugin {
         int maxHeight = section.getInt("max-size.height");
 
         return new CustomGame(this, gameManager, games, language, connectionBuilder, corner, spawn, minWidth, minHeight, maxWidth, maxHeight, "custom");
+    }
+
+    private List<TutorialGame> loadTutorialGames(ConfigurationSection section, GameManager gameManager, List<Game> games, Language language) {
+        new TutorialGame(this, gameManager, games, language, null, null, null, null, null, 0, null);
+        return null;
     }
 
     private List<ModifierArea> loadAreas() {

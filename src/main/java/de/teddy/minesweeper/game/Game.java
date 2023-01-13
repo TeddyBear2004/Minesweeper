@@ -25,7 +25,8 @@ public class Game {
     private final Language language;
     private final Location corner;
     private final Location spawn;
-    private final int size;
+    private final int width;
+    private final int height;
     private final int bombCount;
     private final String difficulty;
     private final int inventoryPosition;
@@ -33,7 +34,7 @@ public class Game {
     private final GameManager gameManager;
     private final ConnectionBuilder connectionBuilder;
 
-    public Game(Plugin plugin, GameManager gameManager, List<Game> games, Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int borderSize, int bombCount, String difficulty, Material material, int inventoryPosition) {
+    public Game(Plugin plugin, GameManager gameManager, List<Game> games, Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int width, int height, int bombCount, String difficulty, Material material, int inventoryPosition) {
         this.gameManager = gameManager;
         this.connectionBuilder = connectionBuilder;
         this.plugin = plugin;
@@ -41,7 +42,8 @@ public class Game {
         this.language = language;
         this.corner = corner;
         this.spawn = spawn;
-        this.size = borderSize;
+        this.width = width;
+        this.height = height;
         this.bombCount = bombCount;
         this.difficulty = difficulty;
         this.inventoryPosition = inventoryPosition;
@@ -51,14 +53,14 @@ public class Game {
 
         if (itemMeta != null) {
             itemMeta.setDisplayName(difficulty);
-            itemMeta.setLore(Collections.singletonList(language.getString("field_desc", String.valueOf(size), String.valueOf(size), String.valueOf(bombCount))));
+            itemMeta.setLore(Collections.singletonList(language.getString("field_desc", String.valueOf(width), String.valueOf(height), String.valueOf(bombCount))));
         }
 
         itemStack.setItemMeta(itemMeta);
     }
 
     public boolean isBlockOutsideGame(Block block) {
-        return !IsBetween.isBetween2D(corner, size, size, block)
+        return !IsBetween.isBetween2D(corner, width, height, block)
                 || !IsBetween.isBetween(corner.getBlockY(), corner.getBlockY() + 1, block.getY());
     }
 
@@ -142,7 +144,7 @@ public class Game {
     }
 
     public String getMap() {
-        return size + "x" + size;
+        return width + "x" + height;
     }
 
     public int getBombCount() {
@@ -168,8 +170,8 @@ public class Game {
             this.game = game;
             this.shouldTeleport = true;
             this.bombCount = game.bombCount;
-            this.width = game.size;
-            this.height = game.size;
+            this.width = game.width;
+            this.height = game.height;
             this.seed = null;
             this.setSeed = false;
             this.saveStats = true;

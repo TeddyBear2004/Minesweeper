@@ -10,13 +10,14 @@ import org.bukkit.entity.Player;
 import java.util.List;
 
 public class CustomGame extends Game {
+
     private final int minWidth;
     private final int minHeight;
     private final int maxWidth;
     private final int maxHeight;
 
     public CustomGame(Minesweeper plugin, GameManager gameManager, List<Game> games, Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int minWidth, int minHeight, int maxWidth, int maxHeight, String difficulty) {
-        super(plugin, gameManager,games, language, connectionBuilder, corner, spawn, -1, -1, difficulty, Material.AIR, -1);
+        super(plugin, gameManager, games, language, connectionBuilder, corner, spawn, -1, -1, -1, difficulty, Material.AIR, -1);
 
         if (minWidth > maxWidth || minHeight > maxHeight)
             throw new IllegalArgumentException("Min size cannot be bigger max size in custom game.");
