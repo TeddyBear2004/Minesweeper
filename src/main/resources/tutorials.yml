@@ -1,0 +1,27 @@
+beginner:
+  name: Beginner Tutorial
+  inventory_material: LIME_STAINED_GLASS_PANE
+  inventory_position: 2
+  corner:
+    x: 53
+    y: 17
+    z: -331
+    world: MineSweeper
+  spawn:
+    x: 58
+    y: 20
+    z: -318.5
+    yaw: -180
+    pitch: 30
+    world: MineSweeper
+  board:
+    - 0000000000
+    - 0000X00000
+    - 0000000000
+    - 0000000000
+    - 0000X00000
+    - 0000000000
+    - 0000000000
+    - 0000X00000
+    - 0000000000
+    - 0000X00000
