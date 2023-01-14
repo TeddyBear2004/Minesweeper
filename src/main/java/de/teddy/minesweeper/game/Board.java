@@ -366,18 +366,14 @@ public class Board {
         }
 
         for (int[] ints1 : this.bombList) {
-            for (int j = -1; j < 2; j++) {
-                for (int k = -1; k < 2; k++) {
-                    if (!(j == 0 && k == 0)) {
-                        int xCoord = ints1[0] + j;
-                        int yCoord = ints1[1] + k;
+            SurfaceDiscoverer.SURROUNDINGS.parallelStream().forEach(ints2 -> {
+                int xCoord = ints1[0] + ints2[0];
+                int yCoord = ints1[1] + ints2[1];
 
-                        if (xCoord >= 0 && xCoord < this.width && yCoord >= 0 && yCoord < this.height) {
-                            ints[xCoord][yCoord]++;
-                        }
-                    }
+                if (xCoord >= 0 && xCoord < this.width && yCoord >= 0 && yCoord < this.height) {
+                    ints[xCoord][yCoord]++;
                 }
-            }
+            });
         }
 
         for (int i = 0; i < cache.length; i++) {

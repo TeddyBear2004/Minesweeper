@@ -7,13 +7,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class SurfaceDiscoverer {
 
-    private static final List<int[]> INTS = new ArrayList<>();
+    public static final List<int[]> SURROUNDINGS = new ArrayList<>();
 
     static {
         for (int i = -1; i <= 1; i++)
             for (int j = -1; j <= 1; j++)
                 if (!(i == 0 && j == 0))
-                    INTS.add(new int[]{i, j});
+                    SURROUNDINGS.add(new int[]{i, j});
     }
 
     /**
@@ -46,7 +46,7 @@ public class SurfaceDiscoverer {
         while (!stack.isEmpty()) {
             Board.Field current = stack.pop();
 
-            INTS.parallelStream().forEach(ints -> {
+            SURROUNDINGS.parallelStream().forEach(ints -> {
                 int i = ints[0];
                 int j = ints[1];
 
@@ -84,7 +84,7 @@ public class SurfaceDiscoverer {
 
         AtomicInteger markedFields = new AtomicInteger(0);
 
-        INTS.parallelStream().forEach(ints -> {
+        SURROUNDINGS.parallelStream().forEach(ints -> {
             int i = ints[0];
             int j = ints[1];
 
@@ -98,7 +98,7 @@ public class SurfaceDiscoverer {
         if (field.getNeighborCount() != markedFields.get())
             return;
 
-        for (int[] ints : INTS) {
+        for (int[] ints : SURROUNDINGS) {
             int i = ints[0];
             int j = ints[1];
 
@@ -118,7 +118,7 @@ public class SurfaceDiscoverer {
         if (field.isCovered())
             return;
 
-        INTS.parallelStream().forEach(ints -> {
+        SURROUNDINGS.parallelStream().forEach(ints -> {
             int i = ints[0];
             int j = ints[1];
 
