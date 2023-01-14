@@ -31,6 +31,7 @@ import de.teddy.minesweeper.game.texture.pack.InternalWebServerHandler;
 import de.teddy.minesweeper.game.texture.pack.ResourcePackHandler;
 import de.teddy.minesweeper.scheduler.HidePlayerScheduler;
 import de.teddy.minesweeper.util.ConnectionBuilder;
+import de.teddy.minesweeper.util.JarWalker;
 import de.teddy.minesweeper.util.Language;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
@@ -41,6 +42,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,10 +71,21 @@ public final class Minesweeper extends JavaPlugin {
     @Override
     public void onEnable() {
         langPath = "lang/" + getConfig().getString("language") + ".toml";
+        try{
+            JarWalker.walkResources(this.getClass(), "/lang", 1, path -> {
+                String localeFileName = path.getFileName().toString();
+                if (!localeFileName.toLowerCase().endsWith(".toml")) return;
+
+                if (!Files.exists(getDataFolder().toPath().resolve("locales").resolve(localeFileName))) {
+                    saveResource("lang/" + localeFileName, false);
+                }
+            });
+        }catch(URISyntaxException | IOException e){
+            throw new RuntimeException(e);
+        }
 
         saveDefaultConfig();
         reloadConfig();
-        saveResource(langPath, false);
         this.gameManager = new GameManager();
 
         ClickHandler clickHandler = new ClickHandler();
