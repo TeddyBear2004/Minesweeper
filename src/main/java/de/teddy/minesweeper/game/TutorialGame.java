@@ -11,10 +11,10 @@ import java.util.List;
 
 public class TutorialGame extends Game {
 
-    private final Board.Field[][] board;
-    private final Board.Field startField;
+    private final Field[][] board;
+    private final Field startField;
 
-    public TutorialGame(Plugin plugin, GameManager gameManager, List<Game> games, Language language, Location corner, Location spawn, Board.Field[][] board, String name, Material material, int inventoryPosition, Board.Field startField) {
+    public TutorialGame(Plugin plugin, GameManager gameManager, List<Game> games, Language language, Location corner, Location spawn, Field[][] board, String name, Material material, int inventoryPosition, Field startField) {
         super(plugin, gameManager, games, language, null, corner, spawn, board.length, board[0].length, determineBombCount(board), name, material, inventoryPosition);
         this.board = board;
         this.startField = startField;
@@ -34,11 +34,11 @@ public class TutorialGame extends Game {
     }
 
 
-    private static int determineBombCount(Board.Field[][] board){
+    private static int determineBombCount(Field[][] board) {
         int count = 0;
 
-        for (Board.Field[] fields : board) {
-            for (Board.Field field : fields) {
+        for (Field[] fields : board) {
+            for (Field field : fields) {
                 if (field.isBomb()) {
                     count++;
                 }

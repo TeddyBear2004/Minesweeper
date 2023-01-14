@@ -8,9 +8,10 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedEnumEntityUseAction;
-import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.Board;
+import de.teddy.minesweeper.game.Field;
 import de.teddy.minesweeper.game.Game;
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.click.ClickHandler;
 import de.teddy.minesweeper.util.HeadGenerator;
 import de.teddy.minesweeper.util.PacketUtil;
@@ -151,7 +152,7 @@ public class ArmorStandPainter implements Painter {
             int i = coords[0];
             int j = coords[1];
 
-            Board.Field field = board.getField(i, j);
+            Field field = board.getField(i, j);
 
             ItemStack itemStack;
 
@@ -219,7 +220,7 @@ public class ArmorStandPainter implements Painter {
     }
 
     @Override
-    public ItemStack getActualItemStack(Board.Field field) {
+    public ItemStack getActualItemStack(Field field) {
         boolean lightField = Board.isLightField(field.getX(), field.getY());
 
         if (field.getBoard().isFinished() && field.isBomb() && (!field.isCovered() || field.getBoard().isLose()))
@@ -232,7 +233,7 @@ public class ArmorStandPainter implements Painter {
     }
 
     @Override
-    public Material getActualMaterial(Board.Field field) {
+    public Material getActualMaterial(Field field) {
         return getActualItemStack(field).getType();
     }
 
@@ -267,7 +268,7 @@ public class ArmorStandPainter implements Painter {
         if (location == null || board.isBlockOutsideGame(location.getBlock()))
             return;
 
-        Board.Field field = board.getField(location);
+        Field field = board.getField(location);
 
 
         clickHandler.rightClick(player, board, field, event);
@@ -300,13 +301,13 @@ public class ArmorStandPainter implements Painter {
         if (board.isBlockOutsideGame(location.getBlock()))
             return;
 
-        Board.Field field = board.getField(location);
+        Field field = board.getField(location);
 
         clickHandler.leftClick(player, game, blockPosition, board, field, location);
     }
 
     @Override
-    public void highlightField(Board.Field field, List<Player> players) {
+    public void highlightField(Field field, List<Player> players) {
 
     }
 

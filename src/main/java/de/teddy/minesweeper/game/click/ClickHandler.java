@@ -3,6 +3,7 @@ package de.teddy.minesweeper.game.click;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
 import de.teddy.minesweeper.game.Board;
+import de.teddy.minesweeper.game.Field;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.SurfaceDiscoverer;
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
@@ -26,14 +27,15 @@ public class ClickHandler {
 
     /**
      * This method performs a left click action on the given board.
-     * @param player The player who clicked.
-     * @param game The game this happened on.
+     *
+     * @param player        The player who clicked.
+     * @param game          The game this happened on.
      * @param blockPosition The position of the clicked block
-     * @param board The board this click happened on.
-     * @param field The field on the board where the click happened.
-     * @param location The location where this click happened.
+     * @param board         The board this click happened on.
+     * @param field         The field on the board where the click happened.
+     * @param location      The location where this click happened.
      */
-    public void leftClick(@Nullable Player player, @NotNull Game game, @NotNull BlockPosition blockPosition, @NotNull Board board, @Nullable Board.Field field, @NotNull Location location) {
+    public void leftClick(@Nullable Player player, @NotNull Game game, @NotNull BlockPosition blockPosition, @NotNull Board board, @Nullable Field field, @NotNull Location location) {
         if (board.isFinished())
             return;
 
@@ -86,12 +88,13 @@ public class ClickHandler {
 
     /**
      * This method performs a right click action on the given board.
-     * @param player The player who clicked
-     * @param board The board this click happened on
-     * @param field The field this happened on.
+     *
+     * @param player      The player who clicked
+     * @param board       The board this click happened on
+     * @param field       The field this happened on.
      * @param cancellable A cancellable which is most likely an event.
      */
-    public void rightClick(@NotNull Player player, @NotNull Board board, @Nullable Board.Field field, @NotNull Cancellable cancellable) {
+    public void rightClick(@NotNull Player player, @NotNull Board board, @Nullable Field field, @NotNull Cancellable cancellable) {
         if (field == null)
             return;
 

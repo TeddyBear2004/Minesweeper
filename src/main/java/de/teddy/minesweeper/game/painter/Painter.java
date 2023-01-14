@@ -5,6 +5,7 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import de.teddy.minesweeper.Minesweeper;
 import de.teddy.minesweeper.game.Board;
+import de.teddy.minesweeper.game.Field;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.modifier.PersonalModifier;
 import org.bukkit.Material;
@@ -60,9 +61,9 @@ public interface Painter {
 
     void drawBombs(Board board, List<Player> players);
 
-    ItemStack getActualItemStack(Board.Field field);
+    ItemStack getActualItemStack(Field field);
 
-    Material getActualMaterial(Board.Field field);
+    Material getActualMaterial(Field field);
 
     List<PacketType> getRightClickPacketType();
 
@@ -72,6 +73,6 @@ public interface Painter {
 
     void onLeftClick(Player player, PacketEvent event, Game game, PacketContainer packet);
 
-    void highlightField(Board.Field field, List<Player> players);
+    void highlightField(Field field, List<Player> players);
 
 }

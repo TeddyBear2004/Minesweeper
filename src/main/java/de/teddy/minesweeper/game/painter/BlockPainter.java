@@ -8,9 +8,10 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
-import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.Board;
+import de.teddy.minesweeper.game.Field;
 import de.teddy.minesweeper.game.Game;
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.click.ClickHandler;
 import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.util.PacketUtil;
@@ -148,7 +149,7 @@ public class BlockPainter implements Painter {
                 if (!subChunkMap.containsKey(subChunkTuplePlusOne))
                     subChunkMap.put(subChunkTuplePlusOne, Pair.of(new ArrayList<>(), new ArrayList<>()));
 
-                Board.Field field = board.getBoard()[i][j];
+                Field field = board.getBoard()[i][j];
 
                 boolean b = Board.isLightField(i, j);
                 Material m;
@@ -203,12 +204,12 @@ public class BlockPainter implements Painter {
     }
 
     @Override
-    public ItemStack getActualItemStack(Board.Field field) {
+    public ItemStack getActualItemStack(Field field) {
         return new ItemStack(getActualMaterial(field));
     }
 
     @Override
-    public Material getActualMaterial(Board.Field field) {
+    public Material getActualMaterial(Field field) {
         boolean lightField = Board.isLightField(field.getX(), field.getY());
 
         if (field.getBoard().isFinished() && field.isBomb() && (!field.isCovered() || field.getBoard().isLose()))
@@ -244,7 +245,7 @@ public class BlockPainter implements Painter {
             Board watching = gameManager.getBoardWatched(player);
 
             if (watching != null) {
-                Board.Field field = watching.getField(location);
+                Field field = watching.getField(location);
 
                 if (watching.isBlockOutsideGame(location.getBlock()))
                     return;
@@ -261,7 +262,7 @@ public class BlockPainter implements Painter {
             return;
         }
 
-        Board.Field field = board.getField(location);
+        Field field = board.getField(location);
         if (packet.getHands().read(0) == EnumWrappers.Hand.OFF_HAND) {
             event.setCancelled(true);
             return;
@@ -287,7 +288,7 @@ public class BlockPainter implements Painter {
             Board watching = gameManager.getBoardWatched(player);
 
             if (watching != null) {
-                Board.Field field = watching.getField(location);
+                Field field = watching.getField(location);
                 if (field == null)
                     return;
                 Material[] materials = new Material[]{getActualMaterial(field), field.getMark()};
@@ -300,7 +301,7 @@ public class BlockPainter implements Painter {
             return;
         }
 
-        Board.Field field = board.getField(location);
+        Field field = board.getField(location);
 
         EnumWrappers.PlayerDigType digType = packet.getPlayerDigTypes().read(0);
         if (field != null && digType == EnumWrappers.PlayerDigType.START_DESTROY_BLOCK) {
@@ -318,7 +319,7 @@ public class BlockPainter implements Painter {
     }
 
     @Override
-    public void highlightField(Board.Field field, List<Player> players) {
+    public void highlightField(Field field, List<Player> players) {
         PacketContainer spawnEntityContainer = PacketUtil.getSpawnEntityContainer(field.getLocation().clone().add(0.5, 0, 0.5), EntityType.SLIME);
         int entityId = spawnEntityContainer.getIntegers().read(0);
 

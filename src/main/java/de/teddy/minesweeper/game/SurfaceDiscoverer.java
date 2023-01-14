@@ -31,7 +31,7 @@ public class SurfaceDiscoverer {
             throw new IllegalArgumentException();
         }
 
-        Board.Field field = board.getField(width, height);
+        Field field = board.getField(width, height);
         if (!field.isCovered()) return;
 
         field.setUncover();
@@ -40,17 +40,17 @@ public class SurfaceDiscoverer {
 
         if (field.getNeighborCount() != 0) return;
 
-        Stack<Board.Field> stack = new Stack<>();
+        Stack<Field> stack = new Stack<>();
         stack.push(field);
 
         while (!stack.isEmpty()) {
-            Board.Field current = stack.pop();
+            Field current = stack.pop();
 
             SURROUNDINGS.parallelStream().forEach(ints -> {
                 int i = ints[0];
                 int j = ints[1];
 
-                Board.Field relativeTo = current.getRelativeTo(i, j);
+                Field relativeTo = current.getRelativeTo(i, j);
                 if (relativeTo == null || !relativeTo.isCovered() || relativeTo.isMarked())
                     return;
 
@@ -77,7 +77,7 @@ public class SurfaceDiscoverer {
             throw new IllegalArgumentException();
         }
 
-        Board.Field field = board.getField(width, height);
+        Field field = board.getField(width, height);
         if (field.isCovered())
             return;
 
@@ -114,7 +114,7 @@ public class SurfaceDiscoverer {
         if (width < 0 || width >= board.getBoard().length || height < 0 || height >= board.getBoard()[0].length)
             throw new IllegalArgumentException();
 
-        Board.Field field = board.getField(width, height);
+        Field field = board.getField(width, height);
         if (field.isCovered())
             return;
 
@@ -123,19 +123,19 @@ public class SurfaceDiscoverer {
             int j = ints[1];
 
 
-            Board.Field field1 = field.getRelativeTo(i, j);
+            Field field1 = field.getRelativeTo(i, j);
             if (field1 != null && field1.isCovered())
                 field1.setMark(place ? MarkType.BOMB_MARK : MarkType.NONE);
         });
 
     }
 
-    public static int calculate3BV(Board board){
-        Set<Board.Field> checked = new HashSet<>();
+    public static int calculate3BV(Board board) {
+        Set<Field> checked = new HashSet<>();
 
-        for (Board.Field[] fields : board.getBoard()) {
-            for (Board.Field field : fields) {
-                if(checked.contains(field))
+        for (Field[] fields : board.getBoard()) {
+            for (Field field : fields) {
+                if (checked.contains(field))
                     continue;
 
 
