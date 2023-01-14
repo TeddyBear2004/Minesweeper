@@ -217,7 +217,8 @@ public class GameStatistic {
             return;
 
         if (duration == 0)
-            throw new RuntimeException("Duration cannot be null.");
+            return;
+
 
         try(Connection connection = connectionBuilder.getConnection()){
             PreparedStatement preparedStatement
