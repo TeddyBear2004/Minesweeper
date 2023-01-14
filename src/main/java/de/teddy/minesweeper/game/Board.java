@@ -93,6 +93,9 @@ public class Board {
     }
 
     public void finish(boolean won, boolean saveStats, long time) {
+        if (isFinished)
+            return;
+
         this.isFinished = true;
 
         if (saveStats && this.saveStats) {
