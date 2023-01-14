@@ -11,8 +11,8 @@ public class Language {
     }
 
     public String getString(String key) {
-
-        return config.getString(key);
+        String string = config.getString(key);
+        return string == null ? key : string;
     }
 
     public String getString(String key, String... args) {

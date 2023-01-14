@@ -24,13 +24,14 @@ public enum MarkType {
         int nextId = this.ordinal() + 1;
 
         if (nextId >= values.length) {
-            nextId = 0;
+            nextId = NONE.ordinal();
+            return values[nextId];
         }
 
         if (player != null) {
             PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
-            if (!personalModifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_QUESTION_MARK).orElse(false) && values.length > 2 && nextId == 2) {
-                nextId = 0;
+            if (!personalModifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_QUESTION_MARK).orElse(false) && nextId == QUESTION_MARK.ordinal()) {
+                nextId = NONE.ordinal();
             }
         }
 

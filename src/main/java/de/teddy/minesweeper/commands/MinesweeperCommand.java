@@ -2,6 +2,7 @@ package de.teddy.minesweeper.commands;
 
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.inventory.Inventories;
+import de.teddy.minesweeper.util.Language;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -12,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public record MinesweeperCommand(List<Game> games, Game customGame) implements TabExecutor {
+public record MinesweeperCommand(List<Game> games, Game customGame, Language language) implements TabExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
@@ -24,19 +25,19 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
             return true;
         }
 
-        if (args[0].equalsIgnoreCase("custom")) {
+        if (args[0].equalsIgnoreCase(language.getString("custom"))) {
             if (customGame == null) {
-                player.sendMessage(ChatColor.DARK_RED + "Custom game is currently unavailable.");
+                player.sendMessage(ChatColor.DARK_RED + language.getString("error_custom_game_unavailable"));
                 return true;
             }
 
             if (args.length < 3) {
-                player.sendMessage(ChatColor.DARK_RED + "/" + label + " custom [Bomb Count] [WidthXHeight] <Seed>");
+                player.sendMessage(ChatColor.DARK_RED + language.getString("minesweeper_command_custom_completion", label));
                 return true;
             }
 
             if (!player.hasPermission("minesweeper.minesweeper.custom")) {
-                player.sendMessage(ChatColor.DARK_RED + "You don't have the permission to execute this command.");
+                player.sendMessage(ChatColor.DARK_RED + language.getString("error_no_permission"));
                 return true;
             }
             int w, h, bombCount;
@@ -44,7 +45,7 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
             try{
                 bombCount = Integer.parseInt(args[1]);
             }catch(NumberFormatException e){
-                player.sendMessage(ChatColor.DARK_RED + "Please use a whole numbers as bomb count.");
+                player.sendMessage(ChatColor.DARK_RED + language.getString("error_no_valid_number"));
                 return true;
 
             }
@@ -56,7 +57,7 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
                 w = Integer.parseInt(s1);
                 h = Integer.parseInt(s2);
             }catch(NumberFormatException e){
-                player.sendMessage(ChatColor.DARK_RED + "Please use a whole numbers as width and height.");
+                player.sendMessage(ChatColor.DARK_RED + language.getString("error_no_valid_number"));
                 return true;
             }
             try{
@@ -76,7 +77,7 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
                             .build(player);
                 }
             }catch(IllegalArgumentException e){
-                player.sendMessage(ChatColor.DARK_RED + "The bomb size is not valid for the given map size.");
+                player.sendMessage(ChatColor.DARK_RED + language.getString("error_bomb_size_not_valid"));
             }
             return true;
         }
@@ -89,15 +90,15 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
                                 .setBombCount(Integer.parseInt(args[1]))
                                 .build(player);
                     }catch(NumberFormatException e){
-                        player.sendMessage("Please write a whole number as second argument.");
+                        player.sendMessage(language.getString("error_no_valid_number"));
                     }catch(IllegalArgumentException e){
-                        player.sendMessage("The provided bomb count is too large.");
+                        player.sendMessage(language.getString("error_bomb_size_too_big"));
                     }
                 } else if (args.length > 2) {
                     try{
                         int bombCount = Integer.parseInt(args[1]);
                         if (bombCount <= 0) {
-                            player.sendMessage(ChatColor.DARK_RED + "The number of bombs must be greater than 0.");
+                            player.sendMessage(ChatColor.DARK_RED + language.getString("error_bomb_size_too_small"));
                             return true;
                         }
                         game.getStarter()
@@ -107,9 +108,9 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
                                 .setSaveStats(false)
                                 .build(player);
                     }catch(NumberFormatException ignored){
-                        player.sendMessage("Please write a whole number as second and third argument.");
+                        player.sendMessage(language.getString("error_no_valid_number"));
                     }catch(IllegalArgumentException e){
-                        player.sendMessage("The provided bomb count is too large.");
+                        player.sendMessage(language.getString("error_bomb_size_too_big"));
                     }
                 } else
                     game.getStarter().build(player);
@@ -131,8 +132,8 @@ public record MinesweeperCommand(List<Game> games, Game customGame) implements T
             });
 
             if (customGame != null)
-                strings.add("custom");
-        } else if (args[0].equalsIgnoreCase("custom")) {
+                strings.add(language.getString("custom"));
+        } else if (args[0].equalsIgnoreCase(language.getString("custom"))) {
             if (args.length == 2) {
                 List.of("10", "20", "30", "40", "80", "100", "150", "200", "250", "350", "500").forEach(s -> {
                     if (s.startsWith(args[1]))

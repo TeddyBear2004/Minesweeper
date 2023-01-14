@@ -6,6 +6,7 @@ import de.teddy.minesweeper.game.statistic.GameStatistic;
 import de.teddy.minesweeper.game.statistic.MapStatistic;
 import de.teddy.minesweeper.game.statistic.PlayerStatistic;
 import de.teddy.minesweeper.util.ConnectionBuilder;
+import de.teddy.minesweeper.util.Language;
 import de.teddy.minesweeper.util.UUIDConverter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -23,10 +24,12 @@ public class MineStatsCommand implements TabExecutor {
 
     private final List<Game> games;
     private final ConnectionBuilder connectionBuilder;
+    private final Language language;
 
-    public MineStatsCommand(List<Game> games, ConnectionBuilder connectionBuilder) {
+    public MineStatsCommand(List<Game> games, ConnectionBuilder connectionBuilder, Language language) {
         this.games = games;
         this.connectionBuilder = connectionBuilder;
+        this.language = language;
     }
 
     @Override
@@ -35,7 +38,7 @@ public class MineStatsCommand implements TabExecutor {
             return true;
 
 
-        if (args.length == 0 || args[0].equalsIgnoreCase("player") || !args[0].equalsIgnoreCase("game")) {
+        if (args.length == 0 || args[0].equalsIgnoreCase(language.getString("player")) || !args[0].equalsIgnoreCase(language.getString("game"))) {
             String playerName = null;
             if (args.length >= 2)
                 playerName = args[1];
@@ -53,15 +56,15 @@ public class MineStatsCommand implements TabExecutor {
             }
 
             if (uuid == null) {
-                player.sendMessage(ChatColor.DARK_RED + "Could not determine the player by its name. Please try again later.");
+                player.sendMessage(ChatColor.DARK_RED + language.getString("error_not_determine_player_name"));
                 return true;
             }
 
             PlayerStatistic playerStatistic = new PlayerStatistic(GameStatistic.retrieve(connectionBuilder, uuid), games);
             player.openInventory(playerStatistic.generateInventory());
         } else {
-            if (args.length < 2){
-                sender.sendMessage(ChatColor.DARK_RED + "Please specify a map.");
+            if (args.length < 2) {
+                sender.sendMessage(ChatColor.DARK_RED + language.getString("error_specify_map"));
                 return true;
             }
 
@@ -84,7 +87,7 @@ public class MineStatsCommand implements TabExecutor {
         List<String> strings = new ArrayList<>();
 
         if (args.length == 1) {
-            List.of("player", "game").forEach(s -> {
+            List.of(language.getString("player"), language.getString("game")).forEach(s -> {
                 if (s.startsWith(args[0].toLowerCase()))
                     strings.add(s);
             });
@@ -101,16 +104,16 @@ public class MineStatsCommand implements TabExecutor {
             String f = args[0].toLowerCase();
             String s = args[1].toLowerCase();
 
-            if (f.equalsIgnoreCase("player")) {
+            if (f.equalsIgnoreCase(language.getString("player"))) {
                 Bukkit.getOnlinePlayers().forEach(player -> {
                     String name = player.getName();
 
                     if (name.toLowerCase().startsWith(s))
                         strings.add(name);
                 });
-            } else if (f.equalsIgnoreCase("game")) {
+            } else if (f.equalsIgnoreCase(language.getString("game"))) {
                 games.forEach(game -> {
-                    if(game instanceof CustomGame)
+                    if (game instanceof CustomGame)
                         return;
 
                     String id = game.getDifficulty();
