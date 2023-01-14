@@ -202,12 +202,12 @@ public class PersonalModifier {
                 commandObject.modifier.set(commandObject.type, null);
                 return;
             }
-            if (commandObject.arg.equalsIgnoreCase(commandObject.language.getString("true"))) {
+            if (commandObject.arg.equalsIgnoreCase(commandObject.language.getString("true_"))) {
                 commandObject.modifier.set(commandObject.type, true);
                 commandObject.player.sendMessage(ChatColor.GREEN + commandObject.language.getString("send_change_enable", commandObject.language.getString(commandObject.type.getLangReference())));
                 return;
             }
-            if (commandObject.arg.equalsIgnoreCase(commandObject.language.getString("false"))) {
+            if (commandObject.arg.equalsIgnoreCase(commandObject.language.getString("false_"))) {
                 commandObject.modifier.set(commandObject.type, false);
                 commandObject.player.sendMessage(ChatColor.GREEN + commandObject.language.getString("send_change_disable", commandObject.language.getString(commandObject.type.getLangReference())));
                 return;
