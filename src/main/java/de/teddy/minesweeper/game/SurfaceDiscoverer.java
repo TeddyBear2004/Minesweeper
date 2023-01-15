@@ -1,8 +1,11 @@
 package de.teddy.minesweeper.game;
 
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SurfaceDiscoverer {
@@ -17,53 +20,6 @@ public class SurfaceDiscoverer {
     }
 
     /**
-     * Uncovers a field on a Minesweeper board and, if the field is a number field with no neighboring bombs,
-     * recursively uncovers all adjacent fields.
-     *
-     * @param board  the board on which to uncover the field
-     * @param width  the width coordinate of the field to uncover
-     * @param height the height coordinate of the field to uncover
-     * @throws BombExplodeException if a bomb is uncovered
-     */
-    public static void uncoverFields(Board board, int width, int height) throws BombExplodeException {
-        // Check if the given coordinates are within the bounds of the board
-        if (width < 0 || width >= board.getBoard().length || height < 0 || height >= board.getBoard()[0].length) {
-            throw new IllegalArgumentException();
-        }
-
-        Field field = board.getField(width, height);
-        if (!field.isCovered()) return;
-
-        field.setUncover();
-        if (field.isBomb())
-            throw new BombExplodeException("Bomb at " + width + " and " + height + " is exploded.");
-
-        if (field.getNeighborCount() != 0) return;
-
-        Stack<Field> stack = new Stack<>();
-        stack.push(field);
-
-        while (!stack.isEmpty()) {
-            Field current = stack.pop();
-
-            SURROUNDINGS.parallelStream().forEach(ints -> {
-                int i = ints[0];
-                int j = ints[1];
-
-                Field relativeTo = current.getRelativeTo(i, j);
-                if (relativeTo == null || !relativeTo.isCovered() || relativeTo.isMarked())
-                    return;
-
-                relativeTo.setUncover();
-                if (relativeTo.getNeighborCount() != 0)
-                    return;
-
-                stack.push(relativeTo);
-            });
-        }
-    }
-
-    /**
      * Uncovers the fields next to a given number field on a Minesweeper board.
      *
      * @param board  the board on which to uncover the fields
@@ -71,14 +27,14 @@ public class SurfaceDiscoverer {
      * @param height the height coordinate of the number field
      * @throws BombExplodeException if a bomb is uncovered
      */
-    public static void uncoverFieldsNextToNumber(Board board, int width, int height) throws BombExplodeException {
+    public static void uncoverFieldsNextToNumber(@NotNull Board board, int width, int height) throws BombExplodeException {
         // Check if the given coordinates are within the bounds of the board
         if (width < 0 || width >= board.getBoard().length || height < 0 || height >= board.getBoard()[0].length) {
             throw new IllegalArgumentException();
         }
 
         Field field = board.getField(width, height);
-        if (field.isCovered())
+        if (field == null || field.isCovered())
             return;
 
 
@@ -109,13 +65,59 @@ public class SurfaceDiscoverer {
 
     }
 
+    /**
+     * Uncovers a field on a Minesweeper board and, if the field is a number field with no neighboring bombs,
+     * recursively uncovers all adjacent fields.
+     *
+     * @param board  the board on which to uncover the field
+     * @param width  the width coordinate of the field to uncover
+     * @param height the height coordinate of the field to uncover
+     * @throws BombExplodeException if a bomb is uncovered
+     */
+    public static void uncoverFields(@NotNull Board board, int width, int height) throws BombExplodeException {
+        // Check if the given coordinates are within the bounds of the board
+        if (width < 0 || width >= board.getBoard().length || height < 0 || height >= board.getBoard()[0].length) {
+            throw new IllegalArgumentException();
+        }
 
-    public static void flagFieldsNextToNumber(Board board, int width, int height, boolean place) {
+        Field field = board.getField(width, height);
+        if (field == null || !field.isCovered()) return;
+
+        field.setUncover();
+        if (field.isBomb())
+            throw new BombExplodeException("Bomb at " + width + " and " + height + " is exploded.");
+
+        if (field.getNeighborCount() != 0) return;
+
+        Stack<Field> stack = new Stack<>();
+        stack.push(field);
+
+        while (!stack.isEmpty()) {
+            Field current = stack.pop();
+
+            SURROUNDINGS.parallelStream().forEach(ints -> {
+                int i = ints[0];
+                int j = ints[1];
+
+                Field relativeTo = current.getRelativeTo(i, j);
+                if (relativeTo == null || !relativeTo.isCovered() || relativeTo.isMarked())
+                    return;
+
+                relativeTo.setUncover();
+                if (relativeTo.getNeighborCount() != 0)
+                    return;
+
+                stack.push(relativeTo);
+            });
+        }
+    }
+
+    public static void flagFieldsNextToNumber(@NotNull Board board, int width, int height, boolean place) {
         if (width < 0 || width >= board.getBoard().length || height < 0 || height >= board.getBoard()[0].length)
             throw new IllegalArgumentException();
 
         Field field = board.getField(width, height);
-        if (field.isCovered())
+        if (field == null || field.isCovered())
             return;
 
         SURROUNDINGS.parallelStream().forEach(ints -> {
@@ -130,17 +132,9 @@ public class SurfaceDiscoverer {
 
     }
 
-    public static int calculate3BV(Board board) {
-        Set<Field> checked = new HashSet<>();
-
-        for (Field[] fields : board.getBoard()) {
-            for (Field field : fields) {
-                if (checked.contains(field))
-                    continue;
-
-
-            }
-        }
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+    public static int calculate3BV(@NotNull Board board) {
         return -1; //todo implement me
     }
+
 }

@@ -5,6 +5,7 @@ import de.teddy.minesweeper.game.inventory.Inventories;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,26 +22,26 @@ public class MainMenuFiller implements ContentFiller {
     }
 
     @Override
-    public Inventories getEInventory() {
+    public @NotNull Inventories getEInventory() {
         return Inventories.CHOOSE_GAME;
     }
 
     @Override
-    public Map<ItemStack, Function<Player, Inventories>> insertEInventoryItems(Inventory inventory) {
+    public @NotNull Map<ItemStack, Function<Player, Inventory>> insertInventoryItems(Inventory inventory) {
         return new HashMap<>();
     }
 
     @Override
-    public Map<ItemStack, Function<Player, Inventory>> insertInventoryItems(Inventory inventory) {
+    public @NotNull Map<ItemStack, Function<Player, Inventories>> insertEInventoryItems(Inventory inventory) {
         return new HashMap<>();
     }
 
     @Override
-    public Map<ItemStack, Function<Player, Consumer<Inventory>>> insertConsumerItems(Inventory inventory) {
+    public @NotNull Map<ItemStack, Function<Player, Consumer<Inventory>>> insertConsumerItems(@NotNull Inventory inventory) {
         HashMap<ItemStack, Function<Player, Consumer<Inventory>>> itemStackFunctionHashMap = new HashMap<>();
 
         for (Game game : games) {
-            if (game.getInventoryPosition() < 0 || game.getItemStack() == null)
+            if (game.getInventoryPosition() < 0)
                 continue;
             inventory.setItem(game.getInventoryPosition(), game.getItemStack());
             itemStackFunctionHashMap.put(game.getItemStack(), player -> {

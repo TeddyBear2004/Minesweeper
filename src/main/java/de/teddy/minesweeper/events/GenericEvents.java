@@ -1,8 +1,8 @@
 package de.teddy.minesweeper.events;
 
-import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.game.modifier.Modifier;
 import de.teddy.minesweeper.game.modifier.PersonalModifier;
@@ -20,6 +20,8 @@ import org.bukkit.event.player.*;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +32,7 @@ public class GenericEvents implements Listener {
     private final Game customGame;
     private final GameManager gameManager;
     private final ResourcePackHandler resourcePackHandler;
-    private final Team noCollision;
+    private final @Nullable Team noCollision;
 
     public GenericEvents(List<Game> games, ResourcePackHandler resourcePackHandler, Game customGame, GameManager gameManager) {
         this.games = games;
@@ -48,7 +50,7 @@ public class GenericEvents implements Listener {
     }
 
     @EventHandler
-    public void onPlayerJoinEvent(PlayerJoinEvent event) {
+    public void onPlayerJoinEvent(@NotNull PlayerJoinEvent event) {
         event.getPlayer().getInventory().setContents(Inventories.VIEWER_INVENTORY);
 
         if (Modifier.getInstance().allowFly()
@@ -80,7 +82,7 @@ public class GenericEvents implements Listener {
         resourcePackHandler.apply(event.getPlayer());
     }
 
-    private void handleWatching(Player player) {
+    private void handleWatching(@NotNull Player player) {
         if (Modifier.getInstance().allowDefaultWatch()) {
             boolean watching = false;
             for (Game map : games) {
@@ -99,7 +101,7 @@ public class GenericEvents implements Listener {
     }
 
     @EventHandler
-    public void onPlayerQuitEvent(PlayerQuitEvent event) {
+    public void onPlayerQuitEvent(@NotNull PlayerQuitEvent event) {
         Game game = gameManager.getGame(event.getPlayer());
         if (game != null) {
             gameManager.finishGame(event.getPlayer(), false);
@@ -111,7 +113,7 @@ public class GenericEvents implements Listener {
 
 
     @EventHandler
-    public void onResourcePack(PlayerResourcePackStatusEvent event) {
+    public void onResourcePack(@NotNull PlayerResourcePackStatusEvent event) {
         Player player = event.getPlayer();
         PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
 
@@ -126,7 +128,7 @@ public class GenericEvents implements Listener {
     }
 
     @EventHandler
-    public void onPlayerMove(PlayerMoveEvent event) {
+    public void onPlayerMove(@NotNull PlayerMoveEvent event) {
         Player player = event.getPlayer();
 
         if (Modifier.getInstance().fromInsideToOutside(event)) {
@@ -147,12 +149,12 @@ public class GenericEvents implements Listener {
     }
 
     @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event) {
+    public void onPlayerInteract(@NotNull PlayerInteractEvent event) {
         if (event.getAction() != Action.LEFT_CLICK_BLOCK) return;
 
         Block block = event.getClickedBlock();
 
-        if (gameManager.getBoard(event.getPlayer()) != null || gameManager.getBoardWatched(event.getPlayer()) != null)
+        if (block == null || gameManager.getBoard(event.getPlayer()) != null || gameManager.getBoardWatched(event.getPlayer()) != null)
             return;
 
         for (Game game : games) {

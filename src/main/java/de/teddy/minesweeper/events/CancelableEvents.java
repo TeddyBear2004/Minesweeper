@@ -20,6 +20,8 @@ import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +33,7 @@ public class CancelableEvents implements Listener {
     private final Map<CancelableEvent, Boolean> cancelableEventBooleanMap = new HashMap<>();
     private final List<ModifierArea> areas;
 
-    public CancelableEvents(ConfigurationSection section, List<ModifierArea> areas) {
+    public CancelableEvents(@Nullable ConfigurationSection section, List<ModifierArea> areas) {
         this.areas = areas;
 
         for (CancelableEvent cancelableEvent : CancelableEvent.values()) {
@@ -41,22 +43,8 @@ public class CancelableEvents implements Listener {
         }
     }
 
-    private boolean shouldCancel(Player player) {
-        return player.getPersistentDataContainer().getOrDefault(BYPASS_EVENTS, PersistentDataType.BYTE, (byte) 0) == 0b0;
-    }
-
-    private boolean isInsideAreaAndShouldBeCanceled(Location location, CancelableEvent event) {
-        for (ModifierArea modifierArea : areas) {
-            if (modifierArea.isInArea(location)) {
-                if (Modifier.getInstance().getTemporaryEvents(event))
-                    return true;
-            }
-        }
-        return false;
-    }
-
     @EventHandler
-    public void onEntityDamageEvent(EntityDamageEvent event) {
+    public void onEntityDamageEvent(@NotNull EntityDamageEvent event) {
         if (cancelableEventBooleanMap.get(CancelableEvent.ENTITY_DAMAGE)
                 || isInsideAreaAndShouldBeCanceled(event.getEntity().getLocation(), CancelableEvent.ENTITY_DAMAGE)) {
             if (event.getEntity() instanceof Player player) {
@@ -70,8 +58,22 @@ public class CancelableEvents implements Listener {
 
     }
 
+    private boolean isInsideAreaAndShouldBeCanceled(@NotNull Location location, CancelableEvent event) {
+        for (ModifierArea modifierArea : areas) {
+            if (modifierArea.isInArea(location)) {
+                if (Modifier.getInstance().getTemporaryEvents(event))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean shouldCancel(@NotNull Player player) {
+        return player.getPersistentDataContainer().getOrDefault(BYPASS_EVENTS, PersistentDataType.BYTE, (byte) 0) == 0b0;
+    }
+
     @EventHandler
-    public void onFoodLevelChangeEvent(FoodLevelChangeEvent event) {
+    public void onFoodLevelChangeEvent(@NotNull FoodLevelChangeEvent event) {
         if (cancelableEventBooleanMap.get(CancelableEvent.FOOD_CHANGE)
                 || isInsideAreaAndShouldBeCanceled(event.getEntity().getLocation(), CancelableEvent.FOOD_CHANGE)) {
             if (event.getEntity() instanceof Player player) {
@@ -85,7 +87,7 @@ public class CancelableEvents implements Listener {
     }
 
     @EventHandler
-    public void onBlockPlaceEvent(BlockPlaceEvent event) {
+    public void onBlockPlaceEvent(@NotNull BlockPlaceEvent event) {
         if (cancelableEventBooleanMap.get(CancelableEvent.BLOCK_PLACE)
                 || isInsideAreaAndShouldBeCanceled(event.getBlockPlaced().getLocation(), CancelableEvent.BLOCK_PLACE)) {
             if (shouldCancel(event.getPlayer()))
@@ -95,7 +97,7 @@ public class CancelableEvents implements Listener {
     }
 
     @EventHandler
-    public void onBlockBreakEvent(BlockBreakEvent event) {
+    public void onBlockBreakEvent(@NotNull BlockBreakEvent event) {
         if (cancelableEventBooleanMap.get(CancelableEvent.BLOCK_BREAK)
                 || isInsideAreaAndShouldBeCanceled(event.getBlock().getLocation(), CancelableEvent.BLOCK_BREAK)) {
             if (shouldCancel(event.getPlayer()))
@@ -105,7 +107,7 @@ public class CancelableEvents implements Listener {
     }
 
     @EventHandler
-    public void onInventoryInteractEvent(InventoryInteractEvent event) {
+    public void onInventoryInteractEvent(@NotNull InventoryInteractEvent event) {
         if (cancelableEventBooleanMap.get(CancelableEvent.INVENTORY_INTERACT)
                 || isInsideAreaAndShouldBeCanceled(event.getWhoClicked().getLocation(), CancelableEvent.INVENTORY_INTERACT)) {
             if (event.getWhoClicked() instanceof Player player)
@@ -116,7 +118,7 @@ public class CancelableEvents implements Listener {
     }
 
     @EventHandler
-    public void onPlayerDropItemEvent(PlayerDropItemEvent event) {
+    public void onPlayerDropItemEvent(@NotNull PlayerDropItemEvent event) {
         if (cancelableEventBooleanMap.get(CancelableEvent.DROP_ITEM)
                 || isInsideAreaAndShouldBeCanceled(event.getPlayer().getLocation(), CancelableEvent.DROP_ITEM)) {
             if (shouldCancel(event.getPlayer()))
@@ -126,7 +128,7 @@ public class CancelableEvents implements Listener {
     }
 
     @EventHandler
-    public void onEntityPickupItemEvent(EntityPickupItemEvent event) {
+    public void onEntityPickupItemEvent(@NotNull EntityPickupItemEvent event) {
         if (cancelableEventBooleanMap.get(CancelableEvent.PICKUP_ITEM)
                 || isInsideAreaAndShouldBeCanceled(event.getEntity().getLocation(), CancelableEvent.PICKUP_ITEM)) {
             if (event.getEntity() instanceof Player player)
@@ -136,17 +138,17 @@ public class CancelableEvents implements Listener {
     }
 
     @EventHandler
-    public void onInventoryDrag(InventoryDragEvent event) {
+    public void onInventoryDrag(@NotNull InventoryDragEvent event) {
         event.setCancelled(true);
     }
 
     @EventHandler
-    public void onInventoryMoveItem(InventoryMoveItemEvent event) {
+    public void onInventoryMoveItem(@NotNull InventoryMoveItemEvent event) {
         event.setCancelled(true);
     }
 
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
+    public void onInventoryClick(@NotNull InventoryClickEvent event) {
         event.setCancelled(true);
     }
 }

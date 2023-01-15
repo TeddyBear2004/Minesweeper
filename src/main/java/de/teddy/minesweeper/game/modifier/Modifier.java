@@ -5,6 +5,8 @@ import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +36,7 @@ public class Modifier {
      * @param config The configuration containing the settings for the modifier.
      * @param areas  The list of areas where the modifier is active.
      */
-    private Modifier(FileConfiguration config, List<ModifierArea> areas) {
+    private Modifier(@NotNull FileConfiguration config, List<ModifierArea> areas) {
         this(false,
              config.getBoolean("allow_fly", true),
              config.getBoolean("allow_default_watch", true),
@@ -43,20 +45,16 @@ public class Modifier {
         );
     }
 
-    /**
-     * Creates a new Modifier instance using the specified configuration and areas.
-     *
-     * @param config  The configuration containing the settings for the modifier.
-     * @param section The configuration section for the specific modifier.
-     * @param areas   The list of areas where the modifier is active.
-     */
-    private Modifier(ConfigurationSection config, ConfigurationSection section, List<ModifierArea> areas) {
-        this(section.getBoolean("temporary_fly", false),
-             config.getBoolean("allow_fly", true),
-             config.getBoolean("allow_default_watch", true),
-             readTemporaryEvents(section.getConfigurationSection("cancelled_events")),
-             areas
-        );
+    private static @NotNull Map<CancelableEvent, Boolean> readTemporaryEvents(@Nullable ConfigurationSection map) {
+        Map<CancelableEvent, Boolean> cancelableEventBooleanMap = new HashMap<>();
+
+        for (CancelableEvent cancelableEvent : CancelableEvent.values()) {
+            cancelableEventBooleanMap.put(cancelableEvent, map == null
+                    ? cancelableEvent.getDefaultValue()
+                    : map.getBoolean(cancelableEvent.getKey(), cancelableEvent.getDefaultValue()));
+        }
+
+        return cancelableEventBooleanMap;
     }
 
     /**
@@ -80,25 +78,29 @@ public class Modifier {
         return modifier;
     }
 
-    public static void initialise(ConfigurationSection config, ConfigurationSection section, List<ModifierArea> areas) {
+    /**
+     * Creates a new Modifier instance using the specified configuration and areas.
+     *
+     * @param config  The configuration containing the settings for the modifier.
+     * @param section The configuration section for the specific modifier.
+     * @param areas   The list of areas where the modifier is active.
+     */
+    private Modifier(@NotNull ConfigurationSection config, @NotNull ConfigurationSection section, List<ModifierArea> areas) {
+        this(section.getBoolean("temporary_fly", false),
+             config.getBoolean("allow_fly", true),
+             config.getBoolean("allow_default_watch", true),
+             readTemporaryEvents(section.getConfigurationSection("cancelled_events")),
+             areas
+        );
+    }
+
+    public static void initialise(@NotNull ConfigurationSection config, @NotNull ConfigurationSection section, List<ModifierArea> areas) {
         if (modifier == null)
             modifier = new Modifier(config, section, areas);
     }
 
-    public static void initialise(FileConfiguration config, List<ModifierArea> areas) {
+    public static void initialise(@NotNull FileConfiguration config, List<ModifierArea> areas) {
         if (modifier == null) modifier = new Modifier(config, areas);
-    }
-
-    private static Map<CancelableEvent, Boolean> readTemporaryEvents(ConfigurationSection map) {
-        Map<CancelableEvent, Boolean> cancelableEventBooleanMap = new HashMap<>();
-
-        for (CancelableEvent cancelableEvent : CancelableEvent.values()) {
-            cancelableEventBooleanMap.put(cancelableEvent, map == null
-                    ? cancelableEvent.getDefaultValue()
-                    : map.getBoolean(cancelableEvent.getKey(), cancelableEvent.getDefaultValue()));
-        }
-
-        return cancelableEventBooleanMap;
     }
 
     public boolean isTemporaryFlightEnabled() {
@@ -117,7 +119,7 @@ public class Modifier {
         return temporaryEvents.getOrDefault(event, false);
     }
 
-    public boolean fromOutsideToInside(PlayerMoveEvent event) {
+    public boolean fromOutsideToInside(@NotNull PlayerMoveEvent event) {
         for (ModifierArea modifierArea : areas)
             if (!modifierArea.isInArea(event.getFrom()) && event.getTo() != null && modifierArea.isInArea(event.getTo()))
                 return true;
@@ -125,7 +127,7 @@ public class Modifier {
         return false;
     }
 
-    public boolean fromInsideToOutside(PlayerMoveEvent event) {
+    public boolean fromInsideToOutside(@NotNull PlayerMoveEvent event) {
         for (ModifierArea modifierArea : areas)
             if (event.getTo() != null && !modifierArea.isInArea(event.getTo()) && modifierArea.isInArea(event.getFrom()))
                 return true;
@@ -133,7 +135,7 @@ public class Modifier {
         return false;
     }
 
-    public boolean isInside(Location location) {
+    public boolean isInside(@NotNull Location location) {
         for (ModifierArea modifierArea : areas)
             if (modifierArea.isInArea(location))
                 return true;

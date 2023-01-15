@@ -4,11 +4,13 @@ import de.teddy.minesweeper.game.modifier.PersonalModifier;
 import de.teddy.minesweeper.game.painter.ArmorStandPainter;
 import de.teddy.minesweeper.game.painter.Painter;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class DisableResourceHandler implements ResourcePackHandler {
 
     @Override
-    public void apply(Player player) {
+    public void apply(@NotNull Player player) {
         String url = getUrl(player);
         if (url != null)
             player.setResourcePack(url);
@@ -16,8 +18,7 @@ public class DisableResourceHandler implements ResourcePackHandler {
             Painter.storePainterClass(player.getPersistentDataContainer(), ArmorStandPainter.class);
     }
 
-    @Override
-    public String getUrl(Player player) {
+    public @Nullable String getUrl(@NotNull Player player) {
         PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
 
         return personalModifier.<String>get(PersonalModifier.ModifierType.RESOURCE_PACK_URL).orElse(null);

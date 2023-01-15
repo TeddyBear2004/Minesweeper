@@ -8,12 +8,11 @@ import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Field;
 import de.teddy.minesweeper.game.Game;
 import de.teddy.minesweeper.game.modifier.PersonalModifier;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,12 +27,16 @@ public interface Painter {
 
     Map<Class<? extends Painter>, Painter> PAINTER_MAP = new HashMap<>();
 
-    static void storePainterClass(PersistentDataContainer container, Class<? extends Painter> clazz) {
+    static void storePainterClass(@NotNull PersistentDataContainer container, @NotNull Class<? extends Painter> clazz) {
         container.set(PAINTER_KEY, PersistentDataType.STRING, clazz.getName());
     }
 
+    static Painter getPainter(@NotNull Player player) {
+        return PAINTER_MAP.get(loadPainterClass(player));
+    }
+
     @SuppressWarnings("unchecked")
-    static Class<? extends Painter> loadPainterClass(Player player) {
+    static Class<? extends Painter> loadPainterClass(@NotNull Player player) {
         PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
 
         Class<? extends Painter> clazz;
@@ -49,10 +52,6 @@ public interface Painter {
         return clazz;
     }
 
-    static Painter getPainter(Player player) {
-        return PAINTER_MAP.get(loadPainterClass(player));
-    }
-
     String getName();
 
     void drawBlancField(Board board, List<Player> players);
@@ -60,10 +59,6 @@ public interface Painter {
     void drawField(Board board, List<Player> players);
 
     void drawBombs(Board board, List<Player> players);
-
-    ItemStack getActualItemStack(Field field);
-
-    Material getActualMaterial(Field field);
 
     List<PacketType> getRightClickPacketType();
 

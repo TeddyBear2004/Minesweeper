@@ -13,6 +13,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,7 +24,7 @@ public class Game {
 
     private final Plugin plugin;
     private final List<Game> games;
-    private final Language language;
+    private final @NotNull Language language;
     private final Location corner;
     private final Location spawn;
     private final int width;
@@ -30,11 +32,11 @@ public class Game {
     private final int bombCount;
     private final String difficulty;
     private final int inventoryPosition;
-    private final ItemStack itemStack;
+    private final @NotNull ItemStack itemStack;
     private final GameManager gameManager;
     private final ConnectionBuilder connectionBuilder;
 
-    public Game(Plugin plugin, GameManager gameManager, List<Game> games, Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int width, int height, int bombCount, String difficulty, Material material, int inventoryPosition) {
+    public Game(Plugin plugin, GameManager gameManager, List<Game> games, @NotNull Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int width, int height, int bombCount, String difficulty, @NotNull Material material, int inventoryPosition) {
         this.gameManager = gameManager;
         this.connectionBuilder = connectionBuilder;
         this.plugin = plugin;
@@ -59,9 +61,9 @@ public class Game {
         itemStack.setItemMeta(itemMeta);
     }
 
-    public boolean isBlockOutsideGame(Block block) {
-        return !IsBetween.isBetween2D(corner, width, height, block)
-                || !IsBetween.isBetween(corner.getBlockY(), corner.getBlockY() + 1, block.getY());
+    public boolean isBlockOutsideGame(@NotNull Block block) {
+        return IsBetween.isOutside2D(corner, width, height, block)
+                || IsBetween.isOutside(corner.getBlockY(), corner.getBlockY() + 1, block.getY());
     }
 
     public int getFieldHeight() {
@@ -76,18 +78,18 @@ public class Game {
         return inventoryPosition;
     }
 
-    public ItemStack getItemStack() {
+    public @NotNull ItemStack getItemStack() {
         return itemStack;
     }
 
-    public Board getRunningGame() {
+    public @Nullable Board getRunningGame() {
         for (Board b : gameManager.getRunningGames().values())
             if (b.getGame() == this)
                 return b;
         return null;
     }
 
-    public Board startGame(Player p, boolean shouldTeleport, int bombCount, int width, int height, long seed, boolean setSeed, boolean saveStats) {
+    public @Nullable Board startGame(@NotNull Player p, boolean shouldTeleport, int bombCount, int width, int height, long seed, boolean setSeed, boolean saveStats) {
         gameManager.stopGames(p, saveStats);
         Board b;
 
@@ -131,7 +133,7 @@ public class Game {
         }
     }
 
-    public void startViewing(Player player, Board runningGame) {
+    public void startViewing(@NotNull Player player, @Nullable Board runningGame) {
         if (runningGame == null) {
             gameManager.switchToMap(player, games.get(0));
         } else {
@@ -143,7 +145,7 @@ public class Game {
         return difficulty;
     }
 
-    public String getMap() {
+    public @NotNull String getMap() {
         return width + "x" + height;
     }
 
@@ -151,22 +153,22 @@ public class Game {
         return bombCount;
     }
 
-    public Builder getStarter() {
+    public @NotNull Builder getStarter() {
         return new Builder(this);
     }
 
     public static class Builder {
 
-        private final Game game;
+        private final @NotNull Game game;
         private boolean shouldTeleport;
         private int bombCount;
         private int width;
         private int height;
-        private Long seed;
+        private @Nullable Long seed;
         private boolean setSeed;
         private boolean saveStats;
 
-        private Builder(Game game) {
+        private Builder(@NotNull Game game) {
             this.game = game;
             this.shouldTeleport = true;
             this.bombCount = game.bombCount;
@@ -177,42 +179,42 @@ public class Game {
             this.saveStats = true;
         }
 
-        public Builder setShouldTeleport(boolean shouldTeleport) {
+        public @NotNull Builder setShouldTeleport(boolean shouldTeleport) {
             this.shouldTeleport = shouldTeleport;
             return this;
         }
 
-        public Builder setBombCount(int bombCount) {
+        public @NotNull Builder setBombCount(int bombCount) {
             this.bombCount = bombCount;
             return this;
         }
 
-        public Builder setWidth(int width) {
+        public @NotNull Builder setWidth(int width) {
             this.width = width;
             return this;
         }
 
-        public Builder setHeight(int height) {
+        public @NotNull Builder setHeight(int height) {
             this.height = height;
             return this;
         }
 
-        public Builder setSeed(long seed) {
+        public @NotNull Builder setSeed(long seed) {
             this.seed = seed;
             return this;
         }
 
-        public Builder setSetSeed(boolean setSeed) {
+        public @NotNull Builder setSetSeed(boolean setSeed) {
             this.setSeed = setSeed;
             return this;
         }
 
-        public Builder setSaveStats(boolean saveStats) {
+        public @NotNull Builder setSaveStats(boolean saveStats) {
             this.saveStats = saveStats;
             return this;
         }
 
-        public void build(Player player) {
+        public void build(@NotNull Player player) {
             if (seed == null)
                 seed = new Random().nextLong();
 

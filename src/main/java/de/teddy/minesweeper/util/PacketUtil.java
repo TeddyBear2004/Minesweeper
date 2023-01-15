@@ -13,6 +13,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -30,19 +31,19 @@ public class PacketUtil {
     private static WrappedDataWatcher armorStandDataWatcher;
     private static WrappedDataWatcher slimeDataWatcher;
 
-    public static void sendActionBar(Player player, String message) {
+    public static void sendActionBar(@NotNull Player player, String message) {
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
     }
 
-    public static void sendParticleEffect(Player player, Location location, Particle particle, float xDifference, float zDifference, int count) {
+    public static void sendParticleEffect(@NotNull Player player, @NotNull Location location, @NotNull Particle particle, float xDifference, float zDifference, int count) {
         player.spawnParticle(particle, location.getX(), location.getY(), location.getZ(), count, xDifference, 0, zDifference);
     }
 
-    public static void sendSoundEffect(Player player, Sound sound, float volume, Location blockPosition) {
+    public static void sendSoundEffect(@NotNull Player player, @NotNull Sound sound, float volume, @NotNull Location blockPosition) {
         player.playSound(blockPosition, sound, volume, 1f);
     }
 
-    public static PacketContainer getBlockChange(BlockPosition blockPosition, WrappedBlockData wrappedBlockData) {
+    public static @NotNull PacketContainer getBlockChange(BlockPosition blockPosition, WrappedBlockData wrappedBlockData) {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.BLOCK_CHANGE, true);
 
@@ -66,7 +67,7 @@ public class PacketUtil {
         }
     }
 
-    public static PacketContainer getMultiBlockChange(short[] shorts, BlockPosition blockPosition, WrappedBlockData[] wrappedBlockData, boolean b) {
+    public static @NotNull PacketContainer getMultiBlockChange(short[] shorts, BlockPosition blockPosition, WrappedBlockData[] wrappedBlockData, boolean b) {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.MULTI_BLOCK_CHANGE, true);
 
@@ -85,7 +86,7 @@ public class PacketUtil {
         return packet;
     }
 
-    public static PacketContainer getSpawnEntityContainer(Location location, EntityType type) {
+    public static @NotNull PacketContainer getSpawnEntityContainer(@NotNull Location location, EntityType type) {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.SPAWN_ENTITY, true);
 
@@ -112,7 +113,7 @@ public class PacketUtil {
         return packet;
     }
 
-    public static PacketContainer getArmorStandMetadata(int entityId) {
+    public static @NotNull PacketContainer getArmorStandMetadata(int entityId) {
         WrappedDataWatcher dataWatcher = getDefaultWrappedDataWatcherForArmorStands();
 
         PacketContainer metadataPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
@@ -124,7 +125,7 @@ public class PacketUtil {
         return metadataPacket;
     }
 
-    private static WrappedDataWatcher getDefaultWrappedDataWatcherForArmorStands() {
+    private static @NotNull WrappedDataWatcher getDefaultWrappedDataWatcherForArmorStands() {
         if (armorStandDataWatcher != null)
             return armorStandDataWatcher;
         WrappedDataWatcher wrappedDataWatcher = new WrappedDataWatcher();
@@ -145,7 +146,7 @@ public class PacketUtil {
     }
 
 
-    public static PacketContainer getItemOnEntityHead(int entityId, ItemStack item) {
+    public static @NotNull PacketContainer getItemOnEntityHead(int entityId, ItemStack item) {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.ENTITY_EQUIPMENT, true);
 
@@ -155,7 +156,7 @@ public class PacketUtil {
         return packet;
     }
 
-    public static PacketContainer getSlimeMetadata(int entityId) {
+    public static @NotNull PacketContainer getSlimeMetadata(int entityId) {
         WrappedDataWatcher dataWatcher = getDefaultWrappedDataWatcherForSlimes();
 
         PacketContainer metadataPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
@@ -167,18 +168,7 @@ public class PacketUtil {
         return metadataPacket;
     }
 
-    public static PacketContainer joinTeam(String teamName, List<UUID> uuids) {
-        PacketContainer scoreboardTeamPacket = new PacketContainer(PacketType.Play.Server.SCOREBOARD_TEAM);
-        List<String> strings = uuids.stream().map(UUID::toString).toList();
-
-        /*scoreboardTeamPacket.getStrings().write(0, teamName);
-        scoreboardTeamPacket.getIntegers().write(0, 3);
-        scoreboardTeamPacket.getSpecificModifier(List.class).write(0, strings);*/
-
-        return scoreboardTeamPacket;
-    }
-
-    private static WrappedDataWatcher getDefaultWrappedDataWatcherForSlimes() {
+    private static @NotNull WrappedDataWatcher getDefaultWrappedDataWatcherForSlimes() {
         if (slimeDataWatcher != null)
             return slimeDataWatcher;
         WrappedDataWatcher wrappedDataWatcher = new WrappedDataWatcher();
@@ -193,7 +183,18 @@ public class PacketUtil {
         return wrappedDataWatcher;
     }
 
-    public static PacketContainer getRemoveEntity(int... entityId) {
+    public static @NotNull PacketContainer joinTeam(String teamName, @NotNull List<UUID> uuids) {
+        PacketContainer scoreboardTeamPacket = new PacketContainer(PacketType.Play.Server.SCOREBOARD_TEAM);
+        List<String> strings = uuids.stream().map(UUID::toString).toList();
+
+        /*scoreboardTeamPacket.getStrings().write(0, teamName);
+        scoreboardTeamPacket.getIntegers().write(0, 3);
+        scoreboardTeamPacket.getSpecificModifier(List.class).write(0, strings);*/
+
+        return scoreboardTeamPacket;
+    }
+
+    public static @NotNull PacketContainer getRemoveEntity(int @NotNull ... entityId) {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.ENTITY_DESTROY, true);
 

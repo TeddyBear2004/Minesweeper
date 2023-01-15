@@ -13,6 +13,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -21,21 +23,21 @@ public class Board {
 
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("mm:ss:SSS");
     private final Game game;
-    private final Plugin plugin;
+    private final @NotNull Plugin plugin;
     private final Language language;
     private final List<Player> viewers = new LinkedList<>();
     private final int width;
     private final int height;
     private final int bombCount;
     private final Location corner;
-    private final Field[][] board;
-    private final int[][] bombList;
+    private final Field[] @NotNull [] board;
+    private final int[] @NotNull [] bombList;
     private final Player player;
-    private final Random random;
+    private final @NotNull Random random;
     private final boolean saveStats;
     private final long seed;
     private final ConnectionBuilder connectionBuilder;
-    boolean setSeed;
+    private final boolean setSeed;
     private boolean win = false;
     private long started;
     private boolean isGenerated;
@@ -45,7 +47,7 @@ public class Board {
     private int startY;
 
 
-    public Board(Plugin plugin, Language language, ConnectionBuilder connectionBuilder, Game game, int width, int height, int bombCount, Location corner, Player player, long seed, boolean setSeed, boolean saveStats) {
+    public Board(@NotNull Plugin plugin, Language language, ConnectionBuilder connectionBuilder, Game game, int width, int height, int bombCount, Location corner, Player player, long seed, boolean setSeed, boolean saveStats) {
         this.connectionBuilder = connectionBuilder;
         this.setSeed = setSeed;
         this.plugin = plugin;
@@ -124,11 +126,11 @@ public class Board {
         return player;
     }
 
-    public List<Player> getViewers() {
+    public @NotNull List<Player> getViewers() {
         return viewers;
     }
 
-    public List<Player> getAllPlayers() {
+    public @NotNull List<Player> getAllPlayers() {
         List<Player> list = new ArrayList<>(viewers);
 
         list.add(player);
@@ -136,7 +138,7 @@ public class Board {
         return list;
     }
 
-    public void addViewer(Player player) {
+    public void addViewer(@NotNull Player player) {
         this.viewers.add(player);
         draw(Collections.singletonList(player));
         setScoreBoard(player);
@@ -154,10 +156,10 @@ public class Board {
         this.drawBlancField(viewers);
     }
 
-    public void drawBlancField(List<Player> players) {
+    public void draw(@NotNull List<Player> players) {
         getCurrentPlayerPainters(players).forEach((painter, players2) -> {
             if (painter != null)
-                painter.drawBlancField(this, players2);
+                painter.drawField(this, players2);
         });
     }
 
@@ -169,27 +171,33 @@ public class Board {
         this.draw(this.viewers);
     }
 
-    public void draw(List<Player> players) {
+    public void setScoreBoard(@NotNull Player player) {
+        if (scoreboard == null || isFinished)
+            return;
+
+        player.setScoreboard(scoreboard);
+    }
+
+    public @NotNull Map<Painter, List<Player>> getCurrentPlayerPainters(@NotNull List<Player> viewers) {
+        Map<Class<? extends Painter>, List<Player>> map1 = new HashMap<>();
+        viewers.forEach(player -> {
+            Class<? extends Painter> painterClass = Painter.loadPainterClass(player);
+            map1.computeIfAbsent(painterClass, p -> new ArrayList<>()).add(player);
+        });
+
+        Class<? extends Painter> playerClass = Painter.loadPainterClass(player);
+        map1.computeIfAbsent(playerClass, p -> new ArrayList<>()).add(player);
+
+        Map<Painter, List<Player>> map2 = new HashMap<>();
+        map1.forEach((painterClass, players) -> map2.put(Painter.PAINTER_MAP.get(painterClass), players));
+        return map2;
+    }
+
+    public void drawBlancField(@NotNull List<Player> players) {
         getCurrentPlayerPainters(players).forEach((painter, players2) -> {
             if (painter != null)
-                painter.drawField(this, players2);
+                painter.drawBlancField(this, players2);
         });
-    }
-
-
-    public Field getField(int x, int y) {
-        if (x >= 0 && x < board.length && y >= 0 && y < board[0].length) {
-            return this.board[x][y];
-        } else {
-            return null;
-        }
-    }
-
-    public Field getField(Location location) {
-        int x = Math.abs(this.corner.getBlockX() - location.getBlockX());
-        int y = Math.abs(this.corner.getBlockZ() - location.getBlockZ());
-
-        return this.getField(x, y);
     }
 
     public void checkField(int x, int y) throws BombExplodeException {
@@ -233,12 +241,19 @@ public class Board {
         return this.started == 0 ? 0 : now - this.started;
     }
 
-    private String getActualTimeNeededString() {
-        return SIMPLE_DATE_FORMAT.format(new Date(getActualTimeNeeded()));
+    public @Nullable Field getField(@NotNull Location location) {
+        int x = Math.abs(this.corner.getBlockX() - location.getBlockX());
+        int y = Math.abs(this.corner.getBlockZ() - location.getBlockZ());
+
+        return this.getField(x, y);
     }
 
-    private String getActualTimeNeededString(long now) {
-        return SIMPLE_DATE_FORMAT.format(new Date(getActualTimeNeeded(now)));
+    public @Nullable Field getField(int x, int y) {
+        if (x >= 0 && x < board.length && y >= 0 && y < board[0].length) {
+            return this.board[x][y];
+        } else {
+            return null;
+        }
     }
 
     public int getWidth() {
@@ -257,23 +272,12 @@ public class Board {
         return bombList;
     }
 
-    public Map<Painter, List<Player>> getCurrentPlayerPainters(List<Player> viewers) {
-        Map<Class<? extends Painter>, List<Player>> map1 = new HashMap<>();
-        viewers.forEach(player -> {
-            Class<? extends Painter> painterClass = Painter.loadPainterClass(player);
-            map1.computeIfAbsent(painterClass, p -> new ArrayList<>()).add(player);
-        });
-
-        Class<? extends Painter> playerClass = Painter.loadPainterClass(player);
-        map1.computeIfAbsent(playerClass, p -> new ArrayList<>()).add(player);
-
-        Map<Painter, List<Player>> map2 = new HashMap<>();
-        map1.forEach((painterClass, players) -> map2.put(Painter.PAINTER_MAP.get(painterClass), players));
-        return map2;
+    private @NotNull String getActualTimeNeededString() {
+        return SIMPLE_DATE_FORMAT.format(new Date(getActualTimeNeeded()));
     }
 
-    public Map<Painter, List<Player>> getCurrentPlayerPainters() {
-        return getCurrentPlayerPainters(this.viewers);
+    private @NotNull String getActualTimeNeededString(long now) {
+        return SIMPLE_DATE_FORMAT.format(new Date(getActualTimeNeeded(now)));
     }
 
     public int getCurrentFlagCount() {
@@ -336,12 +340,8 @@ public class Board {
         }, 20);
     }
 
-    protected void generateBoard(Field[][] board) {
-        if (this.isGenerated)
-            throw new RuntimeException(language.getString("error_already_generated"));
-
-        System.arraycopy(board, 0, this.board, 0, board.length);
-        this.isGenerated = true;
+    public @NotNull Map<Painter, List<Player>> getCurrentPlayerPainters() {
+        return getCurrentPlayerPainters(this.viewers);
     }
 
     private void generateBoard(int x, int y) {
@@ -393,9 +393,12 @@ public class Board {
         return Math.abs(x - possibleX) <= 1 && Math.abs(y - possibleY) <= 1;
     }
 
-    public boolean isBlockOutsideGame(Block block) {
-        return !IsBetween.isBetween2D(corner, width, height, block)
-                || !IsBetween.isBetween(corner.getBlockY(), corner.getBlockY() + 1, block.getY());
+    protected void generateBoard(Field[] @NotNull [] board) {
+        if (this.isGenerated)
+            throw new RuntimeException(language.getString("error_already_generated"));
+
+        System.arraycopy(board, 0, this.board, 0, board.length);
+        this.isGenerated = true;
     }
 
     private void initScoreboard() {
@@ -428,18 +431,16 @@ public class Board {
             flagCounter.setSuffix(ChatColor.GREEN + getFlagCounterString());
     }
 
-    public void setScoreBoard(Player player) {
-        if (scoreboard == null || isFinished)
-            return;
-
-        player.setScoreboard(scoreboard);
+    public boolean isBlockOutsideGame(@NotNull Block block) {
+        return IsBetween.isOutside2D(corner, width, height, block)
+                || IsBetween.isOutside(corner.getBlockY(), corner.getBlockY() + 1, block.getY());
     }
 
-    private String getFlagCounterString() {
+    private @NotNull String getFlagCounterString() {
         return (bombCount < getCurrentFlagCount() ? ChatColor.DARK_RED : ChatColor.GREEN) + "" + getCurrentFlagCount() + ChatColor.GREEN + "/" + bombCount;
     }
 
-    public void removeScoreBoard(Player player) {
+    public void removeScoreBoard(@NotNull Player player) {
         ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
         if (scoreboardManager != null)
             player.setScoreboard(scoreboardManager.getNewScoreboard());

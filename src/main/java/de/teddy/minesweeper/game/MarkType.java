@@ -3,6 +3,7 @@ package de.teddy.minesweeper.game;
 import de.teddy.minesweeper.game.modifier.PersonalModifier;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 public enum MarkType {
     NONE(Material.AIR),
@@ -19,7 +20,7 @@ public enum MarkType {
         return material;
     }
 
-    public MarkType next(Player player) {
+    public MarkType next(@Nullable Player player) {
         MarkType[] values = values();
         int nextId = this.ordinal() + 1;
 

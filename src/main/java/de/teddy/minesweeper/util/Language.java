@@ -2,6 +2,7 @@ package de.teddy.minesweeper.util;
 
 import com.moandjiezana.toml.Toml;
 import org.bukkit.ChatColor;
+import org.jetbrains.annotations.NotNull;
 
 public class Language {
     private final Toml config;
@@ -15,7 +16,7 @@ public class Language {
         return string == null ? key : string;
     }
 
-    public String getString(String key, String... args) {
+    public @NotNull String getString(String key, String @NotNull ... args) {
         String string = config.getString(key);
         for (int i = 0; i < args.length; i++)
             string = string.replace("{" + i + "}", args[i]);

@@ -11,6 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerProfile;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -25,7 +26,7 @@ public class HeadGenerator {
 
     private static final Map<UUID, PlayerProfile> UUID_PLAYER_PROFILE_MAP = new HashMap<>();
 
-    public static ItemStack getHeadFromUrl(String url) {
+    public static @NotNull ItemStack getHeadFromUrl(@NotNull String url) {
         PlayerProfile playerProfile = Bukkit.getServer().createPlayerProfile(UUID.randomUUID());
 
         try{
@@ -37,7 +38,7 @@ public class HeadGenerator {
         return getHeadFromPlayerProfile(playerProfile);
     }
 
-    public static ItemStack getHeadFromPlayerProfile(PlayerProfile playerProfile) {
+    public static @NotNull ItemStack getHeadFromPlayerProfile(PlayerProfile playerProfile) {
         ItemStack itemStack = new ItemStack(Material.PLAYER_HEAD);
 
         SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
@@ -51,16 +52,7 @@ public class HeadGenerator {
         return itemStack;
     }
 
-    public static ItemStack getHeadFromUUID(UUID uuid) {
-        try{
-            return getHeadFromPlayerProfile(getPlayerProfile(uuid));
-        }catch(Exception e){
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static PlayerProfile getPlayerProfile(UUID uuid) throws Exception {
+    public static PlayerProfile getPlayerProfile(@NotNull UUID uuid) throws Exception {
         if (UUID_PLAYER_PROFILE_MAP.containsKey(uuid))
             return UUID_PLAYER_PROFILE_MAP.get(uuid);
 

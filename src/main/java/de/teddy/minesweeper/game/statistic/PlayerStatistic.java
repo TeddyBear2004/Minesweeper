@@ -6,6 +6,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -17,7 +18,7 @@ public class PlayerStatistic {
     private static final DecimalFormat df = new DecimalFormat("#.000");
     private final List<GameStatistic> stats;
     private final List<Game> games;
-    private final Map<Game, MapStatistic> statsPerMap;
+    private final @NotNull Map<Game, MapStatistic> statsPerMap;
 
     public PlayerStatistic(List<GameStatistic> stats, List<Game> games) {
         this.stats = stats;
@@ -41,7 +42,7 @@ public class PlayerStatistic {
         gameStatisticMap.forEach((game, gameStatistic) -> this.statsPerMap.put(game, new MapStatistic(gameStatistic)));
     }
 
-    public Inventory generateInventory() {
+    public @NotNull Inventory generateInventory() {
         Inventory inventory = Bukkit.createInventory(null, 9, ChatColor.AQUA + "Minesweeper Stats");
 
         games.forEach(game -> {

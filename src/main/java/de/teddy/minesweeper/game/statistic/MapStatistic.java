@@ -5,6 +5,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -80,7 +81,7 @@ public class MapStatistic {
         this.winRate = (double) finished / (double) started;
     }
 
-    public Inventory getInventory() {
+    public @NotNull Inventory getInventory() {
         Inventory inventory = Bukkit.createInventory(null, 45, ChatColor.AQUA + "Minesweeper Stats");
 
         for (int i = 0; i < statistics.size(); i++) {
@@ -95,7 +96,7 @@ public class MapStatistic {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return "MapStatistic{" +
                 "  bestDuration=" + bestDuration +
                 ", averageDuration=" + averageDuration +

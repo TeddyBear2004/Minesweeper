@@ -3,6 +3,8 @@ package de.teddy.minesweeper.game;
 import de.teddy.minesweeper.game.modifier.PersonalModifier;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Field {
 
@@ -74,11 +76,11 @@ public class Field {
         return board;
     }
 
-    public Field getRelativeTo(int i, int j) {
+    public @Nullable Field getRelativeTo(int i, int j) {
         return board.getField(x + i, y + j);
     }
 
-    public Location getLocation() {
+    public @NotNull Location getLocation() {
         return board.getCorner().clone().add(x, 0, y);
     }
 

@@ -1,13 +1,16 @@
 package de.teddy.minesweeper.events.packets;
 
 import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.*;
-import de.teddy.minesweeper.game.GameManager;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
 import de.teddy.minesweeper.game.Game;
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.painter.Painter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,13 +19,20 @@ public class RightClickEvent extends PacketAdapter {
 
     private final GameManager gameManager;
 
-    public RightClickEvent(Plugin plugin, GameManager gameManager){
+    public RightClickEvent(Plugin plugin, GameManager gameManager) {
         super(plugin, getPacketTypes());
         this.gameManager = gameManager;
     }
 
+    private static PacketType @NotNull [] getPacketTypes() {
+        Set<PacketType> types = new HashSet<>();
+        Painter.PAINTER_MAP.values().forEach(painter -> types.addAll(painter.getRightClickPacketType()));
+
+        return types.toArray(new PacketType[0]);
+    }
+
     @Override
-    public void onPacketReceiving(PacketEvent event) {
+    public void onPacketReceiving(@NotNull PacketEvent event) {
         Player player = event.getPlayer();
         PacketContainer packet = event.getPacket();
 
@@ -36,12 +46,5 @@ public class RightClickEvent extends PacketAdapter {
 
         if (painter.getRightClickPacketType().contains(packet.getType()))
             painter.onRightClick(player, event, game, packet);
-    }
-
-    private static PacketType[] getPacketTypes(){
-        Set<PacketType> types = new HashSet<>();
-        Painter.PAINTER_MAP.values().forEach(painter -> types.addAll(painter.getRightClickPacketType()));
-
-        return types.toArray(new PacketType[0]);
     }
 }

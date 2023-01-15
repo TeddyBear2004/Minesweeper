@@ -16,7 +16,7 @@ import java.util.List;
 public record MinesweeperCommand(List<Game> games, Game customGame, Language language) implements TabExecutor {
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         if (!(sender instanceof Player player))
             return true;
 
@@ -122,7 +122,7 @@ public record MinesweeperCommand(List<Game> games, Game customGame, Language lan
     }
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public @NotNull List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         List<String> strings = new ArrayList<>();
         if (args.length == 1) {
             games.forEach(game -> {

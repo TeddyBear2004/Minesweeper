@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import de.teddy.minesweeper.game.modifier.PersonalModifier;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -12,11 +13,11 @@ import java.net.InetSocketAddress;
 public class InternalWebServerHandler implements ResourcePackHandler {
 
     private final HttpServer server;
-    private final String host;
+    private final @NotNull String host;
     private final int port;
-    private final File file;
+    private final @NotNull File file;
 
-    public InternalWebServerHandler(String host, int port, File file) throws IOException {
+    public InternalWebServerHandler(@NotNull String host, int port, @NotNull File file) throws IOException {
         if (!file.exists())
             throw new FileNotFoundException();
 
@@ -28,7 +29,7 @@ public class InternalWebServerHandler implements ResourcePackHandler {
         this.server.setExecutor(null);
     }
 
-    private static byte[] readFile(File file) throws IOException {
+    private static byte[] readFile(@NotNull File file) throws IOException {
         FileInputStream is = new FileInputStream(file);
         byte[] buffer = new byte[(int) file.length()];
         int read = is.read(buffer, 0, buffer.length);
@@ -42,12 +43,11 @@ public class InternalWebServerHandler implements ResourcePackHandler {
     }
 
     @Override
-    public void apply(Player player) {
+    public void apply(@NotNull Player player) {
         player.setResourcePack(getUrl(player));
     }
 
-    @Override
-    public String getUrl(Player player) {
+    public @NotNull String getUrl(@NotNull Player player) {
         PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
 
         return personalModifier.<String>get(PersonalModifier.ModifierType.RESOURCE_PACK_URL).orElse("http://" + this.host + ":" + this.port + "/");
@@ -62,7 +62,7 @@ public class InternalWebServerHandler implements ResourcePackHandler {
     private class FileHandler implements HttpHandler {
 
         @Override
-        public void handle(HttpExchange exchange) throws IOException {
+        public void handle(@NotNull HttpExchange exchange) throws IOException {
             byte[] response = readFile(file);
             exchange.sendResponseHeaders(200, response.length);
             OutputStream os = exchange.getResponseBody();

@@ -23,9 +23,10 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -65,31 +66,13 @@ public class BlockPainter implements Painter {
         this.gameManager = gameManager;
     }
 
-    private static void sendMultiBlockChange(List<Player> players, Map<BlockPosition, Pair<List<Short>, List<WrappedBlockData>>> subChunkMap) {
-        ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
-        subChunkMap.forEach((blockPosition, listListTuple) -> {
-            PacketContainer multiBlockChange = PacketUtil.getMultiBlockChange(
-                    ArrayUtils.toPrimitive(listListTuple.getLeft().toArray(new Short[0])),
-                    blockPosition,
-                    listListTuple.getRight().toArray(new WrappedBlockData[0]),
-                    true);
-            for (Player p : players) {
-                try{
-                    protocolManager.sendServerPacket(p, multiBlockChange);
-                }catch(InvocationTargetException e){
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-    }
-
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return "classic";
     }
 
     @Override
-    public void drawBlancField(Board board, List<Player> players) {
+    public void drawBlancField(@Nullable Board board, @NotNull List<Player> players) {
         if (board == null)
             return;
         Map<BlockPosition, Pair<List<Short>, List<WrappedBlockData>>> subChunkMap = new HashMap<>();
@@ -128,8 +111,26 @@ public class BlockPainter implements Painter {
             this.bombTask.cancel();
     }
 
+    private static void sendMultiBlockChange(@NotNull List<Player> players, @NotNull Map<BlockPosition, Pair<List<Short>, List<WrappedBlockData>>> subChunkMap) {
+        ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
+        subChunkMap.forEach((blockPosition, listListTuple) -> {
+            PacketContainer multiBlockChange = PacketUtil.getMultiBlockChange(
+                    ArrayUtils.toPrimitive(listListTuple.getLeft().toArray(new Short[0])),
+                    blockPosition,
+                    listListTuple.getRight().toArray(new WrappedBlockData[0]),
+                    true);
+            for (Player p : players) {
+                try{
+                    protocolManager.sendServerPacket(p, multiBlockChange);
+                }catch(InvocationTargetException e){
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+    }
+
     @Override
-    public void drawField(Board board, List<Player> players) {
+    public void drawField(@Nullable Board board, @NotNull List<Player> players) {
         if (board == null) return;
         Map<BlockPosition, Pair<List<Short>, List<WrappedBlockData>>> subChunkMap = new HashMap<>();
 
@@ -180,7 +181,7 @@ public class BlockPainter implements Painter {
     }
 
     @Override
-    public void drawBombs(Board board, List<Player> players) {
+    public void drawBombs(@NotNull Board board, @NotNull List<Player> players) {
         double explodeDuration = 0.5d;
 
         for (int[] point2D : board.getBombList()) {
@@ -204,35 +205,17 @@ public class BlockPainter implements Painter {
     }
 
     @Override
-    public ItemStack getActualItemStack(Field field) {
-        return new ItemStack(getActualMaterial(field));
-    }
-
-    @Override
-    public Material getActualMaterial(Field field) {
-        boolean lightField = Board.isLightField(field.getX(), field.getY());
-
-        if (field.getBoard().isFinished() && field.isBomb() && (!field.isCovered() || field.getBoard().isLose()))
-            return Material.COAL_BLOCK;
-
-        if (field.isCovered())
-            return lightField ? LIGHT_DEFAULT : DARK_DEFAULT;
-
-        return (lightField ? LIGHT_MATERIALS : DARK_MATERIALS)[field.getNeighborCount()];
-    }
-
-    @Override
-    public List<PacketType> getRightClickPacketType() {
+    public @NotNull List<PacketType> getRightClickPacketType() {
         return Collections.singletonList(PacketType.Play.Client.USE_ITEM);
     }
 
     @Override
-    public List<PacketType> getLeftClickPacketType() {
+    public @NotNull List<PacketType> getLeftClickPacketType() {
         return Collections.singletonList(PacketType.Play.Client.BLOCK_DIG);
     }
 
     @Override
-    public void onRightClick(Player player, PacketEvent event, Game game, PacketContainer packet) {
+    public void onRightClick(@NotNull Player player, @NotNull PacketEvent event, @NotNull Game game, @NotNull PacketContainer packet) {
         BlockPosition blockPosition = packet.getMovingBlockPositions().read(0).getBlockPosition();
         Location location = blockPosition.toLocation(player.getWorld());
 
@@ -273,7 +256,7 @@ public class BlockPainter implements Painter {
     }
 
     @Override
-    public void onLeftClick(Player player, PacketEvent event, Game game, PacketContainer packet) {
+    public void onLeftClick(@NotNull Player player, @NotNull PacketEvent event, @NotNull Game game, @NotNull PacketContainer packet) {
         BlockPosition blockPosition = packet.getBlockPositionModifier().read(0);
         Location location = blockPosition.toLocation(player.getWorld());
 
@@ -319,7 +302,7 @@ public class BlockPainter implements Painter {
     }
 
     @Override
-    public void highlightField(Field field, List<Player> players) {
+    public void highlightField(@NotNull Field field, @NotNull List<Player> players) {
         PacketContainer spawnEntityContainer = PacketUtil.getSpawnEntityContainer(field.getLocation().clone().add(0.5, 0, 0.5), EntityType.SLIME);
         int entityId = spawnEntityContainer.getIntegers().read(0);
 
@@ -336,6 +319,18 @@ public class BlockPainter implements Painter {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    public Material getActualMaterial(@NotNull Field field) {
+        boolean lightField = Board.isLightField(field.getX(), field.getY());
+
+        if (field.getBoard().isFinished() && field.isBomb() && (!field.isCovered() || field.getBoard().isLose()))
+            return Material.COAL_BLOCK;
+
+        if (field.isCovered())
+            return lightField ? LIGHT_DEFAULT : DARK_DEFAULT;
+
+        return (lightField ? LIGHT_MATERIALS : DARK_MATERIALS)[field.getNeighborCount()];
     }
 
 }

@@ -4,15 +4,14 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
-import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.Game;
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.painter.Painter;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class LeftClickEvent extends PacketAdapter {
@@ -25,7 +24,7 @@ public class LeftClickEvent extends PacketAdapter {
         this.gameManager = gameManager;
     }
 
-    private static PacketType[] getPacketTypes() {
+    private static PacketType @NotNull [] getPacketTypes() {
         Set<PacketType> types = new HashSet<>();
         Painter.PAINTER_MAP.values().forEach(painter -> types.addAll(painter.getLeftClickPacketType()));
 
@@ -33,7 +32,7 @@ public class LeftClickEvent extends PacketAdapter {
     }
 
     @Override
-    public void onPacketReceiving(PacketEvent event) {
+    public void onPacketReceiving(@NotNull PacketEvent event) {
         Player player = event.getPlayer();
         PacketContainer packet = event.getPacket();
 

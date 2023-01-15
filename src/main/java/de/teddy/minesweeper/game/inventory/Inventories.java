@@ -12,12 +12,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +35,9 @@ public enum Inventories {
     public static final ItemStack[] VIEWER_INVENTORY = new ItemStack[27];
     private static final Map<Inventories, Supplier<Inventory>> INVENTORIES = new HashMap<>();
     private static final Map<Inventories, String> INVENTORY_NAME_MAP = new HashMap<>();
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     private static final Map<ItemStack, Function<Player, Inventory>> ITEM_INVENTORY_MAP = new HashMap<>();
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     private static final Map<ItemStack, Function<Player, Inventories>> ITEM_INVENTORY_TYPE_MAP = new HashMap<>();
     private static final Map<ItemStack, Function<Player, Consumer<Inventory>>> ITEM_CONSUMER_MAP = new HashMap<>();
     public static ItemStack compass;
@@ -44,36 +47,23 @@ public enum Inventories {
     public static ItemStack reload;
     private static GameManager gameManager;
 
-    public static void initialise(int availableGamesInventoryLines, Language language, GameManager gameManager) {
+    public static void initialise(int availableGamesInventoryLines, @NotNull Language language, GameManager gameManager) {
         Inventories.gameManager = gameManager;
         loadGameInventory(language);
         loadViewerInventory(language);
 
         INVENTORY_NAME_MAP.put(CHOOSE_GAME, ChatColor.AQUA + language.getString("minesweeper"));
-        INVENTORIES.put(CHOOSE_GAME, createSupplier(null,
-                                                    availableGamesInventoryLines * 9,
-                                                    INVENTORY_NAME_MAP.get(CHOOSE_GAME), CHOOSE_GAME));
+        INVENTORIES.put(CHOOSE_GAME, createSupplier(
+                availableGamesInventoryLines * 9,
+                INVENTORY_NAME_MAP.get(CHOOSE_GAME), CHOOSE_GAME));
 
         INVENTORY_NAME_MAP.put(VIEW_GAMES, ChatColor.AQUA + "Watch other games!");
-        INVENTORIES.put(VIEW_GAMES, createSupplier(null,
-                                                   54,
-                                                   INVENTORY_NAME_MAP.get(VIEW_GAMES), VIEW_GAMES));
+        INVENTORIES.put(VIEW_GAMES, createSupplier(
+                54,
+                INVENTORY_NAME_MAP.get(VIEW_GAMES), VIEW_GAMES));
     }
 
-    public static Consumer<Inventory> getConsumer(ItemStack itemStack, Player whoClicked) {
-        Function<Player, Consumer<Inventory>> playerConsumerFunction = ITEM_CONSUMER_MAP.get(itemStack);
-        return playerConsumerFunction != null ? playerConsumerFunction.apply(whoClicked) : null;
-    }
-
-    public static boolean isValidInventory(InventoryView view) {
-        return view != null && INVENTORY_NAME_MAP.keySet().stream().anyMatch(type -> view.getTitle().equals(INVENTORY_NAME_MAP.get(type)));
-    }
-
-    private static List<ContentFiller> getIContentFillers() {
-        return List.of(new MainMenuFiller(Minesweeper.getPlugin(Minesweeper.class).getGames()), new ViewGamesFiller(gameManager));
-    }
-
-    private static void loadGameInventory(Language language) {
+    private static void loadGameInventory(@NotNull Language language) {
         barrier = new ItemStack(Material.BARRIER);
         ItemMeta barrierMeta = barrier.getItemMeta();
         if (barrierMeta != null)
@@ -91,7 +81,7 @@ public enum Inventories {
         GAME_INVENTORY[6] = barrier;
     }
 
-    private static void loadViewerInventory(Language language) {
+    private static void loadViewerInventory(@NotNull Language language) {
         compass = new ItemStack(Material.COMPASS);
         ItemMeta compassMeta = compass.getItemMeta();
         if (compassMeta != null)
@@ -126,8 +116,8 @@ public enum Inventories {
         VIEWER_INVENTORY[7] = book;
     }
 
-    private static Supplier<Inventory> createSupplier(InventoryHolder holder, int size, String name, Inventories inventories) {
-        Inventory inventory = Bukkit.createInventory(holder, size, name);
+    private static @NotNull Supplier<Inventory> createSupplier(int size, @NotNull String name, Inventories inventories) {
+        Inventory inventory = Bukkit.createInventory(null, size, name);
         return () -> {
             getIContentFillers().forEach(iContentFiller -> {
                 if (iContentFiller.getEInventory() == inventories) {
@@ -139,6 +129,19 @@ public enum Inventories {
 
             return inventory;
         };
+    }
+
+    private static @NotNull List<ContentFiller> getIContentFillers() {
+        return List.of(new MainMenuFiller(Minesweeper.getPlugin(Minesweeper.class).getGames()), new ViewGamesFiller(gameManager));
+    }
+
+    public static @Nullable Consumer<Inventory> getConsumer(ItemStack itemStack, Player whoClicked) {
+        Function<Player, Consumer<Inventory>> playerConsumerFunction = ITEM_CONSUMER_MAP.get(itemStack);
+        return playerConsumerFunction != null ? playerConsumerFunction.apply(whoClicked) : null;
+    }
+
+    public static boolean isValidInventory(@Nullable InventoryView view) {
+        return view != null && INVENTORY_NAME_MAP.keySet().stream().anyMatch(type -> view.getTitle().equals(INVENTORY_NAME_MAP.get(type)));
     }
 
     public Inventory getInventory() {

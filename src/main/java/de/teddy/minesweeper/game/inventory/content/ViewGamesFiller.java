@@ -1,7 +1,7 @@
 package de.teddy.minesweeper.game.inventory.content;
 
-import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.Board;
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.util.HeadGenerator;
 import org.bukkit.Material;
@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -26,17 +27,17 @@ public class ViewGamesFiller implements ContentFiller {
     }
 
     @Override
-    public Inventories getEInventory() {
+    public @NotNull Inventories getEInventory() {
         return Inventories.VIEW_GAMES;
     }
 
     @Override
-    public Map<ItemStack, Function<Player, Inventories>> insertEInventoryItems(Inventory inventory) {
+    public @NotNull Map<ItemStack, Function<Player, Inventories>> insertEInventoryItems(Inventory inventory) {
         return new HashMap<>();
     }
 
     @Override
-    public Map<ItemStack, Function<Player, Consumer<Inventory>>> insertConsumerItems(Inventory inventory) {
+    public @NotNull Map<ItemStack, Function<Player, Consumer<Inventory>>> insertConsumerItems(@NotNull Inventory inventory) {
         Map<ItemStack, Function<Player, Consumer<Inventory>>> map = new HashMap<>();
 
         Map<Player, Board> runningGames = gameManager.getRunningGames();
@@ -53,41 +54,7 @@ public class ViewGamesFiller implements ContentFiller {
         return map;
     }
 
-    public ItemStack generateBackItem(Map<ItemStack, Function<Player, Consumer<Inventory>>> map) {
-        ItemStack itemStack = HeadGenerator.getHeadFromUrl("https://textures.minecraft.net/texture/bd69e06e5dadfd84e5f3d1c21063f2553b2fa945ee1d4d7152fdc5425bc12a9");
-        ItemMeta itemMeta = itemStack.getItemMeta();
-
-        if (itemMeta != null) {
-            itemMeta.setDisplayName("Back");
-        }
-
-        itemStack.setItemMeta(itemMeta);
-
-        map.put(itemStack, player -> inventory -> {
-            //todo implement me
-        });
-
-        return itemStack;
-    }
-
-    public ItemStack generateNextItem(Map<ItemStack, Function<Player, Consumer<Inventory>>> map) {
-        ItemStack itemStack = HeadGenerator.getHeadFromUrl("https://textures.minecraft.net/texture/19bf3292e126a105b54eba713aa1b152d541a1d8938829c56364d178ed22bf");
-        ItemMeta itemMeta = itemStack.getItemMeta();
-
-        if (itemMeta != null) {
-            itemMeta.setDisplayName("Next");
-        }
-
-        itemStack.setItemMeta(itemMeta);
-
-        map.put(itemStack, player -> inventory -> {
-            //todo implement me
-        });
-
-        return itemStack;
-    }
-
-    public ItemStack generatePlayerView(Player player, Board board, Map<ItemStack, Function<Player, Consumer<Inventory>>> map) {
+    public @NotNull ItemStack generatePlayerView(@NotNull Player player, @NotNull Board board, @NotNull Map<ItemStack, Function<Player, Consumer<Inventory>>> map) {
         ItemStack itemStack = HeadGenerator.getHeadFromPlayerProfile(player.getPlayerProfile());
 
         ItemMeta itemMeta = itemStack.getItemMeta();

@@ -10,6 +10,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.profile.PlayerProfile;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -52,7 +54,7 @@ public class GameStatistic {
         this.won = won;
     }
 
-    public static List<GameStatistic> retrieve(ConnectionBuilder connectionBuilder, UUID uuid) {
+    public static @NotNull List<GameStatistic> retrieve(@Nullable ConnectionBuilder connectionBuilder, @NotNull UUID uuid) {
         if (connectionBuilder == null)
             return new ArrayList<>();
 
@@ -85,7 +87,7 @@ public class GameStatistic {
         }
     }
 
-    public static GameStatistic retrieveNthPerMap(ConnectionBuilder connectionBuilder, String map, int bombCount, int n) {
+    public static GameStatistic retrieveNthPerMap(@Nullable ConnectionBuilder connectionBuilder, String map, int bombCount, int n) {
         if (connectionBuilder == null)
             return null;
 
@@ -134,26 +136,26 @@ public class GameStatistic {
         }
     }
 
-    public static List<GameStatistic> retrieveTopPerMap(ConnectionBuilder connectionBuilder, String map, int bombCount, int number) {
+    public static @NotNull List<GameStatistic> retrieveTopPerMap(@Nullable ConnectionBuilder connectionBuilder, String map, int bombCount, int number) {
         if (connectionBuilder == null)
             return new ArrayList<>();
 
         try(Connection connection = connectionBuilder.getConnection()){
             PreparedStatement preparedStatement
                     = connection.prepareStatement("""
-            SELECT *
-            FROM minesweeper_stats s
-                     INNER JOIN (
-                SELECT uuid, MIN(CAST(duration AS INTEGER)) AS duration
-                FROM minesweeper_stats
-                WHERE map = ? AND bomb_count = ? AND won = 1
-                GROUP BY uuid
-            ) min_durations
-                                ON s.uuid = min_durations.uuid AND s.duration = min_durations.duration
-            WHERE s.map = ? AND s.bomb_count = ? AND s.won = 1
-            ORDER BY CAST(s.duration AS INTEGER)
-            LIMIT ?
-            """);
+                                                                                                        SELECT *
+                                                                                                        FROM minesweeper_stats s
+                                                                                                                 INNER JOIN (
+                                                                                                            SELECT uuid, MIN(CAST(duration AS INTEGER)) AS duration
+                                                              FROM minesweeper_stats
+                                                              WHERE map = ? AND bomb_count = ? AND won = 1
+                                                              GROUP BY uuid
+                                                          ) min_durations
+                                                                              ON s.uuid = min_durations.uuid AND s.duration = min_durations.duration
+                                                          WHERE s.map = ? AND s.bomb_count = ? AND s.won = 1
+                                                          ORDER BY CAST(s.duration AS INTEGER)
+                                                          LIMIT ?
+                                                          """);
 
             preparedStatement.setString(1, map);
             preparedStatement.setObject(2, bombCount);
@@ -184,7 +186,7 @@ public class GameStatistic {
         }
     }
 
-    public String getName() {
+    public @Nullable String getName() {
         try{
             return HeadGenerator.getPlayerProfile(UUID.fromString(uuid)).getName();
         }catch(Exception e){
@@ -212,7 +214,7 @@ public class GameStatistic {
         return won;
     }
 
-    public void save(ConnectionBuilder connectionBuilder) {
+    public void save(@Nullable ConnectionBuilder connectionBuilder) {
         if (connectionBuilder == null)
             return;
 
@@ -242,7 +244,7 @@ public class GameStatistic {
         }
     }
 
-    public ItemStack getItemStack(int i) throws Exception {
+    public @NotNull ItemStack getItemStack(int i) throws Exception {
         PlayerProfile playerProfile = HeadGenerator.getPlayerProfile(UUID.fromString(uuid));
 
         ItemStack itemStack = HeadGenerator.getHeadFromPlayerProfile(playerProfile);
@@ -252,7 +254,7 @@ public class GameStatistic {
         if (itemMeta != null) {
             itemMeta.setDisplayName((i + 1) + ". " + playerProfile.getName());
 
-            if (start != 0){
+            if (start != 0) {
                 PersistentDataContainer persistentDataContainer = itemMeta.getPersistentDataContainer();
                 persistentDataContainer.set(MAP_KEY, PersistentDataType.STRING, map);
                 persistentDataContainer.set(SEED_KEY, PersistentDataType.LONG, seed);
@@ -277,7 +279,7 @@ public class GameStatistic {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return "GameStatistic{" +
                 "uuid='" + uuid + '\'' +
                 ", start=" + start +

@@ -12,6 +12,8 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -27,7 +29,7 @@ public class PersonalModifier {
         this.container = container;
     }
 
-    public static PersonalModifier getPersonalModifier(Player player) {
+    public static @NotNull PersonalModifier getPersonalModifier(@NotNull Player player) {
         PersistentDataContainer container = player.getPersistentDataContainer();
 
         PersonalModifier modifier = new PersonalModifier(container);
@@ -38,14 +40,14 @@ public class PersonalModifier {
         return modifier;
     }
 
-    public void set(ModifierType type, Object value) {
+    public void set(@NotNull ModifierType type, Object value) {
         modifierTypeObjectMap.put(type, value);
 
         type.set(container, value);
     }
 
     @SuppressWarnings("unchecked")
-    public <Z> Optional<Z> get(ModifierType type) {
+    public <Z> @NotNull Optional<Z> get(ModifierType type) {
         return (Optional<Z>) Optional.ofNullable(modifierTypeObjectMap.get(type));
     }
 
@@ -140,20 +142,16 @@ public class PersonalModifier {
             return langReferences;
         }
 
-        private static void handleTabJustDefault(TabObject tabObject) {
+        private static void handleTabJustDefault(@NotNull TabObject tabObject) {
             if (tabObject.language.getString("default").startsWith(tabObject.key.toLowerCase()))
                 tabObject.strings.add(tabObject.language.getString("default"));
         }
 
-        private static void handleIntegerInput(CommandObject commandObject) {
+        private static void handleIntegerInput(@NotNull CommandObject commandObject) {
             handleNumberInput(commandObject, Integer::parseInt);
         }
 
-        private static void handleDoubleInput(CommandObject commandObject) {
-            handleNumberInput(commandObject, Double::parseDouble);
-        }
-
-        private static <T> void handleNumberInput(CommandObject commandObject, Function<String, T> converter) {
+        private static <T> void handleNumberInput(@NotNull CommandObject commandObject, @NotNull Function<String, T> converter) {
             if (commandObject.arg == null) {
                 commandObject.player.sendMessage(commandObject.language.getString("send_current_setting_number",
                                                                                   commandObject.language.getString(commandObject.type.getLangReference()),
@@ -178,7 +176,11 @@ public class PersonalModifier {
             }
         }
 
-        private static void handleTabBoolean(TabObject tabObject) {
+        private static void handleDoubleInput(@NotNull CommandObject commandObject) {
+            handleNumberInput(commandObject, Double::parseDouble);
+        }
+
+        private static void handleTabBoolean(@NotNull TabObject tabObject) {
             if (tabObject.language.getString("true_").toLowerCase().startsWith(tabObject.key.toLowerCase()))
                 tabObject.strings.add(tabObject.language.getString("true_"));
             if (tabObject.language.getString("false_").toLowerCase().startsWith(tabObject.key.toLowerCase()))
@@ -187,7 +189,7 @@ public class PersonalModifier {
                 tabObject.strings.add(tabObject.language.getString("default"));
         }
 
-        private static void handleBooleanInput(CommandObject commandObject, boolean defaultValue) {
+        private static void handleBooleanInput(@NotNull CommandObject commandObject, boolean defaultValue) {
             if (commandObject.arg == null) {
                 commandObject.player.sendMessage(
                         ChatColor.GREEN + commandObject.language.getString("send_current_setting_boolean",
@@ -215,7 +217,7 @@ public class PersonalModifier {
             commandObject.player.sendMessage(ChatColor.DARK_RED + commandObject.language.getString("error_no_true_or_false"));
         }
 
-        private static void handleTabPainter(TabObject tabObject) {
+        private static void handleTabPainter(@NotNull TabObject tabObject) {
             Painter.PAINTER_MAP.values().forEach(painter -> {
                 if (painter.getName().toLowerCase().startsWith(tabObject.key.toLowerCase()))
                     tabObject.strings.add(painter.getName());
@@ -225,7 +227,7 @@ public class PersonalModifier {
                 tabObject.strings.add(tabObject.language.getString("default"));
         }
 
-        private static void handlePainterInput(CommandObject commandObject) {
+        private static void handlePainterInput(@NotNull CommandObject commandObject) {
             if (commandObject.arg == null) {
                 Optional<String> painterClass = commandObject.modifier.get(PersonalModifier.ModifierType.PAINTER_CLASS);
                 if (painterClass.isPresent()) {
@@ -291,7 +293,7 @@ public class PersonalModifier {
             commandObject.player.sendMessage(ChatColor.DARK_RED + commandObject.language.getString("error_no_valid_number"));
         }
 
-        private static void handleResourcePackLinkInput(CommandObject commandObject) {
+        private static void handleResourcePackLinkInput(@NotNull CommandObject commandObject) {
             if (commandObject.arg == null) {
                 commandObject.player.sendMessage(ChatColor.GREEN + commandObject.language.getString("send_current_resource_pack_url", commandObject.modifier.<String>get(PersonalModifier.ModifierType.RESOURCE_PACK_URL).orElse("default")));
                 return;
@@ -311,14 +313,14 @@ public class PersonalModifier {
         }
 
         @SuppressWarnings("unchecked")
-        public <Z> Z get(PersistentDataContainer container) {
+        public <Z> Z get(@Nullable PersistentDataContainer container) {
             if (container == null) return null;
 
             return container.get(namespacedKey, (PersistentDataType<?, Z>) persistentDataType);
         }
 
         @SuppressWarnings("unchecked")
-        public <Z> void set(PersistentDataContainer container, Z value) {
+        public <Z> void set(@NotNull PersistentDataContainer container, @Nullable Z value) {
             PersistentDataType<?, Z> persistentDataType1 = (PersistentDataType<?, Z>) persistentDataType;
             if (value != null)
                 container.set(namespacedKey, persistentDataType1, value);

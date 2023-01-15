@@ -5,13 +5,14 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.UUID;
 
 public class UUIDConverter {
 
-    public static UUID getPlayerUUID(String playerName) {
+    public static @Nullable UUID getPlayerUUID(String playerName) {
         try{
             HttpClient httpClient = HttpClientBuilder.create().build();
             HttpGet request = new HttpGet("https://api.mojang.com/users/profiles/minecraft/" + playerName);

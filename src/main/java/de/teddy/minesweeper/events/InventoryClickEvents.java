@@ -1,8 +1,8 @@
 package de.teddy.minesweeper.events;
 
-import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.Board;
 import de.teddy.minesweeper.game.Game;
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
 import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.game.statistic.GameStatistic;
@@ -15,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -30,7 +31,7 @@ public class InventoryClickEvents implements Listener {
     }
 
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
+    public void onInventoryClick(@NotNull InventoryClickEvent event) {
         if (handleStats(event))
             return;
 
@@ -48,7 +49,7 @@ public class InventoryClickEvents implements Listener {
             runnable.accept(clickedInventory);
     }
 
-    public boolean handleStats(InventoryClickEvent event) {
+    public boolean handleStats(@NotNull InventoryClickEvent event) {
         ItemStack currentItem = event.getCurrentItem();
         if (currentItem == null)
             return false;

@@ -37,6 +37,8 @@ import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -57,15 +59,26 @@ public final class Minesweeper extends JavaPlugin {
     private final List<BukkitTask> tasks = new ArrayList<>();
     private String langPath;
     private ResourcePackHandler resourcePackHandler;
-    private List<Game> games = new ArrayList<>();
+    private @NotNull List<Game> games = new ArrayList<>();
     private GameManager gameManager;
 
     public GameManager getGameManager() {
         return gameManager;
     }
 
-    public List<Game> getGames() {
+    public @NotNull List<Game> getGames() {
         return games;
+    }
+
+    @Override
+    public void onDisable() {
+        tasks.forEach(BukkitTask::cancel);
+        try{
+            if (resourcePackHandler != null)
+                resourcePackHandler.close();
+        }catch(IOException e){
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -149,32 +162,7 @@ public final class Minesweeper extends JavaPlugin {
         }
     }
 
-    private ConnectionBuilder loadConnectionBuilder(ConfigurationSection database) {
-        if (database == null)
-            return null;
-        try{
-            return new ConnectionBuilder(database.getString("host"),
-                                         database.getString("port"),
-                                         database.getString("user"),
-                                         database.getString("password"),
-                                         database.getString("database"));
-        }catch(SQLException e){
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void onDisable() {
-        tasks.forEach(BukkitTask::cancel);
-        try{
-            if (resourcePackHandler != null)
-                resourcePackHandler.close();
-        }catch(IOException e){
-            throw new RuntimeException(e);
-        }
-    }
-
-    private Language loadLanguage() {
+    private @NotNull Language loadLanguage() {
         File file = new File(getDataFolder(), langPath);
         if (!file.exists()) {
             getLogger().warning("Language file not found! Using default language file!");
@@ -183,6 +171,20 @@ public final class Minesweeper extends JavaPlugin {
         }
 
         return new Language(new Toml().read(file));
+    }
+
+    private @NotNull List<ModifierArea> loadAreas() {
+        ConfigurationSection locationBased = getConfig().getConfigurationSection("location_based");
+        List<ModifierArea> list = new ArrayList<>();
+
+        if (locationBased == null || !locationBased.getBoolean("enable", false))
+            return list;
+
+        List<Map<?, ?>> areas1 = locationBased.getMapList("areas");
+
+        areas1.forEach(map -> list.add(new ModifierArea(map)));
+
+        return list;
     }
 
     private void loadWorld() {
@@ -237,7 +239,36 @@ public final class Minesweeper extends JavaPlugin {
         WorldCreator.name("MineSweeper").type(WorldType.FLAT).createWorld();
     }
 
-    private List<Game> loadGames(Language language, ConnectionBuilder connectionBuilder, GameManager gameManager) {
+    private void loadModifier(List<ModifierArea> areas) {
+        ConfigurationSection locationBased = getConfig().getConfigurationSection("location_based");
+
+        if (locationBased == null || !locationBased.getBoolean("enable", false)) {
+            Modifier.initialise(getConfig(), areas);
+            return;
+        }
+
+        ConfigurationSection actions = locationBased.getConfigurationSection("actions");
+        if (actions == null)
+            Modifier.initialise(getConfig(), areas);
+        else
+            Modifier.initialise(getConfig(), actions, areas);
+    }
+
+    private ConnectionBuilder loadConnectionBuilder(@Nullable ConfigurationSection database) {
+        if (database == null)
+            return null;
+        try{
+            return new ConnectionBuilder(database.getString("host"),
+                                         database.getString("port"),
+                                         database.getString("user"),
+                                         database.getString("password"),
+                                         database.getString("database"));
+        }catch(SQLException e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    private @NotNull List<Game> loadGames(@NotNull Language language, ConnectionBuilder connectionBuilder, GameManager gameManager) {
         List<Game> gameList = new ArrayList<>();
 
         ConfigurationSection games = getConfig().getConfigurationSection("games");
@@ -278,7 +309,7 @@ public final class Minesweeper extends JavaPlugin {
         return gameList;
     }
 
-    private Game loadCustomGame(ConfigurationSection section, ConnectionBuilder connectionBuilder, GameManager gameManager, List<Game> games, Language language) {
+    private Game loadCustomGame(@Nullable ConfigurationSection section, ConnectionBuilder connectionBuilder, GameManager gameManager, List<Game> games, @NotNull Language language) {
         if (section == null || !section.getBoolean("enable", false))
             return null;
 
@@ -298,41 +329,7 @@ public final class Minesweeper extends JavaPlugin {
         return new CustomGame(this, gameManager, games, language, connectionBuilder, corner, spawn, minWidth, minHeight, maxWidth, maxHeight, "custom");
     }
 
-    private List<TutorialGame> loadTutorialGames(ConfigurationSection section, GameManager gameManager, List<Game> games, Language language) {
-        new TutorialGame(this, gameManager, games, language, null, null, null, null, null, 0, null);
-        return null;
-    }
-
-    private List<ModifierArea> loadAreas() {
-        ConfigurationSection locationBased = getConfig().getConfigurationSection("location_based");
-        List<ModifierArea> list = new ArrayList<>();
-
-        if (locationBased == null || !locationBased.getBoolean("enable", false))
-            return list;
-
-        List<Map<?, ?>> areas1 = locationBased.getMapList("areas");
-
-        areas1.forEach(map -> list.add(new ModifierArea(map)));
-
-        return list;
-    }
-
-    private void loadModifier(List<ModifierArea> areas) {
-        ConfigurationSection locationBased = getConfig().getConfigurationSection("location_based");
-
-        if (locationBased == null || !locationBased.getBoolean("enable", false)) {
-            Modifier.initialise(getConfig(), areas);
-            return;
-        }
-
-        ConfigurationSection actions = locationBased.getConfigurationSection("actions");
-        if (actions == null)
-            Modifier.initialise(getConfig(), areas);
-        else
-            Modifier.initialise(getConfig(), actions, areas);
-    }
-
-    private ResourcePackHandler loadTexturePackHandler(ConfigurationSection section) throws IOException {
+    private @NotNull ResourcePackHandler loadTexturePackHandler(@Nullable ConfigurationSection section) throws IOException {
         if (section == null)
             return new DisableResourceHandler();
 
@@ -349,10 +346,17 @@ public final class Minesweeper extends JavaPlugin {
 
         ConfigurationSection externalWebServer = section.getConfigurationSection("external_web_server");
         if (externalWebServer != null && externalWebServer.getBoolean("enable", false)) {
-            return new ExternalWebServerHandler(externalWebServer.getString("link"));
+            String link = externalWebServer.getString("link");
+            if (link != null)
+                return new ExternalWebServerHandler(link);
         }
 
         return new DisableResourceHandler();
+    }
+
+    private @Nullable List<TutorialGame> loadTutorialGames(ConfigurationSection section, GameManager gameManager, List<Game> games, @NotNull Language language) {
+        new TutorialGame(this, gameManager, games, language, null, null, null, null, Material.AIR, 0, null);
+        return null;
     }
 
 }
