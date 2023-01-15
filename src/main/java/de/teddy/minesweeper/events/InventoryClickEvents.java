@@ -18,21 +18,17 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.function.Consumer;
 
 public class InventoryClickEvents implements Listener {
 
-    private final List<Game> games;
     private final GameManager gameManager;
 
     /**
-     * @param games       The list of games.
      * @param gameManager The game manger to start games.
      */
     @Contract(pure = true)
-    public InventoryClickEvents(List<Game> games, GameManager gameManager) {
-        this.games = games;
+    public InventoryClickEvents(GameManager gameManager) {
         this.gameManager = gameManager;
     }
 
@@ -75,7 +71,7 @@ public class InventoryClickEvents implements Listener {
         if (map == null || seed == null || x == null || y == null)
             return false;
 
-        for (Game game : games) {
+        for (Game game : gameManager.getGames()) {
             if (game.getMap().equalsIgnoreCase(map) && event.getWhoClicked() instanceof Player player) {
                 game.getStarter()
                         .setSeed(seed)

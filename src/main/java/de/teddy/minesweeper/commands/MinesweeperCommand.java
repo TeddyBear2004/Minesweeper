@@ -1,6 +1,7 @@
 package de.teddy.minesweeper.commands;
 
 import de.teddy.minesweeper.game.Game;
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.inventory.Inventories;
 import de.teddy.minesweeper.util.Language;
 import org.bukkit.ChatColor;
@@ -13,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public record MinesweeperCommand(List<Game> games, Game customGame, Language language) implements TabExecutor {
+public record MinesweeperCommand(GameManager manager, Game customGame, Language language) implements TabExecutor {
 
     /**
      * @param sender  Source of the command
@@ -88,7 +89,7 @@ public record MinesweeperCommand(List<Game> games, Game customGame, Language lan
             return true;
         }
 
-        for (Game game : games) {
+        for (Game game : manager.getGames()) {
             if (game.getDifficulty().replaceAll(" ", "_").equalsIgnoreCase(args[0])) {
                 if (args.length == 2) {
                     try{
@@ -140,7 +141,7 @@ public record MinesweeperCommand(List<Game> games, Game customGame, Language lan
     public @NotNull List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         List<String> strings = new ArrayList<>();
         if (args.length == 1) {
-            games.forEach(game -> {
+            manager.getGames().forEach(game -> {
                 String s = game.getDifficulty().replaceAll(" ", "_");
                 if (s.toLowerCase().startsWith(args[0].toLowerCase()))
                     strings.add(s);

@@ -23,25 +23,21 @@ import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Optional;
 
 public class GenericEvents implements Listener {
 
-    private final List<Game> games;
     private final Game customGame;
     private final GameManager gameManager;
     private final ResourcePackHandler resourcePackHandler;
     private final @Nullable Team noCollision;
 
     /**
-     * @param games               The games this event handler should consider of
      * @param resourcePackHandler The {@link ResourcePackHandler} this handler should use.
      * @param customGame          The custom game.
      * @param gameManager         The game manager to start games.
      */
-    public GenericEvents(List<Game> games, ResourcePackHandler resourcePackHandler, Game customGame, GameManager gameManager) {
-        this.games = games;
+    public GenericEvents(ResourcePackHandler resourcePackHandler, Game customGame, GameManager gameManager) {
         this.resourcePackHandler = resourcePackHandler;
         this.customGame = customGame;
         this.gameManager = gameManager;
@@ -91,7 +87,7 @@ public class GenericEvents implements Listener {
     private void handleWatching(@NotNull Player player) {
         if (Modifier.getInstance().allowDefaultWatch()) {
             boolean watching = false;
-            for (Game map : games) {
+            for (Game map : gameManager.getGames()) {
                 Board runningGame = map.getRunningGame();
                 if (runningGame != null) {
                     map.startViewing(player, runningGame);
@@ -100,8 +96,8 @@ public class GenericEvents implements Listener {
                 }
             }
             if (!watching) {
-                if (games.size() != 0)
-                    games.get(0).startViewing(player, null);
+                if (gameManager.getGames().size() != 0)
+                    gameManager.getGames().get(0).startViewing(player, null);
             }
         }
     }
@@ -163,7 +159,7 @@ public class GenericEvents implements Listener {
         if (block == null || gameManager.getBoard(event.getPlayer()) != null || gameManager.getBoardWatched(event.getPlayer()) != null)
             return;
 
-        for (Game game : games) {
+        for (Game game : gameManager.getGames()) {
             if (game.equals(customGame) || game.isBlockOutsideGame(block)) continue;
 
             game.getStarter()

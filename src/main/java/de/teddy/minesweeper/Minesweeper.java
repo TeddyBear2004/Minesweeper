@@ -59,7 +59,6 @@ public final class Minesweeper extends JavaPlugin {
     private final List<BukkitTask> tasks = new ArrayList<>();
     private String langPath;
     private ResourcePackHandler resourcePackHandler;
-    private @NotNull List<Game> games = new ArrayList<>();
     private GameManager gameManager;
 
     public GameManager getGameManager() {
@@ -67,7 +66,7 @@ public final class Minesweeper extends JavaPlugin {
     }
 
     public @NotNull List<Game> getGames() {
-        return games;
+        return gameManager.getGames();
     }
 
     @Override
@@ -99,7 +98,9 @@ public final class Minesweeper extends JavaPlugin {
 
         saveDefaultConfig();
         reloadConfig();
-        this.gameManager = new GameManager();
+        List<Game> games = new ArrayList<>();
+
+        this.gameManager = new GameManager(games);
 
         ClickHandler clickHandler = new ClickHandler();
 
@@ -113,11 +114,11 @@ public final class Minesweeper extends JavaPlugin {
         loadModifier(modifierAreas);
         ConnectionBuilder connectionBuilder = loadConnectionBuilder(getConfig().getConfigurationSection("database"));
 
-        this.games = loadGames(language, connectionBuilder, gameManager);
-        Game customGame = loadCustomGame(getConfig().getConfigurationSection("custom_game"), connectionBuilder, gameManager, games, language);
+        loadGames(games, language, connectionBuilder, gameManager);
+        Game customGame = loadCustomGame(getConfig().getConfigurationSection("custom_game"), connectionBuilder, gameManager, language);
 
         if (customGame != null)
-            this.games.add(customGame);
+            games.add(customGame);
 
         try{
             this.resourcePackHandler = loadTexturePackHandler(getConfig().getConfigurationSection("resource_pack"));
@@ -136,14 +137,14 @@ public final class Minesweeper extends JavaPlugin {
 
 
         Objects.requireNonNull(this.getCommand("bypassEventCancellation")).setExecutor(new BypassEventCommand());
-        Objects.requireNonNull(this.getCommand("minesweeper")).setExecutor(new MinesweeperCommand(games, customGame, language));
+        Objects.requireNonNull(this.getCommand("minesweeper")).setExecutor(new MinesweeperCommand(gameManager, customGame, language));
         Objects.requireNonNull(this.getCommand("settings")).setExecutor(new SettingsCommand(resourcePackHandler, language));
-        Objects.requireNonNull(this.getCommand("minestats")).setExecutor(new MineStatsCommand(games, connectionBuilder, language));
+        Objects.requireNonNull(this.getCommand("minestats")).setExecutor(new MineStatsCommand(gameManager, connectionBuilder, language));
 
         getServer().getPluginManager().registerEvents(new CancelableEvents(getConfig().getConfigurationSection("events"), modifierAreas), this);
-        getServer().getPluginManager().registerEvents(new GenericEvents(games, resourcePackHandler, customGame, gameManager), this);
+        getServer().getPluginManager().registerEvents(new GenericEvents(resourcePackHandler, customGame, gameManager), this);
         getServer().getPluginManager().registerEvents(new GenericRightClickEvent(gameManager), this);
-        getServer().getPluginManager().registerEvents(new InventoryClickEvents(games, gameManager), this);
+        getServer().getPluginManager().registerEvents(new InventoryClickEvents(gameManager), this);
 
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         protocolManager.addPacketListener(new RightClickEvent(this, gameManager));
@@ -268,32 +269,29 @@ public final class Minesweeper extends JavaPlugin {
         }
     }
 
-    private @NotNull List<Game> loadGames(@NotNull Language language, ConnectionBuilder connectionBuilder, GameManager gameManager) {
-        List<Game> gameList = new ArrayList<>();
+    private void loadGames(@NotNull List<Game> games, @NotNull Language language, ConnectionBuilder connectionBuilder, GameManager gameManager) {
+        ConfigurationSection gameSection = getConfig().getConfigurationSection("games");
+        if (gameSection == null)
+            return;
 
-        ConfigurationSection games = getConfig().getConfigurationSection("games");
-        if (games == null)
-            return gameList;
-
-        games.getKeys(false).forEach(key -> {
-            ConfigurationSection cornerSection = games.getConfigurationSection(key + ".corner");
+        gameSection.getKeys(false).forEach(key -> {
+            ConfigurationSection cornerSection = gameSection.getConfigurationSection(key + ".corner");
             assert cornerSection != null;
             Location corner = new Location(Bukkit.createWorld(WorldCreator.name(Objects.requireNonNull(cornerSection.getString("world")))), cornerSection.getInt("x"), cornerSection.getInt("y"), cornerSection.getInt("z"));
 
-            ConfigurationSection spawnSection = games.getConfigurationSection(key + ".spawn");
+            ConfigurationSection spawnSection = gameSection.getConfigurationSection(key + ".spawn");
             assert spawnSection != null;
             Location spawn = new Location(Bukkit.createWorld(WorldCreator.name(Objects.requireNonNull(spawnSection.getString("world")))), spawnSection.getInt("x"), spawnSection.getInt("y"), spawnSection.getInt("z"), spawnSection.getInt("yaw"), spawnSection.getInt("pitch"));
 
-            int borderSize = games.getInt(key + ".border_size");
-            int bombCount = games.getInt(key + ".bomb_count");
-            String difficultyLangPath = games.getString(key + ".difficulty_lang_path");
+            int borderSize = gameSection.getInt(key + ".border_size");
+            int bombCount = gameSection.getInt(key + ".bomb_count");
+            String difficultyLangPath = gameSection.getString(key + ".difficulty_lang_path");
 
-            Material material = Material.valueOf(games.getString(key + ".inventory_material"));
-            int inventoryPosition = games.getInt(key + ".inventory_position");
+            Material material = Material.valueOf(gameSection.getString(key + ".inventory_material"));
+            int inventoryPosition = gameSection.getInt(key + ".inventory_position");
 
             Game game = new Game(this,
                                  gameManager,
-                                 gameList,
                                  language,
                                  connectionBuilder,
                                  corner,
@@ -304,12 +302,11 @@ public final class Minesweeper extends JavaPlugin {
                                  language.getString(difficultyLangPath),
                                  material,
                                  inventoryPosition);
-            gameList.add(game);
+            games.add(game);
         });
-        return gameList;
     }
 
-    private Game loadCustomGame(@Nullable ConfigurationSection section, ConnectionBuilder connectionBuilder, GameManager gameManager, List<Game> games, @NotNull Language language) {
+    private Game loadCustomGame(@Nullable ConfigurationSection section, ConnectionBuilder connectionBuilder, GameManager gameManager, @NotNull Language language) {
         if (section == null || !section.getBoolean("enable", false))
             return null;
 
@@ -326,7 +323,7 @@ public final class Minesweeper extends JavaPlugin {
         int maxWidth = section.getInt("max-size.width");
         int maxHeight = section.getInt("max-size.height");
 
-        return new CustomGame(this, gameManager, games, language, connectionBuilder, corner, spawn, minWidth, minHeight, maxWidth, maxHeight, "custom");
+        return new CustomGame(this, gameManager, language, connectionBuilder, corner, spawn, minWidth, minHeight, maxWidth, maxHeight, "custom");
     }
 
     private @NotNull ResourcePackHandler loadTexturePackHandler(@Nullable ConfigurationSection section) throws IOException {

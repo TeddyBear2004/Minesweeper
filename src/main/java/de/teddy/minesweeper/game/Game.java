@@ -17,13 +17,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 
 public class Game {
 
     private final Plugin plugin;
-    private final List<Game> games;
     private final @NotNull Language language;
     private final Location corner;
     private final Location spawn;
@@ -36,11 +34,10 @@ public class Game {
     private final GameManager gameManager;
     private final ConnectionBuilder connectionBuilder;
 
-    public Game(Plugin plugin, GameManager gameManager, List<Game> games, @NotNull Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int width, int height, int bombCount, String difficulty, @NotNull Material material, int inventoryPosition) {
+    public Game(Plugin plugin, GameManager gameManager, @NotNull Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int width, int height, int bombCount, String difficulty, @NotNull Material material, int inventoryPosition) {
         this.gameManager = gameManager;
         this.connectionBuilder = connectionBuilder;
         this.plugin = plugin;
-        this.games = games;
         this.language = language;
         this.corner = corner;
         this.spawn = spawn;
@@ -135,7 +132,7 @@ public class Game {
 
     public void startViewing(@NotNull Player player, @Nullable Board runningGame) {
         if (runningGame == null) {
-            gameManager.switchToMap(player, games.get(0));
+            gameManager.switchToMap(player, gameManager.getGames().get(0));
         } else {
             gameManager.startWatching(player, runningGame);
         }

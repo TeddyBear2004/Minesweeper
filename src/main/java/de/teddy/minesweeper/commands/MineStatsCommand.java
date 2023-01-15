@@ -2,6 +2,7 @@ package de.teddy.minesweeper.commands;
 
 import de.teddy.minesweeper.game.CustomGame;
 import de.teddy.minesweeper.game.Game;
+import de.teddy.minesweeper.game.GameManager;
 import de.teddy.minesweeper.game.statistic.GameStatistic;
 import de.teddy.minesweeper.game.statistic.MapStatistic;
 import de.teddy.minesweeper.game.statistic.PlayerStatistic;
@@ -22,17 +23,17 @@ import java.util.UUID;
 
 public class MineStatsCommand implements TabExecutor {
 
-    private final List<Game> games;
+    private final GameManager gameManager;
     private final ConnectionBuilder connectionBuilder;
     private final Language language;
 
     /**
-     * @param games             A list of games that should be considered when buildings statistics.
+     * @param gameManager       The game manager this stats should build from.
      * @param connectionBuilder A connection builder to execute queries from.
      * @param language          A language class to load strings from.
      */
-    public MineStatsCommand(List<Game> games, ConnectionBuilder connectionBuilder, Language language) {
-        this.games = games;
+    public MineStatsCommand(GameManager gameManager, ConnectionBuilder connectionBuilder, Language language) {
+        this.gameManager = gameManager;
         this.connectionBuilder = connectionBuilder;
         this.language = language;
     }
@@ -71,7 +72,7 @@ public class MineStatsCommand implements TabExecutor {
                 return true;
             }
 
-            PlayerStatistic playerStatistic = new PlayerStatistic(GameStatistic.retrieve(connectionBuilder, uuid), games);
+            PlayerStatistic playerStatistic = new PlayerStatistic(GameStatistic.retrieve(connectionBuilder, uuid), gameManager.getGames());
             player.openInventory(playerStatistic.generateInventory());
         } else {
             if (args.length < 2) {
@@ -79,7 +80,7 @@ public class MineStatsCommand implements TabExecutor {
                 return true;
             }
 
-            for (Game game : games) {
+            for (Game game : gameManager.getGames()) {
                 if (!(game instanceof CustomGame) && game.getDifficulty().equalsIgnoreCase(args[1])) {
                     MapStatistic mapStatistic = new MapStatistic(GameStatistic.retrieveTopPerMap(connectionBuilder, game.getMap(), game.getBombCount(), 45));
 
@@ -132,7 +133,7 @@ public class MineStatsCommand implements TabExecutor {
                         strings.add(name);
                 });
             } else if (f.equalsIgnoreCase(language.getString("game"))) {
-                games.forEach(game -> {
+                gameManager.getGames().forEach(game -> {
                     if (game instanceof CustomGame)
                         return;
 

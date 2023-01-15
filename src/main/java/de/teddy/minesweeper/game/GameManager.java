@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GameManager {
@@ -13,6 +14,11 @@ public class GameManager {
     private final Map<Player, Board> gameWatched = new HashMap<>();
     private final Map<Player, Board> runningGames = new HashMap<>();
     private final Map<Player, Game> playerLocation = new HashMap<>();
+    private final List<Game> games;
+
+    public GameManager(List<Game> games) {
+        this.games = games;
+    }
 
     public void startWatching(@NotNull Player p, @NotNull Board b) {
         stopWatching(p);
@@ -25,10 +31,6 @@ public class GameManager {
         b.addViewer(p);
     }
 
-    public @NotNull Map<Player, Game> getPlayerLocation() {
-        return playerLocation;
-    }
-
     private void stopWatching(Player p) {
         Board b = getGameWatched().remove(p);
         if (b != null) {
@@ -36,37 +38,8 @@ public class GameManager {
         }
     }
 
-    public void stopGames(Player p, boolean saveStats) {
-        Board b = getRunningGames().get(p);
-        if (b != null) {
-            b.drawBlancField();
-            b.finish(false, saveStats);
-            b.getViewers().forEach(getGameWatched()::remove);
-            b.clearViewers();
-        } else {
-            stopWatching(p);
-        }
-        getRunningGames().remove(p);
-    }
-
-    public Game getGame(Player player) {
-        return getPlayerLocation().get(player);
-    }
-
-    public Board getBoard(Player Player) {
-        return getRunningGames().get(Player);
-    }
-
-    public Board getBoardWatched(Player player) {
-        return getGameWatched().get(player);
-    }
-
     public void finishGame(Player p) {
         finishGame(p, true);
-    }
-
-    public void finishGame(Player p, boolean saveStats) {
-        getGame(p).finish(p, saveStats);
     }
 
     public void switchToMap(@NotNull Player p, @NotNull Game g) {
@@ -89,6 +62,43 @@ public class GameManager {
 
     public @NotNull Map<Player, Board> getRunningGames() {
         return runningGames;
+    }
+
+    public void finishGame(Player p, boolean saveStats) {
+        getGame(p).finish(p, saveStats);
+    }
+
+    public Game getGame(Player player) {
+        return getPlayerLocation().get(player);
+    }
+
+    public @NotNull Map<Player, Game> getPlayerLocation() {
+        return playerLocation;
+    }
+
+    public void stopGames(Player p, boolean saveStats) {
+        Board b = getRunningGames().get(p);
+        if (b != null) {
+            b.drawBlancField();
+            b.finish(false, saveStats);
+            b.getViewers().forEach(getGameWatched()::remove);
+            b.clearViewers();
+        } else {
+            stopWatching(p);
+        }
+        getRunningGames().remove(p);
+    }
+
+    public Board getBoard(Player Player) {
+        return getRunningGames().get(Player);
+    }
+
+    public Board getBoardWatched(Player player) {
+        return getGameWatched().get(player);
+    }
+
+    public List<Game> getGames() {
+        return games;
     }
 
 }
