@@ -15,6 +15,12 @@ import java.util.List;
 
 public record MinesweeperCommand(List<Game> games, Game customGame, Language language) implements TabExecutor {
 
+    /**
+     * @param sender  Source of the command
+     * @param command Command which was executed
+     * @param label   Alias of the command which was used
+     * @param args    Passed command arguments
+     */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         if (!(sender instanceof Player player))
@@ -121,6 +127,15 @@ public record MinesweeperCommand(List<Game> games, Game customGame, Language lan
         return true;
     }
 
+    /**
+     * @param sender  Source of the command.  For players tab-completing a
+     *                command inside a command block, this will be the player, not
+     *                the command block.
+     * @param command Command which was executed
+     * @param label   Alias of the command which was used
+     * @param args    The arguments passed to the command, including final
+     *                partial argument to be completed
+     */
     @Override
     public @NotNull List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         List<String> strings = new ArrayList<>();

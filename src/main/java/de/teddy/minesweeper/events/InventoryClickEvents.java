@@ -15,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -25,6 +26,11 @@ public class InventoryClickEvents implements Listener {
     private final List<Game> games;
     private final GameManager gameManager;
 
+    /**
+     * @param games       The list of games.
+     * @param gameManager The game manger to start games.
+     */
+    @Contract(pure = true)
     public InventoryClickEvents(List<Game> games, GameManager gameManager) {
         this.games = games;
         this.gameManager = gameManager;

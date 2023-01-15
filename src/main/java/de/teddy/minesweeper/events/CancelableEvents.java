@@ -33,6 +33,10 @@ public class CancelableEvents implements Listener {
     private final Map<CancelableEvent, Boolean> cancelableEventBooleanMap = new HashMap<>();
     private final List<ModifierArea> areas;
 
+    /**
+     * @param section The {@link ConfigurationSection} to load the event cancellation from
+     * @param areas   A list of all areas to determine where/if an event should be cancelled
+     */
     public CancelableEvents(@Nullable ConfigurationSection section, List<ModifierArea> areas) {
         this.areas = areas;
 

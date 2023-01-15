@@ -26,12 +26,23 @@ public class MineStatsCommand implements TabExecutor {
     private final ConnectionBuilder connectionBuilder;
     private final Language language;
 
+    /**
+     * @param games             A list of games that should be considered when buildings statistics.
+     * @param connectionBuilder A connection builder to execute queries from.
+     * @param language          A language class to load strings from.
+     */
     public MineStatsCommand(List<Game> games, ConnectionBuilder connectionBuilder, Language language) {
         this.games = games;
         this.connectionBuilder = connectionBuilder;
         this.language = language;
     }
 
+    /**
+     * @param sender  Source of the command
+     * @param command Command which was executed
+     * @param label   Alias of the command which was used
+     * @param args    Passed command arguments
+     */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         if (!(sender instanceof Player player))
@@ -82,6 +93,15 @@ public class MineStatsCommand implements TabExecutor {
         return true;
     }
 
+    /**
+     * @param sender  Source of the command.  For players tab-completing a
+     *                command inside a command block, this will be the player, not
+     *                the command block.
+     * @param command Command which was executed
+     * @param label   Alias of the command which was used
+     * @param args    The arguments passed to the command, including final
+     *                partial argument to be completed
+     */
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         List<String> strings = new ArrayList<>();

@@ -10,6 +10,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -18,6 +19,10 @@ public class GenericRightClickEvent implements Listener {
 
     private final GameManager gameManager;
 
+    /**
+     * @param gameManager The game manger to start games.
+     */
+    @Contract(pure = true)
     public GenericRightClickEvent(GameManager gameManager) {
         this.gameManager = gameManager;
     }

@@ -34,6 +34,12 @@ public class GenericEvents implements Listener {
     private final ResourcePackHandler resourcePackHandler;
     private final @Nullable Team noCollision;
 
+    /**
+     * @param games               The games this event handler should consider of
+     * @param resourcePackHandler The {@link ResourcePackHandler} this handler should use.
+     * @param customGame          The custom game.
+     * @param gameManager         The game manager to start games.
+     */
     public GenericEvents(List<Game> games, ResourcePackHandler resourcePackHandler, Game customGame, GameManager gameManager) {
         this.games = games;
         this.resourcePackHandler = resourcePackHandler;

@@ -1,5 +1,7 @@
 package de.teddy.minesweeper.events;
 
+import org.jetbrains.annotations.Contract;
+
 public enum CancelableEvent {
     ENTITY_DAMAGE("cancelEntityDamage", true),
     FOOD_CHANGE("cancelFoodChange", true),
@@ -17,10 +19,18 @@ public enum CancelableEvent {
         this.defaultValue = defaultValue;
     }
 
+    /**
+     * @return The associated key.
+     */
+    @Contract(pure = true)
     public String getKey() {
         return key;
     }
 
+    /**
+     * @return The default value.
+     */
+    @Contract(pure = true)
     public boolean getDefaultValue() {
         return defaultValue;
     }
