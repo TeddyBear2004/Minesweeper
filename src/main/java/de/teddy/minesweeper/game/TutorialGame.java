@@ -9,15 +9,13 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-
 public class TutorialGame extends Game {
 
     private final Field[] @NotNull [] board;
     private final Field startField;
 
-    public TutorialGame(Plugin plugin, GameManager gameManager, List<Game> games, @NotNull Language language, Location corner, Location spawn, Field[] @NotNull [] board, String name, @NotNull Material material, int inventoryPosition, Field startField) {
-        super(plugin, gameManager, games, language, null, corner, spawn, board.length, board[0].length, determineBombCount(board), name, material, inventoryPosition);
+    public TutorialGame(Plugin plugin, GameManager gameManager, @NotNull Language language, Location corner, Location spawn, Field[] @NotNull [] board, String name, @NotNull Material material, int inventoryPosition, Field startField) {
+        super(plugin, gameManager, language, null, corner, spawn, board.length, board[0].length, determineBombCount(board), name, material, inventoryPosition);
         this.board = board;
         this.startField = startField;
     }

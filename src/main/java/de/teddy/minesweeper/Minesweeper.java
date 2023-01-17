@@ -352,7 +352,7 @@ public final class Minesweeper extends JavaPlugin {
     }
 
     private @Nullable List<TutorialGame> loadTutorialGames(ConfigurationSection section, GameManager gameManager, List<Game> games, @NotNull Language language) {
-        new TutorialGame(this, gameManager, games, language, null, null, null, null, Material.AIR, 0, null);
+        new TutorialGame(this, gameManager, language, null, null, null, null, Material.AIR, 0, null);
         return null;
     }
 
