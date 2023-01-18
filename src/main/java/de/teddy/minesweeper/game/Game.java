@@ -211,11 +211,11 @@ public class Game {
             return this;
         }
 
-        public void build(@NotNull Player player) {
+        public Board build(@NotNull Player player) {
             if (seed == null)
                 seed = new Random().nextLong();
 
-            game.startGame(player, shouldTeleport, bombCount, width, height, seed, setSeed, saveStats);
+            return game.startGame(player, shouldTeleport, bombCount, width, height, seed, setSeed, saveStats);
         }
 
     }

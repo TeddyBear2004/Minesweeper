@@ -3,10 +3,7 @@ package de.teddy.minesweeper;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.moandjiezana.toml.Toml;
-import de.teddy.minesweeper.commands.BypassEventCommand;
-import de.teddy.minesweeper.commands.MineStatsCommand;
-import de.teddy.minesweeper.commands.MinesweeperCommand;
-import de.teddy.minesweeper.commands.SettingsCommand;
+import de.teddy.minesweeper.commands.*;
 import de.teddy.minesweeper.events.CancelableEvents;
 import de.teddy.minesweeper.events.GenericEvents;
 import de.teddy.minesweeper.events.GenericRightClickEvent;
@@ -140,6 +137,7 @@ public final class Minesweeper extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("minesweeper")).setExecutor(new MinesweeperCommand(gameManager, customGame, language));
         Objects.requireNonNull(this.getCommand("settings")).setExecutor(new SettingsCommand(resourcePackHandler, language));
         Objects.requireNonNull(this.getCommand("minestats")).setExecutor(new MineStatsCommand(gameManager, connectionBuilder, language));
+        Objects.requireNonNull(this.getCommand("mineduel")).setExecutor(new DuelCommand(this, gameManager));
 
         getServer().getPluginManager().registerEvents(new CancelableEvents(getConfig().getConfigurationSection("events"), modifierAreas), this);
         getServer().getPluginManager().registerEvents(new GenericEvents(resourcePackHandler, customGame, gameManager), this);

@@ -31,3 +31,6 @@ commands:
   minestats:
     usage: /minestats <player/game> <player name/game id>
     permission: minesweeper.stats
+  mineduel:
+    usage: /mineduel
+    permission: minesweeper.duel

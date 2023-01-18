@@ -1,5 +1,7 @@
 package de.teddy.minesweeper.game;
 
+import de.teddy.minesweeper.game.event.BoardLoseEvent;
+import de.teddy.minesweeper.game.event.BoardWinEvent;
 import de.teddy.minesweeper.game.exceptions.BombExplodeException;
 import de.teddy.minesweeper.game.painter.Painter;
 import de.teddy.minesweeper.game.statistic.GameStatistic;
@@ -19,9 +21,9 @@ import org.jetbrains.annotations.Nullable;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class Board {
+public class Board implements Comparable<Board> {
 
-    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("mm:ss:SSS");
+    public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("mm:ss:SSS");
     private final Game game;
     private final @NotNull Plugin plugin;
     private final Language language;
@@ -40,6 +42,7 @@ public class Board {
     private final boolean setSeed;
     private boolean win = false;
     private long started;
+    private Long duration;
     private boolean isGenerated;
     private boolean isFinished;
     private Scoreboard scoreboard;
@@ -75,85 +78,8 @@ public class Board {
 
     }
 
-    public static short convertToLocal(int x, int y, int z) {
-        x &= 0xF;
-        y &= 0xF;
-        z &= 0xF;
-        return (short) (x << 8 | z << 4 | y);
-    }
-
-    public static boolean isLightField(int x, int y) {
-        return Math.abs(x + y) % 2 == 0;
-    }
-
-    public void finish(boolean won) {
-        this.finish(won, true);
-    }
-
-    public void finish(boolean won, boolean saveStats) {
-        this.finish(won, saveStats, getActualTimeNeeded());
-    }
-
-    public void finish(boolean won, boolean saveStats, long time) {
-        if (isFinished)
-            return;
-
-        this.isFinished = true;
-
-        if (saveStats && this.saveStats) {
-            GameStatistic gameStatistic = new GameStatistic(player.getUniqueId().toString(), started, time, bombCount, width + "x" + height, setSeed, seed, startX, startY, won);
-            gameStatistic.save(connectionBuilder);
-        }
-    }
-
-    public boolean isFinished() {
-        return this.isFinished;
-    }
-
-    public boolean isLose() {
-        return !win;
-    }
-
-    public Field[][] getBoard() {
-        return this.board;
-    }
-
-    public int getBombCount() {
-        return bombCount;
-    }
-
-    public Player getPlayer() {
-        return player;
-    }
-
-    public @NotNull List<Player> getViewers() {
-        return viewers;
-    }
-
-    public @NotNull List<Player> getAllPlayers() {
-        List<Player> list = new ArrayList<>(viewers);
-
-        list.add(player);
-
-        return list;
-    }
-
-    public void addViewer(@NotNull Player player) {
-        this.viewers.add(player);
-        draw(Collections.singletonList(player));
-        setScoreBoard(player);
-    }
-
-    public void removeViewer(Player player) {
-        this.viewers.remove(player);
-    }
-
-    public void clearViewers() {
-        this.viewers.clear();
-    }
-
-    public void drawBlancField() {
-        this.drawBlancField(viewers);
+    public void draw() {
+        this.draw(this.viewers);
     }
 
     public void draw(@NotNull List<Player> players) {
@@ -161,21 +87,6 @@ public class Board {
             if (painter != null)
                 painter.drawField(this, players2);
         });
-    }
-
-    public boolean isGenerated() {
-        return this.isGenerated;
-    }
-
-    public void draw() {
-        this.draw(this.viewers);
-    }
-
-    public void setScoreBoard(@NotNull Player player) {
-        if (scoreboard == null || isFinished)
-            return;
-
-        player.setScoreboard(scoreboard);
     }
 
     public @NotNull Map<Painter, List<Player>> getCurrentPlayerPainters(@NotNull List<Player> viewers) {
@@ -193,6 +104,43 @@ public class Board {
         return map2;
     }
 
+    public static short convertToLocal(int x, int y, int z) {
+        x &= 0xF;
+        y &= 0xF;
+        z &= 0xF;
+        return (short) (x << 8 | z << 4 | y);
+    }
+
+    public static boolean isLightField(int x, int y) {
+        return Math.abs(x + y) % 2 == 0;
+    }
+
+    public boolean isFinished() {
+        return this.isFinished;
+    }
+
+    public boolean isLose() {
+        return !win;
+    }
+
+    public Field[][] getBoard() {
+        return this.board;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public @NotNull List<Player> getViewers() {
+        return viewers;
+    }
+
+    public void addViewer(@NotNull Player player) {
+        this.viewers.add(player);
+        draw(Collections.singletonList(player));
+        setScoreBoard(player);
+    }
+
     public void drawBlancField(@NotNull List<Player> players) {
         getCurrentPlayerPainters(players).forEach((painter, players2) -> {
             if (painter != null)
@@ -200,148 +148,16 @@ public class Board {
         });
     }
 
-    public void checkField(int x, int y) throws BombExplodeException {
-        checkField(x, y, true);
+    public void removeViewer(Player player) {
+        this.viewers.remove(player);
     }
 
-    public void checkField(int x, int y, boolean b) throws BombExplodeException {
-        x = Math.abs(this.corner.getBlockX() - x);
-        y = Math.abs(this.corner.getBlockZ() - y);
-
-        boolean isGenerated1 = this.isGenerated;
-
-        if (!isGenerated1)
-            generateBoard(x, y);
-
-        SurfaceDiscoverer.uncoverFields(this, x, y);
-
-        if (b)
-            startStarted();
+    public void clearViewers() {
+        this.viewers.clear();
     }
 
-    public void startStarted() {
-        if (this.started == 0)
-            this.started = System.currentTimeMillis();
-    }
-
-    public void checkNumber(int x, int y) throws BombExplodeException {
-        x = Math.abs(this.corner.getBlockX() - x);
-        y = Math.abs(this.corner.getBlockZ() - y);
-
-        startStarted();
-
-        SurfaceDiscoverer.uncoverFieldsNextToNumber(this, x, y);
-    }
-
-    private long getActualTimeNeeded() {
-        return this.getActualTimeNeeded(System.currentTimeMillis());
-    }
-
-    private long getActualTimeNeeded(long now) {
-        return this.started == 0 ? 0 : now - this.started;
-    }
-
-    public @Nullable Field getField(@NotNull Location location) {
-        int x = Math.abs(this.corner.getBlockX() - location.getBlockX());
-        int y = Math.abs(this.corner.getBlockZ() - location.getBlockZ());
-
-        return this.getField(x, y);
-    }
-
-    public @Nullable Field getField(int x, int y) {
-        if (x >= 0 && x < board.length && y >= 0 && y < board[0].length) {
-            return this.board[x][y];
-        } else {
-            return null;
-        }
-    }
-
-    public int getWidth() {
-        return this.width;
-    }
-
-    public int getHeight() {
-        return this.height;
-    }
-
-    public Location getCorner() {
-        return this.corner;
-    }
-
-    public int[][] getBombList() {
-        return bombList;
-    }
-
-    private @NotNull String getActualTimeNeededString() {
-        return SIMPLE_DATE_FORMAT.format(new Date(getActualTimeNeeded()));
-    }
-
-    private @NotNull String getActualTimeNeededString(long now) {
-        return SIMPLE_DATE_FORMAT.format(new Date(getActualTimeNeeded(now)));
-    }
-
-    public int getCurrentFlagCount() {
-        return Arrays.stream(this.board)
-                .mapToInt(fields -> (int) Arrays.stream(fields).filter(Field::isMarked).count())
-                .sum();
-    }
-
-    public void win() {
-        this.win = true;
-        long now = System.currentTimeMillis();
-        long duration = getActualTimeNeeded(now);
-        String actualTimeNeededString = getActualTimeNeededString(now);
-
-        this.finish(true, true, duration);
-
-        this.player.sendMessage(language.getString("message_win"));
-        this.player.sendMessage(language.getString("field_desc", String.valueOf(this.width), String.valueOf(this.height), String.valueOf(this.bombCount)));
-        this.player.sendMessage(language.getString("message_time_needed", actualTimeNeededString));
-        this.player.sendMessage("Seed: " + seed);
-
-        this.player.sendTitle(ChatColor.DARK_GREEN + language.getString("title_win"), ChatColor.GREEN + language.getString("message_time_needed", actualTimeNeededString), 10, 70, 20);
-        PacketUtil.sendSoundEffect(this.player, Sound.UI_TOAST_CHALLENGE_COMPLETE, .5f, this.player.getLocation());
-        PacketUtil.sendActionBar(this.player, actualTimeNeededString);
-    }
-
-    public void checkIfWon() {
-        for (Field[] fields : this.board)
-            for (Field field : fields)
-                if (field == null || (field.isCovered() && !field.isBomb()))
-                    return;
-
-        win();
-    }
-
-    public void breakGame() {
-        finish(false);
-    }
-
-    public void lose() {
-        this.win = false;
-        finish(false);
-
-        getCurrentPlayerPainters().forEach((painter, players) -> {
-            if (painter != null)
-                painter.drawBombs(this, players);
-        });
-
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-
-            for (Player p : this.viewers) {
-                PacketUtil.sendSoundEffect(p, Sound.ENTITY_GENERIC_EXPLODE, 0.4f, p.getLocation());
-                PacketUtil.sendParticleEffect(p,
-                                              corner.clone().add(((double) this.width) / 2, 1, (double) this.height / 2),
-                                              Particle.EXPLOSION_LARGE,
-                                              (float) this.width / 5,
-                                              (float) this.height / 5,
-                                              this.width * this.height);
-            }
-        }, 20);
-    }
-
-    public @NotNull Map<Painter, List<Player>> getCurrentPlayerPainters() {
-        return getCurrentPlayerPainters(this.viewers);
+    public void drawBlancField() {
+        this.drawBlancField(viewers);
     }
 
     private void generateBoard(int x, int y) {
@@ -388,17 +204,36 @@ public class Board {
         initScoreboard();
     }
 
+    public boolean isGenerated() {
+        return this.isGenerated;
+    }
+
+    public void checkField(int x, int y) throws BombExplodeException {
+        checkField(x, y, true);
+    }
+
+    public void checkField(int x, int y, boolean b) throws BombExplodeException {
+        x = Math.abs(this.corner.getBlockX() - x);
+        y = Math.abs(this.corner.getBlockZ() - y);
+
+        boolean isGenerated1 = this.isGenerated;
+
+        if (!isGenerated1)
+            generateBoard(x, y);
+
+        SurfaceDiscoverer.uncoverFields(this, x, y);
+
+        if (b)
+            startStarted();
+    }
 
     private boolean couldBombSpawn(int x, int y, int possibleX, int possibleY) {
         return Math.abs(x - possibleX) <= 1 && Math.abs(y - possibleY) <= 1;
     }
 
-    protected void generateBoard(Field[] @NotNull [] board) {
-        if (this.isGenerated)
-            throw new RuntimeException(language.getString("error_already_generated"));
-
-        System.arraycopy(board, 0, this.board, 0, board.length);
-        this.isGenerated = true;
+    public void startStarted() {
+        if (this.started == 0)
+            this.started = System.currentTimeMillis();
     }
 
     private void initScoreboard() {
@@ -425,6 +260,197 @@ public class Board {
         getAllPlayers().forEach(this::setScoreBoard);
     }
 
+    public Game getGame() {
+        return game;
+    }
+
+    private @NotNull String getFlagCounterString() {
+        return (bombCount < getCurrentFlagCount() ? ChatColor.DARK_RED : ChatColor.GREEN) + "" + getCurrentFlagCount() + ChatColor.GREEN + "/" + bombCount;
+    }
+
+    public @NotNull List<Player> getAllPlayers() {
+        List<Player> list = new ArrayList<>(viewers);
+
+        list.add(player);
+
+        return list;
+    }
+
+    public void setScoreBoard(@NotNull Player player) {
+        if (scoreboard == null || isFinished)
+            return;
+
+        player.setScoreboard(scoreboard);
+    }
+
+    public int getCurrentFlagCount() {
+        return Arrays.stream(this.board)
+                .mapToInt(fields -> (int) Arrays.stream(fields).filter(Field::isMarked).count())
+                .sum();
+    }
+
+    public void checkNumber(int x, int y) throws BombExplodeException {
+        x = Math.abs(this.corner.getBlockX() - x);
+        y = Math.abs(this.corner.getBlockZ() - y);
+
+        startStarted();
+
+        SurfaceDiscoverer.uncoverFieldsNextToNumber(this, x, y);
+    }
+
+    public @Nullable Field getField(@NotNull Location location) {
+        int x = Math.abs(this.corner.getBlockX() - location.getBlockX());
+        int y = Math.abs(this.corner.getBlockZ() - location.getBlockZ());
+
+        return this.getField(x, y);
+    }
+
+    public @Nullable Field getField(int x, int y) {
+        if (x >= 0 && x < board.length && y >= 0 && y < board[0].length) {
+            return this.board[x][y];
+        } else {
+            return null;
+        }
+    }
+
+    public int getWidth() {
+        return this.width;
+    }
+
+    public int getHeight() {
+        return this.height;
+    }
+
+    public Location getCorner() {
+        return this.corner;
+    }
+
+    public int[][] getBombList() {
+        return bombList;
+    }
+
+    private @NotNull String getActualTimeNeededString() {
+        return SIMPLE_DATE_FORMAT.format(new Date(getActualTimeNeeded()));
+    }
+
+    public void checkIfWon() {
+        for (Field[] fields : this.board)
+            for (Field field : fields)
+                if (field == null || (field.isCovered() && !field.isBomb()))
+                    return;
+
+        win();
+    }
+
+    public void win() {
+        this.win = true;
+        long now = System.currentTimeMillis();
+        duration = getActualTimeNeeded(now);
+        String actualTimeNeededString = getActualTimeNeededString(now);
+
+        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getServer().getPluginManager().callEvent(new BoardWinEvent(this, player, duration, getBombCount())));
+
+        this.finish(true, true, duration);
+
+        this.player.sendMessage(language.getString("message_win"));
+        this.player.sendMessage(language.getString("field_desc", String.valueOf(this.width), String.valueOf(this.height), String.valueOf(this.bombCount)));
+        this.player.sendMessage(language.getString("message_time_needed", actualTimeNeededString));
+        this.player.sendMessage("Seed: " + seed);
+
+        this.player.sendTitle(ChatColor.DARK_GREEN + language.getString("title_win"), ChatColor.GREEN + language.getString("message_time_needed", actualTimeNeededString), 10, 70, 20);
+        PacketUtil.sendSoundEffect(this.player, Sound.UI_TOAST_CHALLENGE_COMPLETE, .5f, this.player.getLocation());
+        PacketUtil.sendActionBar(this.player, actualTimeNeededString);
+    }
+
+    private long getActualTimeNeeded(long now) {
+        return this.started == 0 ? 0 : now - this.started;
+    }
+
+    private @NotNull String getActualTimeNeededString(long now) {
+        return SIMPLE_DATE_FORMAT.format(new Date(getActualTimeNeeded(now)));
+    }
+
+    public int getBombCount() {
+        return bombCount;
+    }
+
+    public long finish(boolean won, boolean saveStats, long time) {
+        if (isFinished)
+            return time;
+
+        this.isFinished = true;
+
+        if (saveStats && this.saveStats) {
+            GameStatistic gameStatistic = new GameStatistic(player.getUniqueId().toString(), started, time, bombCount, width + "x" + height, setSeed, seed, startX, startY, won);
+            gameStatistic.save(connectionBuilder);
+        }
+        return time;
+    }
+
+    public void lose() {
+        this.win = false;
+        duration = finish(false);
+
+        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getServer().getPluginManager().callEvent(new BoardLoseEvent(this, player, duration, calculateFlagScore())));
+
+        getCurrentPlayerPainters().forEach((painter, players) -> {
+            if (painter != null)
+                painter.drawBombs(this, players);
+        });
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+
+            for (Player p : this.viewers) {
+                PacketUtil.sendSoundEffect(p, Sound.ENTITY_GENERIC_EXPLODE, 0.4f, p.getLocation());
+                PacketUtil.sendParticleEffect(p,
+                                              corner.clone().add(((double) this.width) / 2, 1, (double) this.height / 2),
+                                              Particle.EXPLOSION_LARGE,
+                                              (float) this.width / 5,
+                                              (float) this.height / 5,
+                                              this.width * this.height);
+            }
+        }, 20);
+    }
+
+    public void breakGame() {
+        finish(false);
+    }
+
+    public long finish(boolean won) {
+        return this.finish(won, true);
+    }
+
+    public int calculateFlagScore() {
+        int flagScore = 0;
+
+        for (Field[] fields : this.board)
+            for (Field field : fields)
+                if (field.isMarked())
+                    flagScore += field.isBomb() ? 1 : -1;
+
+        return flagScore;
+    }
+
+    public long finish(boolean won, boolean saveStats) {
+        return this.finish(won, saveStats, getActualTimeNeeded());
+    }
+
+    private long getActualTimeNeeded() {
+        return this.getActualTimeNeeded(System.currentTimeMillis());
+    }
+
+    public @NotNull Map<Painter, List<Player>> getCurrentPlayerPainters() {
+        return getCurrentPlayerPainters(this.viewers);
+    }
+
+    protected void generateBoard(Field[] @NotNull [] board) {
+        if (this.isGenerated)
+            throw new RuntimeException(language.getString("error_already_generated"));
+
+        System.arraycopy(board, 0, this.board, 0, board.length);
+        this.isGenerated = true;
+    }
+
     public void updateScoreBoard() {
         Team flagCounter = scoreboard.getTeam("flagCounter");
         if (flagCounter != null)
@@ -434,10 +460,6 @@ public class Board {
     public boolean isBlockOutsideGame(@NotNull Block block) {
         return IsBetween.isOutside2D(corner, width, height, block)
                 || IsBetween.isOutside(corner.getBlockY(), corner.getBlockY() + 1, block.getY());
-    }
-
-    private @NotNull String getFlagCounterString() {
-        return (bombCount < getCurrentFlagCount() ? ChatColor.DARK_RED : ChatColor.GREEN) + "" + getCurrentFlagCount() + ChatColor.GREEN + "/" + bombCount;
     }
 
     public void removeScoreBoard(@NotNull Player player) {
@@ -450,8 +472,31 @@ public class Board {
         getCurrentPlayerPainters().forEach((painter, players) -> painter.highlightField(field, players));
     }
 
-    public Game getGame() {
-        return game;
+    @Override
+    public int compareTo(@NotNull Board other) {
+        if (isWin() && other.isWin()) {
+            if (getDuration() != null && other.getDuration() != null)
+                return getDuration().compareTo(other.getDuration());
+            return 0;
+        } else if (isWin() ^ other.isWin())
+            return isWin() ? -1 : 1;
+
+        if (getDuration() == null || other.getDuration() == null)
+            return 0;
+
+        return calculateFlagScore() < other.calculateFlagScore() ? 1
+                : (calculateFlagScore() == other.calculateFlagScore())
+                ? getDuration().compareTo(other.getDuration())
+                : -1;
+
+    }
+
+    public boolean isWin() {
+        return win;
+    }
+
+    public Long getDuration() {
+        return duration;
     }
 
     private static class BoardScheduler extends BukkitRunnable {
