@@ -59,7 +59,7 @@ hide_player = "hide_player"
 quick_reveal = "enable_double_click"
 enable_flag = "enable_marks"
 enable_question_mark = "enable_question_mark"
-board_style = "painter_class"
+board_style = "board_style"
 quick_reveal_duration = "double_click_duration"
 custom_resource_pack_url = "resource_pack_url"
 
