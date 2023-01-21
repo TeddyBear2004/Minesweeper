@@ -57,6 +57,9 @@ public class StatsExpansion extends PlaceholderExpansion {
                                                                           Integer.parseInt(map[1]),
                                                                           Integer.parseInt(args[1]));
 
+            if (gameStatistic == null)
+                return null;
+
             return args[1] + ". " + gameStatistic.getName() + ": " + SIMPLE_DATE_FORMAT.format(new Date(gameStatistic.getDuration()));
 
 

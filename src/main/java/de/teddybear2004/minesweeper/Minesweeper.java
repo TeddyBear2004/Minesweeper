@@ -3,6 +3,9 @@ package de.teddybear2004.minesweeper;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.moandjiezana.toml.Toml;
+import de.teddy.minesweeper.game.painter.ArmorStandPainter;
+import de.teddy.minesweeper.game.painter.BlockPainter;
+import de.teddy.minesweeper.game.painter.Painter;
 import de.teddybear2004.minesweeper.commands.*;
 import de.teddybear2004.minesweeper.events.CancelableEvents;
 import de.teddybear2004.minesweeper.events.GenericEvents;
@@ -19,9 +22,6 @@ import de.teddybear2004.minesweeper.game.expansions.StatsExpansion;
 import de.teddybear2004.minesweeper.game.inventory.Inventories;
 import de.teddybear2004.minesweeper.game.modifier.Modifier;
 import de.teddybear2004.minesweeper.game.modifier.ModifierArea;
-import de.teddybear2004.minesweeper.game.painter.ArmorStandPainter;
-import de.teddybear2004.minesweeper.game.painter.BlockPainter;
-import de.teddybear2004.minesweeper.game.painter.Painter;
 import de.teddybear2004.minesweeper.game.texture.pack.DisableResourceHandler;
 import de.teddybear2004.minesweeper.game.texture.pack.ExternalWebServerHandler;
 import de.teddybear2004.minesweeper.game.texture.pack.InternalWebServerHandler;
@@ -137,7 +137,7 @@ public final class Minesweeper extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("minesweeper")).setExecutor(new MinesweeperCommand(gameManager, customGame, language));
         Objects.requireNonNull(this.getCommand("settings")).setExecutor(new SettingsCommand(resourcePackHandler, language));
         Objects.requireNonNull(this.getCommand("minestats")).setExecutor(new MineStatsCommand(gameManager, connectionBuilder, language));
-        Objects.requireNonNull(this.getCommand("mineduel")).setExecutor(new DuelCommand(this, gameManager));
+        Objects.requireNonNull(this.getCommand("mineduel")).setExecutor(new DuelCommand(this, gameManager, language));
 
         getServer().getPluginManager().registerEvents(new CancelableEvents(getConfig().getConfigurationSection("events"), modifierAreas), this);
         getServer().getPluginManager().registerEvents(new GenericEvents(resourcePackHandler, customGame, gameManager), this);

@@ -75,6 +75,23 @@ send_current_resource_pack_url = "Your current resource pack url is: {0}"
 send_start_with_http = "Please make sure that the url starts with 'http://' or 'https://'."
 send_resource_pack_applied = "The specified resource pack url was applied."
 
+send_invite_player = "You have been invited by {0} to a duel. Type /duel accept {0} to join the duel."
+broadcast_invite = "{0} has been invited."
+broadcast_accept = "{0} has joined the duel."
+send_leave = "You have left the duel by {0}."
+broadcast_leave = "{0} has left the duel."
+send_Kick = "You have been kicked from the duel by {0}."
+broadcast_Kick = "{0} has left the duel."
+broadcast_game = "The duel will take place on the map {0}."
+broadcast_start = "The duel has started. Good luck!"
+
+duel_invite = "invite"
+duel_accept = "accept"
+duel_leave = "leave"
+duel_Kick = "kick"
+duel_game = "game"
+duel_start = "start"
+
 minesweeper_command_custom_completion = "/{0} custom [Bomb Count] [WidthXHeight] <Seed>"
 
 error_already_generated = "The field has already been generated."

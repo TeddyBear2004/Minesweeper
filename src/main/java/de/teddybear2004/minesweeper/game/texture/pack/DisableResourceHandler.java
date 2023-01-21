@@ -1,8 +1,8 @@
 package de.teddybear2004.minesweeper.game.texture.pack;
 
+import de.teddy.minesweeper.game.painter.ArmorStandPainter;
+import de.teddy.minesweeper.game.painter.Painter;
 import de.teddybear2004.minesweeper.game.modifier.PersonalModifier;
-import de.teddybear2004.minesweeper.game.painter.ArmorStandPainter;
-import de.teddybear2004.minesweeper.game.painter.Painter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

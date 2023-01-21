@@ -1,9 +1,9 @@
 package de.teddybear2004.minesweeper.game;
 
+import de.teddy.minesweeper.game.painter.Painter;
 import de.teddybear2004.minesweeper.game.event.BoardLoseEvent;
 import de.teddybear2004.minesweeper.game.event.BoardWinEvent;
 import de.teddybear2004.minesweeper.game.exceptions.BombExplodeException;
-import de.teddybear2004.minesweeper.game.painter.Painter;
 import de.teddybear2004.minesweeper.game.statistic.GameStatistic;
 import de.teddybear2004.minesweeper.util.ConnectionBuilder;
 import de.teddybear2004.minesweeper.util.IsBetween;

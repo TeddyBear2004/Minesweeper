@@ -1,8 +1,11 @@
 package de.teddybear2004.minesweeper.commands;
 
+import de.teddybear2004.minesweeper.game.CustomGame;
 import de.teddybear2004.minesweeper.game.DuelGame;
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
+import de.teddybear2004.minesweeper.game.event.DuelLeaveEvent;
+import de.teddybear2004.minesweeper.util.Language;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -20,12 +23,15 @@ import java.util.*;
 public class DuelCommand implements TabExecutor, Listener {
 
     private final Map<Player, DuelGame.Builder> builderMap = new HashMap<>();
+    private final Map<Player, DuelGame> duelGameMap = new HashMap<>();
     private final Plugin plugin;
     private final GameManager gameManager;
+    private final Language language;
 
-    public DuelCommand(Plugin plugin, GameManager gameManager) {
+    public DuelCommand(Plugin plugin, GameManager gameManager, Language language) {
         this.plugin = plugin;
         this.gameManager = gameManager;
+        this.language = language;
 
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
     }
@@ -38,90 +44,91 @@ public class DuelCommand implements TabExecutor, Listener {
         if (args.length == 0)
             return false;
 
-        switch(args[0].toLowerCase()){
-            case "invite" -> {
-                if (!builderMap.containsKey(player))
-                    builderMap.put(player, new DuelGame.Builder(player, plugin));
+        if (args[0].equalsIgnoreCase(language.getString("duel_invite"))) {
+            if (!builderMap.containsKey(player))
+                builderMap.put(player, new DuelGame.Builder(player, plugin));
 
-                if (args.length > 1) {
-                    Player player1 = Bukkit.getPlayer(args[1]);
-                    if (player1 == null)
-                        return true;
+            if (args.length > 1) {
+                Player player1 = Bukkit.getPlayer(args[1]);
+                if (player1 == null)
+                    return true;
 
-                    if (builderMap.get(player).invite(player1)) {
-                        player1.sendMessage("Du wurdest von " + player.getName() + " zu einem Duell eingeladen. Gebe /duel accept " + player.getName() + " ein um diesem beizutreten.");
-                        builderMap.get(player).broadcast(player1.getName() + " wurde eingeladen.");
+                if (builderMap.get(player).invite(player1)) {
+                    player1.sendMessage(language.getString("send_invite_player", player.getName()));
+                    builderMap.get(player).broadcast(language.getString("broadcast_invite", player1.getName()));
+                }
+            }
+        } else if (args[0].equalsIgnoreCase(language.getString("duel_accept"))) {
+            if (args.length > 1) {
+                Player player1 = Bukkit.getPlayer(args[1]);
+                if (player1 == null)
+                    return true;
+
+                DuelGame.Builder builder = builderMap.get(player1);
+
+                if (builder != null) {
+                    if (builder.accept(player)) {
+                        builder.broadcast(language.getString("broadcast_accept", player.getName()));
                     }
                 }
             }
-            case "accept" -> {
-                if (args.length > 1) {
-                    Player player1 = Bukkit.getPlayer(args[1]);
-                    if (player1 == null)
-                        return true;
+        } else if (args[0].equalsIgnoreCase(language.getString("duel_leave"))) {
+            if (args.length > 1) {
+                Player player1 = Bukkit.getPlayer(args[1]);
 
-                    DuelGame.Builder builder = builderMap.get(player1);
+                if (player1 == null)
+                    return true;
 
-                    if (builder != null) {
-                        if (builder.accept(player)) {
-                            builder.broadcast(player1.getName() + " ist dem Duell beigetreten.");
-                        }
+                DuelGame.Builder builder = builderMap.get(player1);
+
+                if (builder != null) {
+                    if (builder.kick(player)) {
+                        DuelLeaveEvent event = new DuelLeaveEvent(player, builder);
+                        Bukkit.getServer().getPluginManager().callEvent(event);
+                        player1.sendMessage(language.getString("send_leave", player.getName()));
+                        builder.broadcast(language.getString("broadcast_leave", player1.getName()));
                     }
                 }
             }
-            case "leave" -> {
-                if (args.length > 1) {
-                    Player player1 = Bukkit.getPlayer(args[1]);
+        } else if (args[0].equalsIgnoreCase(language.getString("duel_kick"))) {
+            if (args.length > 1) {
+                Player player1 = Bukkit.getPlayer(args[1]);
 
-                    if (player1 == null)
-                        return true;
+                if (player1 == null)
+                    return true;
 
-                    DuelGame.Builder builder = builderMap.get(player1);
+                DuelGame.Builder builder = builderMap.get(player);
 
-                    if (builder != null) {
-                        if (builder.kick(player)) {
-                            player1.sendMessage("Du hast das Duell von " + player.getName() + " verlassen.");
-                            builder.broadcast(player1.getName() + " hat das Duell verlassen.");
-                        }
+                if (builder != null) {
+                    if (builder.kick(Bukkit.getPlayer(args[1]))) {
+                        DuelLeaveEvent event = new DuelLeaveEvent(player, builder);
+                        Bukkit.getServer().getPluginManager().callEvent(event);
+
+                        player1.sendMessage(language.getString("send_kick", player.getName()));
+                        builder.broadcast(language.getString("broadcast_kick", player1.getName()));
                     }
                 }
             }
-            case "kick" -> {
-                if (args.length > 1) {
-                    Player player1 = Bukkit.getPlayer(args[1]);
+        } else if (args[0].equalsIgnoreCase(language.getString("duel_game"))) {
+            if (!builderMap.containsKey(player))
+                builderMap.put(player, new DuelGame.Builder(player, plugin));
 
-                    if (player1 == null)
-                        return true;
+            for (Game game : gameManager.getGames()) {
+                if (game instanceof CustomGame)
+                    continue;
 
+                if (args[1].equalsIgnoreCase(game.getMap())) {
                     DuelGame.Builder builder = builderMap.get(player);
-
-                    if (builder != null) {
-                        if (builder.kick(Bukkit.getPlayer(args[1]))) {
-                            player1.sendMessage("Du wurdest aus dem Duell von " + player.getName() + " gekickt.");
-                            builder.broadcast(player1.getName() + " hat das Duell verlassen.");
-                        }
-                    }
+                    builder.setGame(game);
+                    builder.broadcast(language.getString("broadcast_game", game.getMap()));
+                    break;
                 }
             }
-            case "game" -> {
-                if (!builderMap.containsKey(player))
-                    builderMap.put(player, new DuelGame.Builder(player, plugin));
-
-                for (Game game : gameManager.getGames()) {
-                    if (args[1].equalsIgnoreCase(game.getMap())) {
-                        DuelGame.Builder builder = builderMap.get(player);
-                        builder.setGame(game);
-                        builder.broadcast("Das Duell findet nun auf der Map " + game.getMap() + " statt.");
-                        break;
-                    }
-                }
-            }
-            case "start" -> {
-                if (builderMap.containsKey(player)) {
-                    DuelGame.Builder builder = builderMap.get(player);
-                    builder.build(gameManager.getGames().get(0)).startGame();
-                    builder.broadcast("Das Duell hat gestartet. Viel Glück!");
-                }
+        } else if (args[0].equalsIgnoreCase(language.getString("duel_start"))) {
+            if (builderMap.containsKey(player)) {
+                DuelGame.Builder builder = builderMap.get(player);
+                builder.build(gameManager.getGames().get(0)).startGame();
+                builder.broadcast(language.getString("broadcast_start"));
             }
         }
         return true;
@@ -131,6 +138,7 @@ public class DuelCommand implements TabExecutor, Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         builderMap.remove(player);
+        duelGameMap.remove(player);
 
         builderMap.values().forEach(builder -> builder.kick(player));
     }
@@ -144,56 +152,52 @@ public class DuelCommand implements TabExecutor, Listener {
             return strings;
 
         if (args.length == 1) {
-            Arrays.asList("invite", "accept", "leave", "kick", "start", "game").forEach(s -> {
+            Arrays.asList(language.getString("duel_invite"), language.getString("duel_accept"), language.getString("duel_leave"), language.getString("duel_kick"), language.getString("duel_game"), language.getString("duel_start")).forEach(s -> {
                 if (s.toLowerCase().startsWith(args[0]))
                     strings.add(s);
             });
         } else if (args.length > 1) {
-            switch(args[0].toLowerCase()){
-                case "invite" -> {
-                    DuelGame.Builder builder = builderMap.get(player);
+            if (args[0].equalsIgnoreCase(language.getString("duel_invite"))) {
+                DuelGame.Builder builder = builderMap.get(player);
 
-                    if (builder == null)
-                        Bukkit.getOnlinePlayers().forEach(player1 -> {
-                            if (player1.getName().toLowerCase().startsWith(args[1].toLowerCase()) && player != player1) {
-                                strings.add(player1.getName());
-                            }
-                        });
-
-                    else Bukkit.getOnlinePlayers().forEach(player1 -> {
-                        if (player1.getName().toLowerCase().startsWith(args[1].toLowerCase()) && player != player1 && !builder.getAll().contains(player1)) {
+                if (builder == null)
+                    Bukkit.getOnlinePlayers().forEach(player1 -> {
+                        if (player1.getName().toLowerCase().startsWith(args[1].toLowerCase()) && player != player1) {
                             strings.add(player1.getName());
                         }
                     });
-                }
-                case "accept" -> {
-                    for (Player player1 : builderMap.keySet()) {
-                        DuelGame.Builder builder = builderMap.get(player1);
 
-                        if (builder.getInvited().contains(player) && player1.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
-                            strings.add(player1.getName());
-                        }
+                else Bukkit.getOnlinePlayers().forEach(player1 -> {
+                    if (player1.getName().toLowerCase().startsWith(args[1].toLowerCase()) && player != player1 && !builder.getAll().contains(player1)) {
+                        strings.add(player1.getName());
+                    }
+                });
+            } else if (args[0].equalsIgnoreCase(language.getString("duel_accept"))) {
+                for (Player player1 : builderMap.keySet()) {
+                    DuelGame.Builder builder = builderMap.get(player1);
+
+                    if (builder.getInvited().contains(player) && player1.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
+                        strings.add(player1.getName());
                     }
                 }
-                case "leave" -> {
-                    for (Player player1 : builderMap.keySet()) {
-                        DuelGame.Builder builder = builderMap.get(player1);
+            } else if (args[0].equalsIgnoreCase(language.getString("duel_leave"))) {
+                for (Player player1 : builderMap.keySet()) {
+                    DuelGame.Builder builder = builderMap.get(player1);
 
-                        if (builder.getAll().contains(player) && player1.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
-                            strings.add(player1.getName());
-                        }
+                    if (builder.getAll().contains(player) && player1.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
+                        strings.add(player1.getName());
                     }
                 }
-                case "kick" -> {
-                    DuelGame.Builder builder = builderMap.get(player);
+            } else if (args[0].equalsIgnoreCase(language.getString("duel_kick"))) {
+                DuelGame.Builder builder = builderMap.get(player);
 
-                    if (builder != null)
-                        Bukkit.getOnlinePlayers().forEach(player1 -> {
-                            if (player1.getName().toLowerCase().startsWith(args[1].toLowerCase()) && player != player1)
-                                strings.add(player1.getName());
-                        });
-                }
-                case "game" -> gameManager.getGames().forEach(game -> {
+                if (builder != null)
+                    Bukkit.getOnlinePlayers().forEach(player1 -> {
+                        if (player1.getName().toLowerCase().startsWith(args[1].toLowerCase()) && player != player1)
+                            strings.add(player1.getName());
+                    });
+            } else if (args[0].equalsIgnoreCase(language.getString("duel_game"))) {
+                gameManager.getGames().forEach(game -> {
                     if (game.getMap().toLowerCase().startsWith(args[1].toLowerCase()))
                         strings.add(game.getMap());
                 });

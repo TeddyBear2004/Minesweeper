@@ -1,4 +1,4 @@
-package de.teddybear2004.minesweeper.game.painter;
+package de.teddy.minesweeper.game.painter;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;

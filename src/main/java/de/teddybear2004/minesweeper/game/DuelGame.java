@@ -3,6 +3,7 @@ package de.teddybear2004.minesweeper.game;
 import de.teddybear2004.minesweeper.game.event.BoardFinishEvent;
 import de.teddybear2004.minesweeper.game.event.BoardLoseEvent;
 import de.teddybear2004.minesweeper.game.event.BoardWinEvent;
+import de.teddybear2004.minesweeper.game.event.DuelLeaveEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -40,6 +41,39 @@ public class DuelGame implements Listener {
         this.onBoardFinish(event);
     }
 
+    @EventHandler
+    public void onDuelLeave(DuelLeaveEvent event) {
+        if (playerBoardMap.remove(event.getPlayer()) == null)
+            return;
+
+        int completed = getCompleted();
+
+        String message = event.getPlayer().getName() + " hat das Spiel verlassen! (" + completed + " / " + playerBoardMap.size() + ")";
+        broadcastMessage(message);
+
+        checkDone(completed);
+    }
+
+    private void checkDone(int completed) {
+        if (completed >= playerBoardMap.size()) {
+            String message = "Alle Spieler haben ihr beendet.";
+            broadcastMessage(message);
+            List<Board> boards = new ArrayList<>(playerBoardMap.values());
+
+            boards.sort(Board::compareTo);
+
+            for (int i = 0; i < boards.size(); i++) {
+                Board board = boards.get(i);
+                if (board.getDuration() != null) {
+                    message = ChatColor.GOLD.toString() + (i + 1) + ". Platz: " + board.getPlayer().getName() + " Zeit: " + Board.SIMPLE_DATE_FORMAT.format(board.getDuration()) + " Flaggen Score: " + (board.isWin() ? board.getBombCount() : board.calculateFlagScore());
+                    broadcastMessage(message);
+                }
+            }
+
+            HandlerList.unregisterAll(this);
+        }
+    }
+
     private void onBoardFinish(BoardFinishEvent event) {
         if (!this.playerBoardMap.containsValue(event.getBoard()))
             return;
@@ -49,21 +83,7 @@ public class DuelGame implements Listener {
         String message = event.getPlayer().getName() + " hat das Spiel beendet! (" + completed + " / " + playerBoardMap.size() + ")";
         broadcastMessage(message);
 
-        if (completed >= playerBoardMap.size()) {
-            message = "Alle Spieler haben ihr beendet.";
-            broadcastMessage(message);
-            List<Board> boards = new ArrayList<>(playerBoardMap.values());
-
-            boards.sort(Board::compareTo);
-
-            for (int i = 0; i < boards.size() && i < 3; i++) {
-                Board board = boards.get(i);
-                message = ChatColor.GOLD.toString() + (i + 1) + ". Platz: " + board.getPlayer().getName() + " Zeit: " + Board.SIMPLE_DATE_FORMAT.format(board.getDuration()) + " Flaggen Score: " + (board.isWin() ? board.getBombCount() : board.calculateFlagScore());
-                broadcastMessage(message);
-            }
-
-            HandlerList.unregisterAll(this);
-        }
+        checkDone(completed);
     }
 
     private int getCompleted() {
@@ -123,8 +143,12 @@ public class DuelGame implements Listener {
         }
 
         public void broadcast(String message) {
+            this.broadcast(message, true);
+        }
+
+        public void broadcast(String message, boolean all) {
             owner.sendMessage(message);
-            getAll().forEach(player -> player.sendMessage(message));
+            (all ? getAll() : getAccepted()).forEach(player -> player.sendMessage(message));
         }
 
         public Set<Player> getAll() {
@@ -134,12 +158,12 @@ public class DuelGame implements Listener {
             return players;
         }
 
-        public Set<Player> getInvited() {
-            return invited;
-        }
-
         public Set<Player> getAccepted() {
             return accepted;
+        }
+
+        public Set<Player> getInvited() {
+            return invited;
         }
 
         public DuelGame build(Game defaultGame) {

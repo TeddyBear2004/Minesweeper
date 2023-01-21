@@ -1,14 +1,14 @@
 package de.teddybear2004.minesweeper.events;
 
+import de.teddy.minesweeper.game.painter.ArmorStandPainter;
+import de.teddy.minesweeper.game.painter.BlockPainter;
+import de.teddy.minesweeper.game.painter.Painter;
 import de.teddybear2004.minesweeper.game.Board;
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
 import de.teddybear2004.minesweeper.game.inventory.Inventories;
 import de.teddybear2004.minesweeper.game.modifier.Modifier;
 import de.teddybear2004.minesweeper.game.modifier.PersonalModifier;
-import de.teddybear2004.minesweeper.game.painter.ArmorStandPainter;
-import de.teddybear2004.minesweeper.game.painter.BlockPainter;
-import de.teddybear2004.minesweeper.game.painter.Painter;
 import de.teddybear2004.minesweeper.game.texture.pack.ResourcePackHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;

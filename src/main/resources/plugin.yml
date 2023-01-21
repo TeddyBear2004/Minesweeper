@@ -1,6 +1,6 @@
 name: Minesweeper
 version: ${project.version}
-main: de.teddy.minesweeper.Minesweeper
+main: de.teddybear2004.minesweeper.Minesweeper
 api-version: 1.19
 authors:
   - TeddyBear_2004
