@@ -1,6 +1,7 @@
 package de.teddybear2004.minesweeper.game.statistic;
 
 import de.teddybear2004.minesweeper.game.Game;
+import de.teddybear2004.minesweeper.util.Time;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.inventory.Inventory;
@@ -9,13 +10,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class PlayerStatistic {
 
-    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("mm:ss:SSS");
-    private static final DecimalFormat df = new DecimalFormat("#.000");
+    private static final DecimalFormat df = new DecimalFormat("0.000");
     private final List<GameStatistic> stats;
     private final List<Game> games;
     private final @NotNull Map<Game, MapStatistic> statsPerMap;
@@ -63,11 +62,11 @@ public class PlayerStatistic {
                 if (mapStatistic.getStarted() != 0)
                     itemMeta.setLore(List.of(
                             ChatColor.GRAY + "Personal best time: "
-                                    + ChatColor.YELLOW + SIMPLE_DATE_FORMAT.format(new Date(mapStatistic.getBestDuration())),
+                                    + ChatColor.YELLOW + Time.parse(true, mapStatistic.getBestDuration()),
                             ChatColor.GRAY + "Average time: "
-                                    + ChatColor.YELLOW + SIMPLE_DATE_FORMAT.format(new Date(mapStatistic.getAverageDuration())),
+                                    + ChatColor.YELLOW + Time.parse(true, mapStatistic.getAverageDuration()),
                             ChatColor.GRAY + "Total time played: "
-                                    + ChatColor.YELLOW + SIMPLE_DATE_FORMAT.format(new Date(mapStatistic.getTotalDuration())),
+                                    + ChatColor.YELLOW + Time.parse(true, mapStatistic.getTotalDuration()),
                             ChatColor.GRAY + "Win rate: "
                                     + ChatColor.YELLOW + df.format(mapStatistic.getWinRate() * 100) + "%",
                             ChatColor.GRAY + "Times won: "

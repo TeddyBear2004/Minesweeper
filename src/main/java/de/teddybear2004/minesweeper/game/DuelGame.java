@@ -4,6 +4,7 @@ import de.teddybear2004.minesweeper.game.event.BoardFinishEvent;
 import de.teddybear2004.minesweeper.game.event.BoardLoseEvent;
 import de.teddybear2004.minesweeper.game.event.BoardWinEvent;
 import de.teddybear2004.minesweeper.game.event.DuelLeaveEvent;
+import de.teddybear2004.minesweeper.util.Time;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -65,7 +66,7 @@ public class DuelGame implements Listener {
             for (int i = 0; i < boards.size(); i++) {
                 Board board = boards.get(i);
                 if (board.getDuration() != null) {
-                    message = ChatColor.GOLD.toString() + (i + 1) + ". Platz: " + board.getPlayer().getName() + " Zeit: " + Board.SIMPLE_DATE_FORMAT.format(board.getDuration()) + " Flaggen Score: " + (board.isWin() ? board.getBombCount() : board.calculateFlagScore());
+                    message = ChatColor.GOLD.toString() + (i + 1) + ". Platz: " + board.getPlayer().getName() + " Zeit: " + Time.parse(false, board.getDuration()) + " Flaggen Score: " + (board.isWin() ? board.getBombCount() : board.calculateFlagScore());
                     broadcastMessage(message);
                 }
             }

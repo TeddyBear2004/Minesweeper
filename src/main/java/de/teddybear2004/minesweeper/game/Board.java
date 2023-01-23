@@ -5,10 +5,7 @@ import de.teddybear2004.minesweeper.game.event.BoardLoseEvent;
 import de.teddybear2004.minesweeper.game.event.BoardWinEvent;
 import de.teddybear2004.minesweeper.game.exceptions.BombExplodeException;
 import de.teddybear2004.minesweeper.game.statistic.GameStatistic;
-import de.teddybear2004.minesweeper.util.ConnectionBuilder;
-import de.teddybear2004.minesweeper.util.IsBetween;
-import de.teddybear2004.minesweeper.util.Language;
-import de.teddybear2004.minesweeper.util.PacketUtil;
+import de.teddybear2004.minesweeper.util.*;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -18,12 +15,10 @@ import org.bukkit.scoreboard.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Board implements Comparable<Board> {
 
-    public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("mm:ss:SSS");
     private final Game game;
     private final @NotNull Plugin plugin;
     private final Language language;
@@ -141,11 +136,11 @@ public class Board implements Comparable<Board> {
         setScoreBoard(player);
     }
 
-    public void drawBlancField(@NotNull List<Player> players) {
-        getCurrentPlayerPainters(players).forEach((painter, players2) -> {
-            if (painter != null)
-                painter.drawBlancField(this, players2);
-        });
+    public void setScoreBoard(@NotNull Player player) {
+        if (scoreboard == null || isFinished)
+            return;
+
+        player.setScoreboard(scoreboard);
     }
 
     public void removeViewer(Player player) {
@@ -160,48 +155,11 @@ public class Board implements Comparable<Board> {
         this.drawBlancField(viewers);
     }
 
-    private void generateBoard(int x, int y) {
-        if (this.isGenerated)
-            throw new RuntimeException(language.getString("error_already_generated"));
-
-        startX = x;
-        startY = y;
-
-        boolean[][] cache = new boolean[this.width][this.height];
-        int[][] ints = new int[this.width][this.height];
-
-        for (int i = 0; i < this.bombCount; i++) {
-            int randWidth, randHeight;
-
-            do{
-                randWidth = random.nextInt(this.width);
-                randHeight = random.nextInt(this.height);
-            }while (cache[randWidth][randHeight] || couldBombSpawn(x, y, randWidth, randHeight));
-
-            cache[randWidth][randHeight] = true;
-            this.bombList[i][0] = randWidth;
-            this.bombList[i][1] = randHeight;
-        }
-
-        for (int[] ints1 : this.bombList) {
-            SurfaceDiscoverer.SURROUNDINGS.parallelStream().forEach(ints2 -> {
-                int xCoord = ints1[0] + ints2[0];
-                int yCoord = ints1[1] + ints2[1];
-
-                if (xCoord >= 0 && xCoord < this.width && yCoord >= 0 && yCoord < this.height) {
-                    ints[xCoord][yCoord]++;
-                }
-            });
-        }
-
-        for (int i = 0; i < cache.length; i++) {
-            for (int j = 0; j < cache[i].length; j++) {
-                this.board[i][j] = new Field(this, i, j, cache[i][j], ints[i][j]);
-            }
-        }
-
-        this.isGenerated = true;
-        initScoreboard();
+    public void drawBlancField(@NotNull List<Player> players) {
+        getCurrentPlayerPainters(players).forEach((painter, players2) -> {
+            if (painter != null)
+                painter.drawBlancField(this, players2);
+        });
     }
 
     public boolean isGenerated() {
@@ -227,13 +185,65 @@ public class Board implements Comparable<Board> {
             startStarted();
     }
 
-    private boolean couldBombSpawn(int x, int y, int possibleX, int possibleY) {
-        return Math.abs(x - possibleX) <= 1 && Math.abs(y - possibleY) <= 1;
+    private void generateBoard(int x, int y) {
+        if (this.isGenerated)
+            throw new RuntimeException(language.getString("error_already_generated"));
+
+        startX = x;
+        startY = y;
+
+        boolean[][] cache = new boolean[this.width][this.height];
+        int[][] ints = new int[this.width][this.height];
+
+        List<int[]> freeFields = new ArrayList<>();
+        for (int i = 0; i < cache.length; i++) {
+            for (int j = 0; j < cache[i].length; j++) {
+                if (!couldBombSpawn(x, y, i, j)) {
+                    freeFields.add(new int[]{i, j});
+                    cache[i][j] = false;
+                }
+            }
+        }
+
+        int flipped = 0;
+        while (flipped < bombCount && freeFields.size() > 0) {
+            int randomIndex = random.nextInt(freeFields.size());
+            int[] randomField = freeFields.get(randomIndex);
+
+            cache[randomField[0]][randomField[1]] = true;
+            bombList[flipped] = randomField;
+            freeFields.remove(randomIndex);
+            flipped++;
+        }
+
+        for (int[] ints1 : this.bombList) {
+            SurfaceDiscoverer.SURROUNDINGS.parallelStream().forEach(ints2 -> {
+                int xCoord = ints1[0] + ints2[0];
+                int yCoord = ints1[1] + ints2[1];
+
+                if (xCoord >= 0 && xCoord < this.width && yCoord >= 0 && yCoord < this.height) {
+                    ints[xCoord][yCoord]++;
+                }
+            });
+        }
+
+        for (int i = 0; i < cache.length; i++) {
+            for (int j = 0; j < cache[i].length; j++) {
+                this.board[i][j] = new Field(this, i, j, cache[i][j], ints[i][j]);
+            }
+        }
+
+        this.isGenerated = true;
+        initScoreboard();
     }
 
     public void startStarted() {
         if (this.started == 0)
             this.started = System.currentTimeMillis();
+    }
+
+    private boolean couldBombSpawn(int x, int y, int possibleX, int possibleY) {
+        return Math.abs(x - possibleX) <= 1 && Math.abs(y - possibleY) <= 1;
     }
 
     private void initScoreboard() {
@@ -274,13 +284,6 @@ public class Board implements Comparable<Board> {
         list.add(player);
 
         return list;
-    }
-
-    public void setScoreBoard(@NotNull Player player) {
-        if (scoreboard == null || isFinished)
-            return;
-
-        player.setScoreboard(scoreboard);
     }
 
     public int getCurrentFlagCount() {
@@ -330,7 +333,15 @@ public class Board implements Comparable<Board> {
     }
 
     private @NotNull String getActualTimeNeededString() {
-        return SIMPLE_DATE_FORMAT.format(new Date(getActualTimeNeeded()));
+        return Time.parse(false, getActualTimeNeeded());
+    }
+
+    private long getActualTimeNeeded() {
+        return this.getActualTimeNeeded(System.currentTimeMillis());
+    }
+
+    private long getActualTimeNeeded(long now) {
+        return this.started == 0 ? 0 : now - this.started;
     }
 
     public void checkIfWon() {
@@ -362,12 +373,8 @@ public class Board implements Comparable<Board> {
         PacketUtil.sendActionBar(this.player, actualTimeNeededString);
     }
 
-    private long getActualTimeNeeded(long now) {
-        return this.started == 0 ? 0 : now - this.started;
-    }
-
     private @NotNull String getActualTimeNeededString(long now) {
-        return SIMPLE_DATE_FORMAT.format(new Date(getActualTimeNeeded(now)));
+        return Time.parse(false, getActualTimeNeeded(now));
     }
 
     public int getBombCount() {
@@ -412,10 +419,6 @@ public class Board implements Comparable<Board> {
         }, 20);
     }
 
-    public void breakGame() {
-        finish(false);
-    }
-
     public long finish(boolean won) {
         return this.finish(won, true);
     }
@@ -431,16 +434,16 @@ public class Board implements Comparable<Board> {
         return flagScore;
     }
 
+    public @NotNull Map<Painter, List<Player>> getCurrentPlayerPainters() {
+        return getCurrentPlayerPainters(this.viewers);
+    }
+
     public long finish(boolean won, boolean saveStats) {
         return this.finish(won, saveStats, getActualTimeNeeded());
     }
 
-    private long getActualTimeNeeded() {
-        return this.getActualTimeNeeded(System.currentTimeMillis());
-    }
-
-    public @NotNull Map<Painter, List<Player>> getCurrentPlayerPainters() {
-        return getCurrentPlayerPainters(this.viewers);
+    public void breakGame() {
+        finish(false);
     }
 
     protected void generateBoard(Field[] @NotNull [] board) {

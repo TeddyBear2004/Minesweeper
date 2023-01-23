@@ -25,3 +25,8 @@ beginner:
     - 0000X00000
     - 0000000000
     - 0000X00000
+# 0 Unaufgedeckt
+# X Bombe
+# 1 Aufgedeckt
+# 2 Flagge
+# 3 Fragezeichen

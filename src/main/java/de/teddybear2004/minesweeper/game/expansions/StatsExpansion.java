@@ -2,18 +2,14 @@ package de.teddybear2004.minesweeper.game.expansions;
 
 import de.teddybear2004.minesweeper.game.statistic.GameStatistic;
 import de.teddybear2004.minesweeper.util.ConnectionBuilder;
+import de.teddybear2004.minesweeper.util.Time;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class StatsExpansion extends PlaceholderExpansion {
-
-    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("mm:ss:SSS");
-
     private final ConnectionBuilder connectionBuilder;
 
     public StatsExpansion(ConnectionBuilder connectionBuilder) {
@@ -60,7 +56,7 @@ public class StatsExpansion extends PlaceholderExpansion {
             if (gameStatistic == null)
                 return null;
 
-            return args[1] + ". " + gameStatistic.getName() + ": " + SIMPLE_DATE_FORMAT.format(new Date(gameStatistic.getDuration()));
+            return args[1] + ". " + gameStatistic.getName() + ": " + Time.parse(false, gameStatistic.getDuration());
 
 
         }catch(NumberFormatException e){

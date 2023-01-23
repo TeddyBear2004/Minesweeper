@@ -3,6 +3,7 @@ package de.teddybear2004.minesweeper.game.statistic;
 import de.teddybear2004.minesweeper.Minesweeper;
 import de.teddybear2004.minesweeper.util.ConnectionBuilder;
 import de.teddybear2004.minesweeper.util.HeadGenerator;
+import de.teddybear2004.minesweeper.util.Time;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -17,15 +18,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 public class GameStatistic {
 
-    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("mm:ss:SSS");
     public static final NamespacedKey MAP_KEY = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "map");
     public static final NamespacedKey SEED_KEY = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "seed");
     public static final NamespacedKey X_KEY = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "x");
@@ -263,7 +261,7 @@ public class GameStatistic {
 
                 itemMeta.setLore(List.of(
                         ChatColor.GRAY + "Duration: "
-                                + ChatColor.YELLOW + SIMPLE_DATE_FORMAT.format(new Date(duration)),
+                                + ChatColor.YELLOW + Time.parse(true, duration),
                         ChatColor.GRAY + "Map Size: "
                                 + ChatColor.YELLOW + map,
                         ChatColor.GRAY + "Bomb count: "

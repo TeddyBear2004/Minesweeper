@@ -8,7 +8,7 @@ resource_pack:
     name: pack.zip
   external_web_server:
     enable: true
-    link: https://cdn.discordapp.com/attachments/755817146986004551/1058350165888614430/assets.zip
+    link: https://cdn.discordapp.com/attachments/755817146986004551/1066488894146756618/assets.zip
 
 allow_fly: true
 allow_default_watch: true
