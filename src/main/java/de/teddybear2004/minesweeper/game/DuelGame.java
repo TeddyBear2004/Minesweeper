@@ -29,12 +29,21 @@ public class DuelGame implements Listener {
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
-    public void startGame() {
+    public boolean startGame() {
+        for (Player player : this.playerBoardMap.keySet()) {
+            Board board = game.getGameManager().getBoard(player);
+            if (!(board == null || !board.isGenerated())) {
+                broadcastMessage("Der Spieler " + player.getName() + " hat ein Spiel gestartet!");
+                return false;
+            }
+        }
+
         Game.Builder builder = this.game.getStarter()
                 .setSaveStats(true)
                 .setShouldTeleport(true);
 
         this.playerBoardMap.keySet().forEach(player -> this.playerBoardMap.put(player, builder.build(player)));
+        return true;
     }
 
     @EventHandler
@@ -42,37 +51,8 @@ public class DuelGame implements Listener {
         this.onBoardFinish(event);
     }
 
-    @EventHandler
-    public void onDuelLeave(DuelLeaveEvent event) {
-        if (playerBoardMap.remove(event.getPlayer()) == null)
-            return;
-
-        int completed = getCompleted();
-
-        String message = event.getPlayer().getName() + " hat das Spiel verlassen! (" + completed + " / " + playerBoardMap.size() + ")";
-        broadcastMessage(message);
-
-        checkDone(completed);
-    }
-
-    private void checkDone(int completed) {
-        if (completed >= playerBoardMap.size()) {
-            String message = "Alle Spieler haben ihr beendet.";
-            broadcastMessage(message);
-            List<Board> boards = new ArrayList<>(playerBoardMap.values());
-
-            boards.sort(Board::compareTo);
-
-            for (int i = 0; i < boards.size(); i++) {
-                Board board = boards.get(i);
-                if (board.getDuration() != null) {
-                    message = ChatColor.GOLD.toString() + (i + 1) + ". Platz: " + board.getPlayer().getName() + " Zeit: " + Time.parse(false, board.getDuration()) + " Flaggen Score: " + (board.isWin() ? board.getBombCount() : board.calculateFlagScore());
-                    broadcastMessage(message);
-                }
-            }
-
-            HandlerList.unregisterAll(this);
-        }
+    private void broadcastMessage(String message) {
+        this.playerBoardMap.keySet().forEach(player -> player.sendMessage(message));
     }
 
     private void onBoardFinish(BoardFinishEvent event) {
@@ -95,8 +75,37 @@ public class DuelGame implements Listener {
         return completed;
     }
 
-    private void broadcastMessage(String message) {
-        this.playerBoardMap.keySet().forEach(player -> player.sendMessage(message));
+    private void checkDone(int completed) {
+        if (completed >= playerBoardMap.size()) {
+            String message = "Alle Spieler haben ihr beendet.";
+            broadcastMessage(message);
+            List<Board> boards = new ArrayList<>(playerBoardMap.values());
+
+            boards.sort(Board::compareTo);
+
+            for (int i = 0; i < boards.size(); i++) {
+                Board board = boards.get(i);
+                if (board.getDuration() != null) {
+                    message = ChatColor.GOLD.toString() + (i + 1) + ". Platz: " + board.getPlayer().getName() + " Zeit: " + Time.parse(false, board.getDuration()) + " Flaggen Score: " + (board.isWin() ? board.getBombCount() : board.calculateFlagScore());
+                    broadcastMessage(message);
+                }
+            }
+
+            HandlerList.unregisterAll(this);
+        }
+    }
+
+    @EventHandler
+    public void onDuelLeave(DuelLeaveEvent event) {
+        if (playerBoardMap.remove(event.getPlayer()) == null)
+            return;
+
+        int completed = getCompleted();
+
+        String message = event.getPlayer().getName() + " hat das Spiel verlassen! (" + completed + " / " + playerBoardMap.size() + ")";
+        broadcastMessage(message);
+
+        checkDone(completed);
     }
 
     @EventHandler

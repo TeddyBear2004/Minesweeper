@@ -86,6 +86,10 @@ public class Game {
         return null;
     }
 
+    public GameManager getGameManager() {
+        return gameManager;
+    }
+
     public @Nullable Board startGame(@NotNull Player p, boolean shouldTeleport, int bombCount, int width, int height, long seed, boolean setSeed, boolean saveStats) {
         gameManager.stopGames(p, saveStats);
         Board b;

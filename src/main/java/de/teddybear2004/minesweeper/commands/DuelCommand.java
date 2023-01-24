@@ -23,7 +23,6 @@ import java.util.*;
 public class DuelCommand implements TabExecutor, Listener {
 
     private final Map<Player, DuelGame.Builder> builderMap = new HashMap<>();
-    private final Map<Player, DuelGame> duelGameMap = new HashMap<>();
     private final Plugin plugin;
     private final GameManager gameManager;
     private final Language language;
@@ -76,8 +75,15 @@ public class DuelCommand implements TabExecutor, Listener {
             if (args.length > 1) {
                 Player player1 = Bukkit.getPlayer(args[1]);
 
-                if (player1 == null)
+                if (player1 == null) {
+                    builderMap.forEach((player2, builder) -> {
+                        if (builder.kick(player)) {
+                            player.sendMessage(language.getString("send_leave", player.getName()));
+                            builder.broadcast(language.getString("broadcast_leave", player.getName()));
+                        }
+                    });
                     return true;
+                }
 
                 DuelGame.Builder builder = builderMap.get(player1);
 
@@ -127,8 +133,9 @@ public class DuelCommand implements TabExecutor, Listener {
         } else if (args[0].equalsIgnoreCase(language.getString("duel_start"))) {
             if (builderMap.containsKey(player)) {
                 DuelGame.Builder builder = builderMap.get(player);
-                builder.build(gameManager.getGames().get(0)).startGame();
-                builder.broadcast(language.getString("broadcast_start"));
+
+                if (builder.build(gameManager.getGames().get(0)).startGame())
+                    builder.broadcast(language.getString("broadcast_start"));
             }
         }
         return true;
@@ -138,7 +145,6 @@ public class DuelCommand implements TabExecutor, Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         builderMap.remove(player);
-        duelGameMap.remove(player);
 
         builderMap.values().forEach(builder -> builder.kick(player));
     }

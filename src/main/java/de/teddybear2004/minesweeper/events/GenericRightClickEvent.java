@@ -3,7 +3,9 @@ package de.teddybear2004.minesweeper.events;
 import de.teddybear2004.minesweeper.game.Board;
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
+import de.teddybear2004.minesweeper.game.event.BoardLoseEvent;
 import de.teddybear2004.minesweeper.game.inventory.Inventories;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -50,6 +52,9 @@ public class GenericRightClickEvent implements Listener {
                 }
                 return;
             } else if (itemStack.equals(Inventories.barrier)) {
+                BoardLoseEvent boardLoseEvent = new BoardLoseEvent(gameManager.getBoard(event.getPlayer()), event.getPlayer(), 0, -99);
+                Bukkit.getPluginManager().callEvent(boardLoseEvent);
+
                 gameManager.finishGame(event.getPlayer(), false);
                 event.getPlayer().getInventory().setContents(Inventories.VIEWER_INVENTORY);
                 event.setCancelled(true);
