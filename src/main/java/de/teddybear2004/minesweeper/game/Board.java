@@ -521,8 +521,8 @@ public class Board implements Comparable<Board> {
                 board.updateScoreBoard();
 
             board.getViewers().forEach(player1 -> {
-                if (player1.equals(board.player))
-                    PacketUtil.sendActionBar(board.player, ChatColor.GRAY + "Du beobachtet: " + ChatColor.GREEN + board.player.getName());
+                if (!player1.equals(board.player))
+                    PacketUtil.sendActionBar(player1, ChatColor.GRAY + "Du beobachtet: " + ChatColor.GREEN + board.player.getName());
             });
 
             PacketUtil.sendActionBar(board.player, board.getActualTimeNeededString());
