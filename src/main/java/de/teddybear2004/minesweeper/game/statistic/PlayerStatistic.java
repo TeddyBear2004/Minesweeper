@@ -1,6 +1,7 @@
 package de.teddybear2004.minesweeper.game.statistic;
 
 import de.teddybear2004.minesweeper.game.Game;
+import de.teddybear2004.minesweeper.util.Language;
 import de.teddybear2004.minesweeper.util.Time;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -41,7 +42,7 @@ public class PlayerStatistic {
         gameStatisticMap.forEach((game, gameStatistic) -> this.statsPerMap.put(game, new MapStatistic(gameStatistic)));
     }
 
-    public @NotNull Inventory generateInventory() {
+    public @NotNull Inventory generateInventory(Language language) {
         Inventory inventory = Bukkit.createInventory(null, 9, ChatColor.AQUA + "Minesweeper Stats");
 
         games.forEach(game -> {
@@ -57,7 +58,7 @@ public class PlayerStatistic {
             ItemMeta itemMeta = itemStack.getItemMeta();
 
             if (itemMeta != null) {
-                itemMeta.setDisplayName(game.getDifficulty());
+                itemMeta.setDisplayName(language.getString(game.getDifficulty()));
 
                 if (mapStatistic.getStarted() != 0)
                     itemMeta.setLore(List.of(

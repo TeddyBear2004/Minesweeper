@@ -36,7 +36,7 @@ public class SettingsCommand implements TabExecutor {
      */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
-        if (!(sender instanceof Player player) || args.length == 0) {
+        if (!(sender instanceof Player player) || args.length < 2) {
             return true;
         }
 

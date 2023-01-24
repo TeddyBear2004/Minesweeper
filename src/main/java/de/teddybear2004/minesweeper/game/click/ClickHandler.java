@@ -2,10 +2,7 @@ package de.teddybear2004.minesweeper.game.click;
 
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
-import de.teddybear2004.minesweeper.game.Board;
-import de.teddybear2004.minesweeper.game.Field;
-import de.teddybear2004.minesweeper.game.Game;
-import de.teddybear2004.minesweeper.game.SurfaceDiscoverer;
+import de.teddybear2004.minesweeper.game.*;
 import de.teddybear2004.minesweeper.game.exceptions.BombExplodeException;
 import de.teddybear2004.minesweeper.game.inventory.Inventories;
 import de.teddybear2004.minesweeper.game.modifier.PersonalModifier;
@@ -53,14 +50,19 @@ public class ClickHandler {
                     return;
                 }
 
+                PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
+
                 if (field.isMarked()) {
-                    if (location.getBlockY() - game.getFieldHeight() == 1)
+                    if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.BREAK_FLAG).orElse(false)) {
+                        field.setMark(MarkType.NONE);
+                        board.draw();
+                    } else if (location.getBlockY() - game.getFieldHeight() == 1) {
                         PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(field.getMark()));
+                    }
 
                     return;
                 }
 
-                PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
 
                 long l = System.currentTimeMillis();
 
@@ -94,11 +96,12 @@ public class ClickHandler {
      * @param field       The field this happened on.
      * @param cancellable A cancellable which is most likely an event.
      */
-    public void rightClick(@NotNull Player player, @NotNull Board board, @Nullable Field field, @NotNull Cancellable cancellable) {
+    public void rightClick(@NotNull Player player, @NotNull Board board, @Nullable Field field, @Nullable Cancellable cancellable) {
         if (field == null)
             return;
 
-        cancellable.setCancelled(true);
+        if (cancellable != null)
+            cancellable.setCancelled(true);
         player.getInventory().setContents(Inventories.GAME_INVENTORY);
 
         if (board.isFinished())

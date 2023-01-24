@@ -31,7 +31,7 @@ public enum Inventories {
     CHOOSE_GAME,
     VIEW_GAMES;
 
-    public static final ItemStack[] GAME_INVENTORY = new ItemStack[27];
+    public static final ItemStack[] GAME_INVENTORY = new ItemStack[41];
     public static final ItemStack[] VIEWER_INVENTORY = new ItemStack[27];
     private static final Map<Inventories, Supplier<Inventory>> INVENTORIES = new HashMap<>();
     private static final Map<Inventories, String> INVENTORY_NAME_MAP = new HashMap<>();
@@ -79,6 +79,7 @@ public enum Inventories {
 
         GAME_INVENTORY[2] = reload;
         GAME_INVENTORY[6] = barrier;
+        GAME_INVENTORY[40] = new ItemStack(Material.SLIME_BALL);
     }
 
     private static void loadViewerInventory(@NotNull Language language) {

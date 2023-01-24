@@ -109,7 +109,6 @@ public class PacketUtil {
                 .write(1, location.getY())
                 .write(2, location.getZ());
 
-
         return packet;
     }
 
@@ -117,9 +116,7 @@ public class PacketUtil {
         WrappedDataWatcher dataWatcher = getDefaultWrappedDataWatcherForArmorStands();
 
         PacketContainer metadataPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
-
         metadataPacket.getIntegers().write(0, entityId);
-
         metadataPacket.getWatchableCollectionModifier().write(0, dataWatcher.getWatchableObjects());
 
         return metadataPacket;
@@ -128,17 +125,10 @@ public class PacketUtil {
     private static @NotNull WrappedDataWatcher getDefaultWrappedDataWatcherForArmorStands() {
         if (armorStandDataWatcher != null)
             return armorStandDataWatcher;
+
         WrappedDataWatcher wrappedDataWatcher = new WrappedDataWatcher();
 
-
         wrappedDataWatcher.setObject(0, BYTE_SERIALIZER, (byte) 0x20);
-        wrappedDataWatcher.setObject(1, INT_SERIALIZER, 300);
-        wrappedDataWatcher.setObject(7, INT_SERIALIZER, 0);
-        wrappedDataWatcher.setObject(8, BYTE_SERIALIZER, (byte) 0);
-        wrappedDataWatcher.setObject(9, INT_SERIALIZER, 20);
-        wrappedDataWatcher.setObject(10, INT_SERIALIZER, 0);
-        wrappedDataWatcher.setObject(12, INT_SERIALIZER, 0);
-        wrappedDataWatcher.setObject(13, INT_SERIALIZER, 0);
         wrappedDataWatcher.setObject(15, BYTE_SERIALIZER, (byte) 0x08);
 
         armorStandDataWatcher = wrappedDataWatcher;

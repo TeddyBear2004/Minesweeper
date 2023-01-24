@@ -73,7 +73,7 @@ public class MineStatsCommand implements TabExecutor {
             }
 
             PlayerStatistic playerStatistic = new PlayerStatistic(GameStatistic.retrieve(connectionBuilder, uuid), gameManager.getGames());
-            player.openInventory(playerStatistic.generateInventory());
+            player.openInventory(playerStatistic.generateInventory(language));
         } else {
             if (args.length < 2) {
                 sender.sendMessage(ChatColor.DARK_RED + language.getString("error_specify_map"));

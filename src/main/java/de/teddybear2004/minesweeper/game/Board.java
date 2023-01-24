@@ -252,9 +252,9 @@ public class Board implements Comparable<Board> {
             objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
             Team difficulty = scoreboard.registerNewTeam("difficulty");
-            difficulty.addEntry(ChatColor.GREEN + getGame().getDifficulty());
+            difficulty.addEntry(ChatColor.GREEN + language.getString(getGame().getDifficulty()));
             difficulty.setPrefix(ChatColor.GRAY + "Difficulty:     ");
-            objective.getScore(ChatColor.GREEN + getGame().getDifficulty()).setScore(15);
+            objective.getScore(ChatColor.GREEN + language.getString(getGame().getDifficulty())).setScore(15);
 
             Team size = scoreboard.registerNewTeam("size");
             size.addEntry(ChatColor.GREEN + " " + width + "x" + height);
@@ -519,7 +519,14 @@ public class Board implements Comparable<Board> {
             }
             if (board.isGenerated)
                 board.updateScoreBoard();
+
+            board.getViewers().forEach(player1 -> {
+                if (player1.equals(board.player))
+                    PacketUtil.sendActionBar(board.player, ChatColor.GRAY + "Du beobachtet: " + ChatColor.GREEN + board.player.getName());
+            });
+
             PacketUtil.sendActionBar(board.player, board.getActualTimeNeededString());
+
         }
 
     }

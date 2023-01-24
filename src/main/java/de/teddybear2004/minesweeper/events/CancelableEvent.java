@@ -9,6 +9,7 @@ public enum CancelableEvent {
     BLOCK_BREAK("cancelBlockBreak", true),
     INVENTORY_INTERACT("cancelInventoryInteract", true),
     DROP_ITEM("cancelDropItem", true),
+    SWAP_ITEMS("swapItems", true),
     PICKUP_ITEM("cancelPickupItem", true);
 
     private final String key;

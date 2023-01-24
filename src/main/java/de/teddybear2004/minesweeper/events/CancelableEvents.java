@@ -19,6 +19,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -122,6 +123,16 @@ public class CancelableEvents implements Listener {
     }
 
     @EventHandler
+    public void onPlayerSwapHandItems(@NotNull PlayerSwapHandItemsEvent event) {
+        if (cancelableEventBooleanMap.get(CancelableEvent.SWAP_ITEMS)
+                || isInsideAreaAndShouldBeCanceled(event.getPlayer().getLocation(), CancelableEvent.SWAP_ITEMS)) {
+            if (shouldCancel(event.getPlayer()))
+                event.setCancelled(true);
+        }
+
+    }
+
+    @EventHandler
     public void onPlayerDropItemEvent(@NotNull PlayerDropItemEvent event) {
         if (cancelableEventBooleanMap.get(CancelableEvent.DROP_ITEM)
                 || isInsideAreaAndShouldBeCanceled(event.getPlayer().getLocation(), CancelableEvent.DROP_ITEM)) {
@@ -155,4 +166,5 @@ public class CancelableEvents implements Listener {
     public void onInventoryClick(@NotNull InventoryClickEvent event) {
         event.setCancelled(true);
     }
+
 }

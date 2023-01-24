@@ -112,6 +112,12 @@ public class PersonalModifier {
                 CustomPersistentDataType.PERSISTENT_BOOLEAN,
                 "use_multi_flag",
                 commandObject1 -> handleBooleanInput(commandObject1, false),
+                ModifierType::handleTabBoolean),
+        BREAK_FLAG(
+                new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "break_flags"),
+                CustomPersistentDataType.PERSISTENT_BOOLEAN,
+                "break_flags",
+                commandObject1 -> handleBooleanInput(commandObject1, false),
                 ModifierType::handleTabBoolean);
 
         private static List<String> langReferences;

@@ -51,7 +51,7 @@ public class Game {
         ItemMeta itemMeta = itemStack.getItemMeta();
 
         if (itemMeta != null) {
-            itemMeta.setDisplayName(difficulty);
+            itemMeta.setDisplayName(language.getString(difficulty));
             itemMeta.setLore(Collections.singletonList(language.getString("field_desc", String.valueOf(width), String.valueOf(height), String.valueOf(bombCount))));
         }
 

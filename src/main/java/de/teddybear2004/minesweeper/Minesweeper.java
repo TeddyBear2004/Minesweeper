@@ -7,10 +7,7 @@ import de.teddy.minesweeper.game.painter.ArmorStandPainter;
 import de.teddy.minesweeper.game.painter.BlockPainter;
 import de.teddy.minesweeper.game.painter.Painter;
 import de.teddybear2004.minesweeper.commands.*;
-import de.teddybear2004.minesweeper.events.CancelableEvents;
-import de.teddybear2004.minesweeper.events.GenericEvents;
-import de.teddybear2004.minesweeper.events.GenericRightClickEvent;
-import de.teddybear2004.minesweeper.events.InventoryClickEvents;
+import de.teddybear2004.minesweeper.events.*;
 import de.teddybear2004.minesweeper.events.packets.LeftClickEvent;
 import de.teddybear2004.minesweeper.events.packets.RightClickEvent;
 import de.teddybear2004.minesweeper.game.CustomGame;
@@ -143,6 +140,7 @@ public final class Minesweeper extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new GenericEvents(resourcePackHandler, customGame, gameManager), this);
         getServer().getPluginManager().registerEvents(new GenericRightClickEvent(gameManager), this);
         getServer().getPluginManager().registerEvents(new InventoryClickEvents(gameManager), this);
+        getServer().getPluginManager().registerEvents(new GenericLongClickEvent(gameManager, clickHandler), this);
 
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         protocolManager.addPacketListener(new RightClickEvent(this, gameManager));
@@ -297,7 +295,7 @@ public final class Minesweeper extends JavaPlugin {
                                  borderSize,
                                  borderSize,
                                  bombCount,
-                                 language.getString(difficultyLangPath),
+                                 difficultyLangPath,
                                  material,
                                  inventoryPosition);
             games.add(game);
