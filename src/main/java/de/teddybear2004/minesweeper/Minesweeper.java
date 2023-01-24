@@ -152,7 +152,7 @@ public final class Minesweeper extends JavaPlugin {
                 games.get(0).startViewing(player, null);
         });
 
-        tasks.add(new HidePlayerScheduler(this).runTaskTimer(this, 20, 5));
+        tasks.add(new HidePlayerScheduler(this, gameManager).runTaskTimer(this, 20, 5));
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new StatsExpansion(connectionBuilder).register();

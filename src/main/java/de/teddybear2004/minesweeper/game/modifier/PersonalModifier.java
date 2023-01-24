@@ -118,6 +118,12 @@ public class PersonalModifier {
                 CustomPersistentDataType.PERSISTENT_BOOLEAN,
                 "break_flags",
                 commandObject1 -> handleBooleanInput(commandObject1, false),
+                ModifierType::handleTabBoolean),
+        JUST_HIDE_WHILE_IN_GAME(
+                new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "hide_while_in_game"),
+                CustomPersistentDataType.PERSISTENT_BOOLEAN,
+                "hide_while_in_game",
+                commandObject1 -> handleBooleanInput(commandObject1, false),
                 ModifierType::handleTabBoolean);
 
         private static List<String> langReferences;
