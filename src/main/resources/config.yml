@@ -8,7 +8,7 @@ resource_pack:
     name: pack.zip
   external_web_server:
     enable: true
-    link: https://cdn.discordapp.com/attachments/755817146986004551/1058350165888614430/assets.zip
+    link: https://cdn.discordapp.com/attachments/755817146986004551/1067181025672830986/assets.zip
 
 allow_fly: true
 allow_default_watch: true
@@ -44,6 +44,8 @@ location_based:
       cancelInventoryInteract: true
       cancelDropItem: true
       cancelPickupItem: true
+      swapItems: true
+
   areas:
     - x1: 80
       y1: 10
@@ -96,7 +98,7 @@ games:
       world: MineSweeper
     border_size: 10
     bomb_count: 10
-    difficulty_lang_path: difficulty_easy
+    difficulty_lang_path: easy
     inventory_material: LIME_STAINED_GLASS_PANE
     inventory_position: 2
 
@@ -116,7 +118,7 @@ games:
       world: MineSweeper
     border_size: 18
     bomb_count: 40
-    difficulty_lang_path: difficulty_normal
+    difficulty_lang_path: normal
     inventory_material: YELLOW_STAINED_GLASS_PANE
     inventory_position: 4
 
@@ -135,6 +137,6 @@ games:
       world: MineSweeper
     border_size: 24
     bomb_count: 99
-    difficulty_lang_path: difficulty_hard
+    difficulty_lang_path: hard
     inventory_material: RED_STAINED_GLASS_PANE
     inventory_position: 6

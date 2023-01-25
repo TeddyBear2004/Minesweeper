@@ -1,6 +1,6 @@
 leave = "Verlassen"
-restart_pl = "Neustarten"
-watch_others = "Andere Spieler beobachten"
+restart_pl = "Neustart"
+watch_others = "Beobachte andere Spieler"
 minesweeper = "Minesweeper"
 
 book_page_1 = """
@@ -8,11 +8,11 @@ book_page_1 = """
 
 §rDas Ziel ist es, alle Felder zu enthüllen. Dabei darfst du keine Bombe aktivieren.
 
-Die Zahlen zeigen dir, wie viele Bomben in einem 3x3 Feld liegen."""
+Die Zahlen zeigen dir, wie viele Bomben sich in einem 3x3 Bereich befinden."""
 book_page_2 = """
-§2§nBenutze:§r
+§2§nVerwendung:§r
 
-§9§oLinksklick§r, um ein Feld zu enthüllen.
+§9§oLinksklick§r um ein Feld aufzudecken.
 
 §r§9§oRechtsklick§r, um eine Flagge zu platzieren.
 §8->Damit markierst du
@@ -24,28 +24,86 @@ book_page_2 = """
 book_page_3 = """
 §9§oDoppel Linksklick§r, um
 alle umliegenden Felder aufzudecken.
-§8->Nur möglich, wenn im
-   Umfeld schon
-   die benötigten
-   Bomben markiert
-   wurden."""
-book_tutorial = "Tutorial"
-book_title = "Minesweeper - Tutorial"
+§8-> Nur möglich, wenn in
+den umliegenden
+Feldern alle Bomben
+markiert sind."""
+book_tutorial = "Anleitung"
+book_title = "Minesweeper - Anleitung"
 hour_glass_display_name = "Starte ein Spiel"
-
-difficulty_easy = "Einfach"
-difficulty_normal = "Mittel"
-difficulty_hard = "Schwer"
-
+easy = "§2Easy"
+normal = "§eMedium"
+hard = "§cHard"
 field_desc = "Größe: {0}x{1} | Bomben: {2}"
-
-resource_pack_error = "Beim Herunterterladen des Texturenpacks ist ein Fehler aufgetreten, bitte betrete den Server neu."
-resource_pack_not_enabled = "Um dieses Minispiel zu spielen, ist das Herunterladen des Servertexturenpacks erforderlich. Bitte erlaube dies in den Optionen des Spiels und betrete den Server neu."
-
+resource_pack_error = "Ein Fehler ist beim Herunterladen des Texturpakets aufgetreten, bitte den Server erneut betreten."
+resource_pack_not_enabled = "Das Herunterladen des Server-Texturpakets ist erforderlich, um dieses Minispiel zu spielen. Bitte erlaube dies in den Spieloptionen und betrete den Server erneut."
 message_win = "Du hast das Spiel gewonnen!"
 message_time_needed = "Benötigte Zeit: {0}"
 
 title_win = "Du hast gewonnen!"
 
-error_already_generated = "Das Spielfeld wurde bereits generiert."
-error_bomb_exploded = "Bomb at {0} and {1} is exploded."
+player = "player"
+game = "game"
+custom = "benutzerdefiniert"
+default = "Standard"
+default_setting = "Standardeinstellung"
+true_ = "true"
+false_ = "false"
+enabled = "aktiviert"
+disabled = "deaktiviert"
+
+use_multi_flag = "use_multi_flag"
+reveal_on_double_click = "reveal_on_double_click"
+hide_player_distance = "hide_player_distance"
+hide_player = "hide_player"
+quick_reveal = "quick_reveal"
+enable_flag = "enable_flag"
+enable_question_mark = "enable_question_mark"
+board_style = "board_style"
+quick_reveal_duration = "quick_reveal_duration"
+custom_resource_pack_url = "custom_resource_pack_url"
+
+send_current_setting_number = "Deine aktuelle {0} ist {1}."
+send_current_setting_boolean = "Derzeit ist {0} {1}."
+send_was_applied = "Die angegebene {0} wurde angewendet."
+send_change_enable = "{0} wurde aktiviert."
+send_change_disable = "{0} wurde deaktiviert."
+send_current_board_style = "Dein aktueller Board-Stil ist: {0}."
+send_board_style_applied = "Der angegebene Board-Stil wurde angewendet."
+send_unknown_error = "Ein unbekannter Fehler ist aufgetreten."
+send_current_resource_pack_url = "Deine aktuelle URL des Texturpakets lautet: {0}"
+send_start_with_http = "Stell bitte sicher, dass die URL mit 'http://' oder 'https://' beginnt."
+send_resource_pack_applied = "Die angegebene URL des Texturpakets wurde angewendet."
+
+send_invite_player = "Du wurdest von {0} zu einem Duell eingeladen. Gebe /mineduel accept {0} ein um diesem beizutreten."
+broadcast_invite = "{0} wurde eingeladen."
+broadcast_accept = "{0} ist dem Duell beigetreten."
+send_leave = "Du hast das Duell von {0} verlassen."
+broadcast_leave = "{0} hat das Duell verlassen."
+send_kick = "Du wurdest aus dem Duell von {0} gekickt."
+broadcast_kick = "{0} hat das Duell verlassen."
+broadcast_game = "Das Duell findet nun auf der Map {0} statt."
+broadcast_start = "Das Duell hat gestartet. Viel Glück!"
+
+duel_invite = "invite"
+duel_accept = "accept"
+duel_leave = "leave"
+duel_kick = "kick"
+duel_game = "game"
+duel_start = "start"
+
+minesweeper_command_custom_completion = "/{0} custom [Bombenanzahl] [BreiteXHöhe] <Seed>"
+
+error_already_generated = "Das Feld wurde bereits generiert."
+error_bomb_exploded = "Die Bombe bei {0} und {1} ist explodiert."
+error_not_determine_player_name = "Der Spielername konnte nicht bestimmt werden. Bitte versuche es später erneut."
+error_specify_map = "Bitte gib eine Karte an."
+error_custom_game_unavailable = "Benutzerdefiniertes Spiel ist derzeit nicht verfügbar."
+
+error_no_true_or_false = "Es wurde kein wahr oder falsch als Argument gefunden, deshalb wird der Befehl ignoriert."
+
+error_no_permission = "Du hast keine Berechtigung, diesen Befehl auszuführen."
+error_no_valid_number = "Bitte gib eine gültige ganze Zahl an."
+error_bomb_size_not_valid = "Die Bombenanzahl ist für die angegebene Kartengröße ungültig."
+error_bomb_size_too_big = "Die angegebene Bombenanzahl ist zu groß."
+error_bomb_size_too_small = "Die Anzahl der Bomben muss größer als Null sein."

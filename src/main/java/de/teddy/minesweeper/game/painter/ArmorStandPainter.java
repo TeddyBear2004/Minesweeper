@@ -8,13 +8,13 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedEnumEntityUseAction;
-import de.teddy.minesweeper.game.Board;
-import de.teddy.minesweeper.game.Field;
-import de.teddy.minesweeper.game.Game;
-import de.teddy.minesweeper.game.GameManager;
-import de.teddy.minesweeper.game.click.ClickHandler;
-import de.teddy.minesweeper.util.HeadGenerator;
-import de.teddy.minesweeper.util.PacketUtil;
+import de.teddybear2004.minesweeper.game.Board;
+import de.teddybear2004.minesweeper.game.Field;
+import de.teddybear2004.minesweeper.game.Game;
+import de.teddybear2004.minesweeper.game.GameManager;
+import de.teddybear2004.minesweeper.game.click.ClickHandler;
+import de.teddybear2004.minesweeper.util.HeadGenerator;
+import de.teddybear2004.minesweeper.util.PacketUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -24,6 +24,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -46,9 +48,9 @@ public class ArmorStandPainter implements Painter {
     private final Plugin plugin;
     private final ClickHandler clickHandler;
     private final GameManager gameManager;
-    private Map<Integer, ItemStack> currentItemStackPerEntityId = new HashMap<>();
-    private Map<Integer, int[]> armorStandEntityIds;
-    private Map<int[], Integer> locationEntityIds;
+    private @Nullable Map<Integer, ItemStack> currentItemStackPerEntityId = new HashMap<>();
+    private @Nullable Map<Integer, int[]> armorStandEntityIds;
+    private @Nullable Map<int[], Integer> locationEntityIds;
     private BukkitTask bombTask;
 
     public ArmorStandPainter(Plugin plugin, ClickHandler clickHandler, GameManager gameManager) {
@@ -58,12 +60,12 @@ public class ArmorStandPainter implements Painter {
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return "heads";
     }
 
     @Override
-    public void drawBlancField(Board board, List<Player> players) {
+    public void drawBlancField(@Nullable Board board, @NotNull List<Player> players) {
         if (board == null)
             return;
 
@@ -97,10 +99,10 @@ public class ArmorStandPainter implements Painter {
     }
 
     @Override
-    public void drawField(Board board, List<Player> players) {
+    public void drawField(@NotNull Board board, @NotNull List<Player> players) {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
 
-        if (this.armorStandEntityIds == null) {
+        if (this.armorStandEntityIds == null || this.locationEntityIds == null || this.currentItemStackPerEntityId == null) {
             this.armorStandEntityIds = new HashMap<>();
             this.locationEntityIds = new HashMap<>();
             this.currentItemStackPerEntityId = new HashMap<>();
@@ -186,7 +188,7 @@ public class ArmorStandPainter implements Painter {
     }
 
     @Override
-    public void drawBombs(Board board, List<Player> players) {
+    public void drawBombs(@NotNull Board board, @NotNull List<Player> players) {
         double explodeDuration = 0.5d;
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
 
@@ -200,6 +202,8 @@ public class ArmorStandPainter implements Painter {
                 bombTask.cancel();
 
             bombTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                if (this.locationEntityIds == null)
+                    return;
                 Integer integer = this.locationEntityIds.get(ints);
                 if (integer == null)
                     return;
@@ -219,38 +223,19 @@ public class ArmorStandPainter implements Painter {
         }
     }
 
-    @Override
-    public ItemStack getActualItemStack(Field field) {
-        boolean lightField = Board.isLightField(field.getX(), field.getY());
-
-        if (field.getBoard().isFinished() && field.isBomb() && (!field.isCovered() || field.getBoard().isLose()))
-            return new ItemStack(Material.COAL_BLOCK);
-
-        if (field.isCovered())
-            return new ItemStack(lightField ? LIGHT_DEFAULT : DARK_DEFAULT);
-
-        return ITEM_STACKS[field.getNeighborCount()];
-    }
-
-    @Override
-    public Material getActualMaterial(Field field) {
-        return getActualItemStack(field).getType();
-    }
-
-    @Override
-    public List<PacketType> getRightClickPacketType() {
+    public @NotNull List<PacketType> getRightClickPacketType() {
         return List.of(PacketType.Play.Client.USE_ENTITY, PacketType.Play.Client.USE_ITEM);
     }
 
     @Override
-    public List<PacketType> getLeftClickPacketType() {
+    public @NotNull List<PacketType> getLeftClickPacketType() {
         return List.of(PacketType.Play.Client.USE_ENTITY, PacketType.Play.Client.BLOCK_DIG);
     }
 
     @Override
-    public void onRightClick(Player player, PacketEvent event, Game game, PacketContainer packet) {
+    public void onRightClick(@NotNull Player player, @NotNull PacketEvent event, Game game, @NotNull PacketContainer packet) {
         if (packet.getType() == PacketType.Play.Client.USE_ITEM) {
-            Painter.PAINTER_MAP.get(BlockPainter.class).onRightClick(player, event, game, packet);
+            PAINTER_MAP.get(BlockPainter.class).onRightClick(player, event, game, packet);
             return;
         }
 
@@ -275,9 +260,9 @@ public class ArmorStandPainter implements Painter {
     }
 
     @Override
-    public void onLeftClick(Player player, PacketEvent event, Game game, PacketContainer packet) {
+    public void onLeftClick(Player player, @NotNull PacketEvent event, @NotNull Game game, @NotNull PacketContainer packet) {
         if (packet.getType() == PacketType.Play.Client.BLOCK_DIG) {
-            Painter.PAINTER_MAP.get(BlockPainter.class).onLeftClick(player, event, game, packet);
+            PAINTER_MAP.get(BlockPainter.class).onLeftClick(player, event, game, packet);
             return;
         }
 
@@ -311,10 +296,24 @@ public class ArmorStandPainter implements Painter {
 
     }
 
-    public Location getLocation(Board board, int entityId) {
+    public @Nullable Location getLocation(@NotNull Board board, int entityId) {
+        if (this.armorStandEntityIds == null)
+            return null;
         int[] ints = this.armorStandEntityIds.get(entityId);
         if (ints == null) return null;
         return board.getCorner().clone().add(ints[0], 0, ints[1]);
+    }
+
+    public ItemStack getActualItemStack(@NotNull Field field) {
+        boolean lightField = Board.isLightField(field.getX(), field.getY());
+
+        if (field.getBoard().isFinished() && field.isBomb() && (!field.isCovered() || field.getBoard().isLose()))
+            return new ItemStack(Material.COAL_BLOCK);
+
+        if (field.isCovered())
+            return new ItemStack(lightField ? LIGHT_DEFAULT : DARK_DEFAULT);
+
+        return ITEM_STACKS[field.getNeighborCount()];
     }
 
 }
