@@ -23,41 +23,45 @@ public class GenericRightClickEvent implements Listener {
 
     @EventHandler
     public void onPlayerInteractEvent(PlayerInteractEvent event) {
-        if (Objects.equals(event.getHand(), EquipmentSlot.OFF_HAND) || event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK || event.getItem() == null)
+        if (Objects.equals(event.getHand(), EquipmentSlot.OFF_HAND) || event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK)
             return;
         ItemStack itemStack = event.getItem();
 
         Game game = gameManager.getGame(event.getPlayer());
 
-        if (game != null) {
-            if (itemStack.equals(Inventories.reload)) {
-                Board board = gameManager.getBoard(event.getPlayer());
-                if (board.isGenerated()) {
+        if (itemStack != null) {
+            if (game != null) {
+                if (itemStack.equals(Inventories.reload)) {
+                    Board board = gameManager.getBoard(event.getPlayer());
+                    if (board.isGenerated()) {
+                        gameManager.finishGame(event.getPlayer(), false);
+                        game.getStarter()
+                                .setBombCount(board.getBombCount())
+                                .setShouldTeleport(false)
+                                .setWidth(board.getWidth())
+                                .setHeight(board.getHeight())
+                                .build(event.getPlayer());
+                        event.setCancelled(true);
+                    }
+                    return;
+                } else if (itemStack.equals(Inventories.barrier)) {
                     gameManager.finishGame(event.getPlayer(), false);
-                    game.getStarter()
-                            .setBombCount(board.getBombCount())
-                            .setShouldTeleport(false)
-                            .setWidth(board.getWidth())
-                            .setHeight(board.getHeight())
-                            .build(event.getPlayer());
+                    event.getPlayer().getInventory().setContents(Inventories.VIEWER_INVENTORY);
                     event.setCancelled(true);
+                    return;
                 }
-                return;
-            } else if (itemStack.equals(Inventories.barrier)) {
-                gameManager.finishGame(event.getPlayer(), false);
-                event.getPlayer().getInventory().setContents(Inventories.VIEWER_INVENTORY);
+            }
+
+            if (itemStack.equals(Inventories.compass)) {
+                event.getPlayer().openInventory(Inventories.VIEW_GAMES.getInventory());
                 event.setCancelled(true);
-                return;
+            } else if (itemStack.equals(Inventories.hourGlass)) {
+                event.getPlayer().openInventory(Inventories.CHOOSE_GAME.getInventory());
+                event.setCancelled(true);
             }
         }
 
-        if (itemStack.equals(Inventories.compass)) {
-            event.getPlayer().openInventory(Inventories.VIEW_GAMES.getInventory());
-            event.setCancelled(true);
-        } else if (itemStack.equals(Inventories.hourGlass)) {
-            event.getPlayer().openInventory(Inventories.CHOOSE_GAME.getInventory());
-            event.setCancelled(true);
-        }
+        event.setCancelled(true);
     }
 
 }
