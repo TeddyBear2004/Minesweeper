@@ -1,9 +1,9 @@
-package de.teddy.minesweeper.events;
+package de.teddybear2004.minesweeper.events;
 
-import de.teddy.minesweeper.game.Board;
-import de.teddy.minesweeper.game.Game;
-import de.teddy.minesweeper.game.GameManager;
-import de.teddy.minesweeper.game.inventory.Inventories;
+import de.teddybear2004.minesweeper.game.Board;
+import de.teddybear2004.minesweeper.game.Game;
+import de.teddybear2004.minesweeper.game.GameManager;
+import de.teddybear2004.minesweeper.game.inventory.Inventories;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
