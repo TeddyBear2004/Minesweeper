@@ -221,7 +221,7 @@ public class BlockPainter implements Painter {
 
         Board board = gameManager.getBoard(player);
 
-        if (board != null && board.isBlockOutsideGame(location.getBlock()))
+        if (board != null && board.isBlockOutsideGame(location))
             return;
 
         if (board == null) {
@@ -230,7 +230,7 @@ public class BlockPainter implements Painter {
             if (watching != null) {
                 Field field = watching.getField(location);
 
-                if (watching.isBlockOutsideGame(location.getBlock()))
+                if (watching.isBlockOutsideGame(location))
                     return;
 
                 if (field != null) {
@@ -261,7 +261,7 @@ public class BlockPainter implements Painter {
         Location location = blockPosition.toLocation(player.getWorld());
 
         Board board = gameManager.getBoard(player);
-        if (board != null && board.isBlockOutsideGame(location.getBlock()))
+        if (board != null && board.isBlockOutsideGame(location))
             return;
 
         if (board == null)

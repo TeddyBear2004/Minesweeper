@@ -4,6 +4,7 @@ import de.teddybear2004.minesweeper.game.Board;
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
 import de.teddybear2004.minesweeper.game.inventory.Inventories;
+import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -61,7 +62,9 @@ public class GenericRightClickEvent implements Listener {
             }
         }
 
-        event.setCancelled(true);
+        Block block = event.getClickedBlock();
+        if (block != null && !gameManager.isInside(block.getLocation()))
+            event.setCancelled(true);
     }
 
 }

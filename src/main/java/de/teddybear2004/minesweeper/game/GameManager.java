@@ -1,6 +1,7 @@
 package de.teddybear2004.minesweeper.game;
 
 import de.teddybear2004.minesweeper.game.modifier.Modifier;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,8 +39,8 @@ public class GameManager {
         }
     }
 
-    public void finishGame(Player p) {
-        finishGame(p, true);
+    public @NotNull Map<Player, Game> getPlayerLocation() {
+        return playerLocation;
     }
 
     public void switchToMap(@NotNull Player p, @NotNull Game g) {
@@ -64,16 +65,16 @@ public class GameManager {
         return runningGames;
     }
 
+    public void finishGame(Player p) {
+        finishGame(p, true);
+    }
+
     public void finishGame(Player p, boolean saveStats) {
         getGame(p).finish(p, saveStats);
     }
 
     public Game getGame(Player player) {
         return getPlayerLocation().get(player);
-    }
-
-    public @NotNull Map<Player, Game> getPlayerLocation() {
-        return playerLocation;
     }
 
     public void stopGames(Player p, boolean saveStats) {
@@ -99,6 +100,14 @@ public class GameManager {
 
     public List<Game> getGames() {
         return games;
+    }
+
+    public boolean isInside(Location location) {
+        for (Game game : this.games)
+            if (!game.isOutside(location))
+                return true;
+
+        return false;
     }
 
 }

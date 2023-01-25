@@ -8,7 +8,6 @@ import de.teddybear2004.minesweeper.util.Language;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -58,9 +57,9 @@ public class Game {
         itemStack.setItemMeta(itemMeta);
     }
 
-    public boolean isBlockOutsideGame(@NotNull Block block) {
-        return IsBetween.isOutside2D(corner, width, height, block)
-                || IsBetween.isOutside(corner.getBlockY(), corner.getBlockY() + 1, block.getY());
+    public boolean isOutside(@NotNull Location location) {
+        return IsBetween.isOutside2D(corner, width, height, location)
+                || IsBetween.isOutside(corner.getBlockY(), corner.getBlockY() + 1, location.getY());
     }
 
     public int getFieldHeight() {

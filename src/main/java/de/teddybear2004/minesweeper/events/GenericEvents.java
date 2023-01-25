@@ -163,7 +163,7 @@ public class GenericEvents implements Listener {
             return;
 
         for (Game game : gameManager.getGames()) {
-            if (game.equals(customGame) || game.isBlockOutsideGame(block)) continue;
+            if (game.equals(customGame) || game.isOutside(block.getLocation())) continue;
 
             game.getStarter()
                     .setShouldTeleport(false)

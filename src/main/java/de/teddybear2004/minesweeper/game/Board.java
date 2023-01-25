@@ -7,7 +7,6 @@ import de.teddybear2004.minesweeper.game.exceptions.BombExplodeException;
 import de.teddybear2004.minesweeper.game.statistic.GameStatistic;
 import de.teddybear2004.minesweeper.util.*;
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -460,9 +459,9 @@ public class Board implements Comparable<Board> {
             flagCounter.setSuffix(ChatColor.GREEN + getFlagCounterString());
     }
 
-    public boolean isBlockOutsideGame(@NotNull Block block) {
-        return IsBetween.isOutside2D(corner, width, height, block)
-                || IsBetween.isOutside(corner.getBlockY(), corner.getBlockY() + 1, block.getY());
+    public boolean isBlockOutsideGame(@NotNull Location location) {
+        return IsBetween.isOutside2D(corner, width, height, location)
+                || IsBetween.isOutside(corner.getBlockY(), corner.getBlockY() + 1, location.getY());
     }
 
     public void removeScoreBoard(@NotNull Player player) {

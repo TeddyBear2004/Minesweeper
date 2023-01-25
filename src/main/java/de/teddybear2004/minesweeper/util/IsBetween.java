@@ -1,18 +1,17 @@
 package de.teddybear2004.minesweeper.util;
 
 import org.bukkit.Location;
-import org.bukkit.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 public class IsBetween {
 
-    public static boolean isOutside2D(@NotNull Location corner, int width, int height, @NotNull Block clickedBlock) {
+    public static boolean isOutside2D(@NotNull Location corner, int width, int height, @NotNull Location location) {
         int minX = Math.min(corner.getBlockX(), corner.getBlockX() + width);
         int maxX = Math.max(corner.getBlockX(), corner.getBlockX() + width);
         int minZ = Math.min(corner.getBlockZ(), corner.getBlockZ() + height);
         int maxZ = Math.max(corner.getBlockZ(), corner.getBlockZ() + height);
 
-        return minX > clickedBlock.getX() || clickedBlock.getX() > maxX || minZ > clickedBlock.getZ() || clickedBlock.getZ() > maxZ;
+        return minX > location.getX() || location.getX() > maxX || minZ > location.getZ() || location.getZ() > maxZ;
     }
 
     public static boolean isOutside(double x1, double x2, double clicked) {
