@@ -3,7 +3,6 @@ package de.teddybear2004.minesweeper.game.texture.pack;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import de.teddybear2004.minesweeper.game.modifier.PersonalModifier;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,13 +43,11 @@ public class InternalWebServerHandler implements ResourcePackHandler {
 
     @Override
     public void apply(@NotNull Player player) {
-        player.setResourcePack(getUrl(player));
+        player.setResourcePack(getUrl());
     }
 
-    public @NotNull String getUrl(@NotNull Player player) {
-        PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
-
-        return personalModifier.<String>get(PersonalModifier.ModifierType.RESOURCE_PACK_URL).orElse("http://" + this.host + ":" + this.port + "/");
+    public @NotNull String getUrl() {
+        return "http://" + this.host + ":" + this.port + "/";
     }
 
 

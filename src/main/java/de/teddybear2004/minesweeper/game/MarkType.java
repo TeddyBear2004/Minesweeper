@@ -31,7 +31,7 @@ public enum MarkType {
 
         if (player != null) {
             PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
-            if (!personalModifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_QUESTION_MARK).orElse(false) && nextId == QUESTION_MARK.ordinal()) {
+            if (!personalModifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_QUESTION_MARK) && nextId == QUESTION_MARK.ordinal()) {
                 nextId = NONE.ordinal();
             }
         }

@@ -2,7 +2,8 @@ package de.teddybear2004.minesweeper.commands;
 
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
-import de.teddybear2004.minesweeper.game.inventory.Inventories;
+import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
+import de.teddybear2004.minesweeper.game.inventory.content.ViewGamesGenerator;
 import de.teddybear2004.minesweeper.util.Language;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -14,7 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public record MinesweeperCommand(GameManager manager, Game customGame, Language language) implements TabExecutor {
+public record MinesweeperCommand(GameManager manager, Game customGame, Language language,
+                                 InventoryManager inventoryManager) implements TabExecutor {
 
     /**
      * @param sender  Source of the command
@@ -28,7 +30,7 @@ public record MinesweeperCommand(GameManager manager, Game customGame, Language 
             return true;
 
         if (args.length == 0) {
-            player.openInventory(Inventories.CHOOSE_GAME.getInventory());
+            player.openInventory(inventoryManager.getInventory(ViewGamesGenerator.class, player));
             return true;
         }
 

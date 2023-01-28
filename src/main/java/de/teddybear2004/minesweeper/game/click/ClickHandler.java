@@ -4,7 +4,7 @@ import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
 import de.teddybear2004.minesweeper.game.*;
 import de.teddybear2004.minesweeper.game.exceptions.BombExplodeException;
-import de.teddybear2004.minesweeper.game.inventory.Inventories;
+import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
 import de.teddybear2004.minesweeper.game.modifier.PersonalModifier;
 import de.teddybear2004.minesweeper.util.PacketUtil;
 import org.bukkit.Location;
@@ -53,7 +53,7 @@ public class ClickHandler {
                 PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
 
                 if (field.isMarked()) {
-                    if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.BREAK_FLAG).orElse(false)) {
+                    if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.BREAK_FLAG)) {
                         field.setMark(MarkType.NONE);
                         board.draw();
                     } else if (location.getBlockY() - game.getFieldHeight() == 1) {
@@ -68,15 +68,15 @@ public class ClickHandler {
 
                 if (field.isCovered()) {
                     board.checkField(location.getBlockX(), location.getBlockZ());
-                } else if (l - lastLeftClick.getOrDefault(player, (long) -1000) <= personalModifier.<Integer>get(PersonalModifier.ModifierType.DOUBLE_CLICK_DURATION).orElse(350)) {
-                    if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.REVEAL_ON_DOUBLE_CLICK).orElse(true)) {
+                } else if (l - lastLeftClick.getOrDefault(player, (long) -1000) <= personalModifier.<Integer>get(PersonalModifier.ModifierType.DOUBLE_CLICK_DURATION)) {
+                    if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.REVEAL_ON_DOUBLE_CLICK)) {
                         board.checkNumber(location.getBlockX(), location.getBlockZ());
                     } else {
                         board.highlightBlocksAround(field);
                     }
                 }
 
-                if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_DOUBLE_CLICK).orElse(false))
+                if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_DOUBLE_CLICK))
                     lastLeftClick.put(player, l);
             }catch(BombExplodeException e){
                 board.lose();
@@ -102,7 +102,8 @@ public class ClickHandler {
 
         if (cancellable != null)
             cancellable.setCancelled(true);
-        player.getInventory().setContents(Inventories.GAME_INVENTORY);
+
+        InventoryManager.PlayerInventory.GAME.apply(player);
 
         if (board.isFinished())
             return;
@@ -113,15 +114,15 @@ public class ClickHandler {
 
         if (field.isCovered())
             field.reverseMark();
-        else if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.USE_MULTI_FLAG).orElse(false)) {
+        else if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.USE_MULTI_FLAG)) {
             if (l - lastLastRightClick.getOrDefault(player, (long) -1000) <= 700)
                 SurfaceDiscoverer.flagFieldsNextToNumber(board, field.getX(), field.getY(), false);
-            else if (l - lastRightClick.getOrDefault(player, (long) -1000) <= personalModifier.<Integer>get(PersonalModifier.ModifierType.DOUBLE_CLICK_DURATION).orElse(350))
+            else if (l - lastRightClick.getOrDefault(player, (long) -1000) <= personalModifier.<Integer>get(PersonalModifier.ModifierType.DOUBLE_CLICK_DURATION))
                 SurfaceDiscoverer.flagFieldsNextToNumber(board, field.getX(), field.getY(), true);
 
         }
 
-        if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_DOUBLE_CLICK).orElse(false)) {
+        if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_DOUBLE_CLICK)) {
             lastLastRightClick.put(player, lastRightClick.getOrDefault(player, (long) -1000));
             lastRightClick.put(player, l);
         }

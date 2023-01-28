@@ -6,7 +6,7 @@ import de.teddy.minesweeper.game.painter.Painter;
 import de.teddybear2004.minesweeper.game.Board;
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
-import de.teddybear2004.minesweeper.game.inventory.Inventories;
+import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
 import de.teddybear2004.minesweeper.game.modifier.Modifier;
 import de.teddybear2004.minesweeper.game.modifier.PersonalModifier;
 import de.teddybear2004.minesweeper.game.texture.pack.ResourcePackHandler;
@@ -22,8 +22,6 @@ import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Optional;
 
 public class GenericEvents implements Listener {
 
@@ -53,35 +51,35 @@ public class GenericEvents implements Listener {
 
     @EventHandler
     public void onPlayerJoinEvent(@NotNull PlayerJoinEvent event) {
-        event.getPlayer().getInventory().setContents(Inventories.VIEWER_INVENTORY);
+        Player player = event.getPlayer();
+        InventoryManager.PlayerInventory.VIEWER.apply(player);
 
         if (Modifier.getInstance().allowFly()
                 || !Modifier.getInstance().isTemporaryFlightEnabled()
-                || Modifier.getInstance().isInside(event.getPlayer().getLocation()))
-            event.getPlayer().setAllowFlight(true);
+                || Modifier.getInstance().isInside(player.getLocation()))
+            player.setAllowFlight(true);
 
-        event.getPlayer().setCollidable(false);
+        player.setCollidable(false);
         if (noCollision != null) {
-            noCollision.addEntry(event.getPlayer().getName());
+            noCollision.addEntry(player.getName());
         }
 
-        PersonalModifier modifier = PersonalModifier.getPersonalModifier(event.getPlayer());
+        PersonalModifier modifier = PersonalModifier.getPersonalModifier(player);
 
-        Optional<String> o = modifier.get(PersonalModifier.ModifierType.PAINTER_CLASS);
-        if (o.isPresent()) {
-            try{
-                Class<? extends Painter> aClass = Class.forName(o.get()).asSubclass(Painter.class);
+        String s = modifier.get(PersonalModifier.ModifierType.PAINTER_CLASS);
+        try{
+            Class<? extends Painter> aClass = Class.forName(s).asSubclass(Painter.class);
 
-                if (aClass != BlockPainter.class) {
-                    Painter.storePainterClass(event.getPlayer().getPersistentDataContainer(), aClass);
-                    handleWatching(event.getPlayer());
-                    return;
-                }
-            }catch(ClassNotFoundException | ClassCastException ignored){
+            if (aClass != BlockPainter.class) {
+                Painter.storePainterClass(player.getPersistentDataContainer(), aClass);
+                handleWatching(player);
+                return;
             }
+        }catch(ClassNotFoundException | ClassCastException ignored){
         }
-        handleWatching(event.getPlayer());
-        resourcePackHandler.apply(event.getPlayer());
+
+        handleWatching(player);
+        resourcePackHandler.apply(player);
     }
 
     private void handleWatching(@NotNull Player player) {
@@ -117,15 +115,12 @@ public class GenericEvents implements Listener {
     @EventHandler
     public void onResourcePack(@NotNull PlayerResourcePackStatusEvent event) {
         Player player = event.getPlayer();
-        PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
 
-        if (personalModifier.get(PersonalModifier.ModifierType.PAINTER_CLASS).isEmpty()) {
-            switch(event.getStatus()){
-                case DECLINED, FAILED_DOWNLOAD ->
-                        Painter.storePainterClass(player.getPersistentDataContainer(), ArmorStandPainter.class);
-                case SUCCESSFULLY_LOADED ->
-                        Painter.storePainterClass(player.getPersistentDataContainer(), BlockPainter.class);
-            }
+        switch(event.getStatus()){
+            case DECLINED, FAILED_DOWNLOAD ->
+                    Painter.storePainterClass(player.getPersistentDataContainer(), ArmorStandPainter.class);
+            case SUCCESSFULLY_LOADED ->
+                    Painter.storePainterClass(player.getPersistentDataContainer(), BlockPainter.class);
         }
     }
 
@@ -171,4 +166,5 @@ public class GenericEvents implements Listener {
             break;
         }
     }
+
 }

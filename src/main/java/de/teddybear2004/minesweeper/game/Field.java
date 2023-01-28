@@ -45,7 +45,7 @@ public class Field {
 
     public void reverseMark() {
         PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(board.getPlayer());
-        if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_MARKS).orElse(true))
+        if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_MARKS))
             this.markType = this.markType.next(board.getPlayer());
         else
             this.markType = MarkType.NONE;

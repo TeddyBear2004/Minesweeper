@@ -3,8 +3,11 @@ package de.teddybear2004.minesweeper.events;
 import de.teddybear2004.minesweeper.game.Board;
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
-import de.teddybear2004.minesweeper.game.inventory.Inventories;
+import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
+import de.teddybear2004.minesweeper.game.inventory.content.ChooseGameGenerator;
+import de.teddybear2004.minesweeper.game.inventory.content.ViewGamesGenerator;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -17,47 +20,52 @@ import java.util.Objects;
 public class GenericRightClickEvent implements Listener {
 
     private final GameManager gameManager;
+    private final InventoryManager manager;
 
-    public GenericRightClickEvent(GameManager gameManager) {
+    public GenericRightClickEvent(GameManager gameManager, InventoryManager manager) {
         this.gameManager = gameManager;
+        this.manager = manager;
     }
 
     @EventHandler
     public void onPlayerInteractEvent(PlayerInteractEvent event) {
         if (Objects.equals(event.getHand(), EquipmentSlot.OFF_HAND) || event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK)
             return;
+
+        Player player = event.getPlayer();
+
         ItemStack itemStack = event.getItem();
 
-        Game game = gameManager.getGame(event.getPlayer());
+        Game game = gameManager.getGame(player);
 
         if (itemStack != null) {
             if (game != null) {
-                if (itemStack.equals(Inventories.reload)) {
-                    Board board = gameManager.getBoard(event.getPlayer());
+                if (itemStack.equals(InventoryManager.PlayerInventory.Items.RELOAD.getItemStack())) {
+                    Board board = gameManager.getBoard(player);
                     if (board.isGenerated()) {
-                        gameManager.finishGame(event.getPlayer(), false);
+                        gameManager.finishGame(player, false);
                         game.getStarter()
                                 .setBombCount(board.getBombCount())
                                 .setShouldTeleport(false)
                                 .setWidth(board.getWidth())
                                 .setHeight(board.getHeight())
-                                .build(event.getPlayer());
+                                .build(player);
                         event.setCancelled(true);
                     }
                     return;
-                } else if (itemStack.equals(Inventories.barrier)) {
-                    gameManager.finishGame(event.getPlayer(), false);
-                    event.getPlayer().getInventory().setContents(Inventories.VIEWER_INVENTORY);
+                } else if (itemStack.equals(InventoryManager.PlayerInventory.Items.LEAVE.getItemStack())) {
+                    gameManager.finishGame(player, false);
+                    InventoryManager.PlayerInventory.VIEWER.apply(player);
                     event.setCancelled(true);
                     return;
                 }
             }
 
-            if (itemStack.equals(Inventories.compass)) {
-                event.getPlayer().openInventory(Inventories.VIEW_GAMES.getInventory());
+            if (itemStack.equals(InventoryManager.PlayerInventory.Items.WATCH_OTHER.getItemStack())) {
+                player.openInventory(manager.getInventory(ViewGamesGenerator.class, player));
                 event.setCancelled(true);
-            } else if (itemStack.equals(Inventories.hourGlass)) {
-                event.getPlayer().openInventory(Inventories.CHOOSE_GAME.getInventory());
+            } else if (itemStack.equals(InventoryManager.PlayerInventory.Items.START.getItemStack())) {
+                player.openInventory(manager.getInventory(ChooseGameGenerator.class, player));
                 event.setCancelled(true);
             }
         }

@@ -21,7 +21,7 @@ public class DisableResourceHandler implements ResourcePackHandler {
     public @Nullable String getUrl(@NotNull Player player) {
         PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
 
-        return personalModifier.<String>get(PersonalModifier.ModifierType.RESOURCE_PACK_URL).orElse(null);
+        return personalModifier.get(PersonalModifier.ModifierType.RESOURCE_PACK_URL);
     }
 
     @Override

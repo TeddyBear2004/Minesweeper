@@ -13,7 +13,7 @@ import de.teddybear2004.minesweeper.game.Field;
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
 import de.teddybear2004.minesweeper.game.click.ClickHandler;
-import de.teddybear2004.minesweeper.game.inventory.Inventories;
+import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
 import de.teddybear2004.minesweeper.util.PacketUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -239,7 +239,7 @@ public class BlockPainter implements Painter {
                     if (i < materials.length && i > 0)
                         PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(materials[i]));
                 }
-                player.getInventory().setContents(Inventories.VIEWER_INVENTORY);
+                InventoryManager.PlayerInventory.VIEWER.apply(player);
                 event.setCancelled(true);
             }
             return;

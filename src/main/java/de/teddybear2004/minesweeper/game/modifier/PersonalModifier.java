@@ -2,20 +2,28 @@ package de.teddybear2004.minesweeper.game.modifier;
 
 import de.teddy.minesweeper.game.painter.Painter;
 import de.teddybear2004.minesweeper.Minesweeper;
-import de.teddybear2004.minesweeper.game.Board;
-import de.teddybear2004.minesweeper.game.GameManager;
-import de.teddybear2004.minesweeper.game.texture.pack.ResourcePackHandler;
+import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
 import de.teddybear2004.minesweeper.util.CustomPersistentDataType;
+import de.teddybear2004.minesweeper.util.HeadGenerator;
 import de.teddybear2004.minesweeper.util.Language;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -47,8 +55,8 @@ public class PersonalModifier {
     }
 
     @SuppressWarnings("unchecked")
-    public <Z> @NotNull Optional<Z> get(ModifierType type) {
-        return (Optional<Z>) Optional.ofNullable(modifierTypeObjectMap.get(type));
+    public <Z> @NotNull Z get(ModifierType type) {
+        return (Z) Optional.ofNullable(modifierTypeObjectMap.get(type)).orElse(type.defaultValue);
     }
 
 
@@ -57,271 +65,171 @@ public class PersonalModifier {
                 new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "resource_pack_url"),
                 PersistentDataType.STRING,
                 "custom_resource_pack_url",
-                ModifierType::handleResourcePackLinkInput,
-                ModifierType::handleTabJustDefault),
+                ModifierType::getBoolean,
+                ModifierType::handleBooleanClick,
+                false),
         DOUBLE_CLICK_DURATION(
                 new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "double_click_duration"),
                 PersistentDataType.INTEGER,
                 "quick_reveal_duration",
-                ModifierType::handleIntegerInput,
-                ModifierType::handleTabJustDefault),
+                ModifierType::getInteger,
+                ModifierType::handleIntegerClick,
+                350),
         PAINTER_CLASS(
                 new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "painter_class"),
                 PersistentDataType.STRING,
                 "board_style",
-                ModifierType::handlePainterInput,
-                ModifierType::handleTabPainter),
+                ModifierType::getPainter,
+                ModifierType::handlePainterClick,
+                Painter.DEFAULT_PAINTER.getName()),
         ENABLE_QUESTION_MARK(
                 new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "enable_question_mark"),
                 CustomPersistentDataType.PERSISTENT_BOOLEAN,
                 "enable_question_mark",
-                commandObject1 -> handleBooleanInput(commandObject1, false),
-                ModifierType::handleTabBoolean),
+                ModifierType::getBoolean,
+                ModifierType::handleBooleanClick,
+                false),
         ENABLE_MARKS(
                 new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "enable_marks"),
                 CustomPersistentDataType.PERSISTENT_BOOLEAN,
                 "enable_flag",
-                commandObject1 -> handleBooleanInput(commandObject1, true),
-                ModifierType::handleTabBoolean),
+                ModifierType::getBoolean,
+                ModifierType::handleBooleanClick,
+                true),
         ENABLE_DOUBLE_CLICK(
                 new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "enable_double_click"),
                 CustomPersistentDataType.PERSISTENT_BOOLEAN,
                 "quick_reveal",
-                commandObject1 -> handleBooleanInput(commandObject1, false),
-                ModifierType::handleTabBoolean),
+                ModifierType::getBoolean,
+                ModifierType::handleBooleanClick,
+                false),
         HIDE_PLAYER(
                 new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "hide_player"),
                 CustomPersistentDataType.PERSISTENT_BOOLEAN,
                 "hide_player",
-                commandObject1 -> handleBooleanInput(commandObject1, false),
-                ModifierType::handleTabBoolean),
+                ModifierType::getBoolean,
+                ModifierType::handleBooleanClick,
+                false),
         HIDE_PLAYER_DISTANCE(
                 new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "hide_player_distance"),
                 PersistentDataType.DOUBLE,
                 "hide_player_distance",
-                ModifierType::handleDoubleInput,
-                ModifierType::handleTabJustDefault),
+                ModifierType::getDouble,
+                ModifierType::handleDoubleClick,
+                5.0),
         REVEAL_ON_DOUBLE_CLICK(
                 new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "reveal_on_double_click"),
                 CustomPersistentDataType.PERSISTENT_BOOLEAN,
                 "reveal_on_double_click",
-                commandObject1 -> handleBooleanInput(commandObject1, true),
-                ModifierType::handleTabBoolean),
+                ModifierType::getBoolean,
+                ModifierType::handleBooleanClick,
+                true),
         USE_MULTI_FLAG(
                 new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "use_multi_flag"),
                 CustomPersistentDataType.PERSISTENT_BOOLEAN,
                 "use_multi_flag",
-                commandObject1 -> handleBooleanInput(commandObject1, false),
-                ModifierType::handleTabBoolean),
+                ModifierType::getBoolean,
+                ModifierType::handleBooleanClick,
+                false),
         BREAK_FLAG(
                 new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "break_flags"),
                 CustomPersistentDataType.PERSISTENT_BOOLEAN,
                 "break_flags",
-                commandObject1 -> handleBooleanInput(commandObject1, false),
-                ModifierType::handleTabBoolean),
+                ModifierType::getBoolean,
+                ModifierType::handleBooleanClick,
+                false),
         JUST_HIDE_WHILE_IN_GAME(
                 new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "hide_while_in_game"),
                 CustomPersistentDataType.PERSISTENT_BOOLEAN,
                 "hide_while_in_game",
-                commandObject1 -> handleBooleanInput(commandObject1, false),
-                ModifierType::handleTabBoolean);
-
-        private static List<String> langReferences;
+                ModifierType::getBoolean,
+                ModifierType::handleBooleanClick,
+                false);
+        private static final NamespacedKey BOOLEAN = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "boolean");
+        private static final NamespacedKey PAINTER = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "painter");
+        private static final NamespacedKey INTEGER = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "integer");
+        private static final NamespacedKey DOUBLE = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "double");
+        private static final DecimalFormat df = new DecimalFormat(".0");
         private final NamespacedKey namespacedKey;
         private final PersistentDataType<?, ?> persistentDataType;
         private final String langReference;
-        private final Consumer<CommandObject> commandObject;
-        private final Consumer<TabObject> tabConsumer;
+        private final Function<GetObject, ItemStack> getObjectConsumer;
+        private final Consumer<ClickObject> clickObjectConsumer;
+        private final Object defaultValue;
 
-        ModifierType(NamespacedKey namespacedKey, PersistentDataType<?, ?> persistentDataType, String langReference, Consumer<CommandObject> commandObject, Consumer<TabObject> tabConsumer) {
+        ModifierType(NamespacedKey namespacedKey, PersistentDataType<?, ?> persistentDataType, String langReference, Function<GetObject, ItemStack> getObjectConsumer, Consumer<ClickObject> clickObjectConsumer, Object defaultValue) {
             this.namespacedKey = namespacedKey;
             this.persistentDataType = persistentDataType;
             this.langReference = langReference;
-            this.commandObject = commandObject;
-            this.tabConsumer = tabConsumer;
+            this.getObjectConsumer = getObjectConsumer;
+            this.clickObjectConsumer = clickObjectConsumer;
+            this.defaultValue = defaultValue;
         }
 
-        public static List<String> getLangReferences() {
-            if (langReferences != null)
-                return langReferences;
-
-            langReferences = new ArrayList<>(values().length);
-
-            for (ModifierType value : values()) {
-                langReferences.add(value.getLangReference());
-            }
-
-            return langReferences;
-        }
-
-        private static void handleTabJustDefault(@NotNull TabObject tabObject) {
-            if (tabObject.language.getString("default").startsWith(tabObject.key.toLowerCase()))
-                tabObject.strings.add(tabObject.language.getString("default"));
-        }
-
-        private static void handleIntegerInput(@NotNull CommandObject commandObject) {
-            handleNumberInput(commandObject, Integer::parseInt);
-        }
-
-        private static <T> void handleNumberInput(@NotNull CommandObject commandObject, @NotNull Function<String, T> converter) {
-            if (commandObject.arg == null) {
-                commandObject.player.sendMessage(commandObject.language.getString("send_current_setting_number",
-                                                                                  commandObject.language.getString(commandObject.type.getLangReference()),
-                                                                                  commandObject.modifier.get(commandObject.type).isPresent()
-                                                                                          ? commandObject.modifier.get(commandObject.type).get().toString()
-                                                                                          : commandObject.language.getString("default_setting")
-                ) + ".");
+        private static void handlePainterClick(@NotNull ClickObject clickObject) {
+            ItemStack item = clickObject.inventory.getItem(clickObject.clickedSlot);
+            if (item == null)
                 return;
-            }
-            if (commandObject.arg.equalsIgnoreCase("default")) {
-                commandObject.modifier.set(commandObject.type, null);
+
+            ItemMeta itemMeta = item.getItemMeta();
+            if (itemMeta == null)
                 return;
-            }
-            try{
-                T t = converter.apply(commandObject.arg);
 
-                commandObject.modifier.set(commandObject.type, t);
-                commandObject.player.sendMessage(ChatColor.GREEN + commandObject.language.getString("send_was_applied",
-                                                                                                    commandObject.language.getString(commandObject.type.getLangReference())));
-            }catch(NumberFormatException e){
-                commandObject.player.sendMessage(ChatColor.DARK_RED + commandObject.language.getString("error_no_valid_number"));
-            }
-        }
-
-        private static void handleDoubleInput(@NotNull CommandObject commandObject) {
-            handleNumberInput(commandObject, Double::parseDouble);
-        }
-
-        private static void handleTabBoolean(@NotNull TabObject tabObject) {
-            if (tabObject.language.getString("true_").toLowerCase().startsWith(tabObject.key.toLowerCase()))
-                tabObject.strings.add(tabObject.language.getString("true_"));
-            if (tabObject.language.getString("false_").toLowerCase().startsWith(tabObject.key.toLowerCase()))
-                tabObject.strings.add(tabObject.language.getString("false_"));
-            if (tabObject.language.getString("default").toLowerCase().startsWith(tabObject.key.toLowerCase()))
-                tabObject.strings.add(tabObject.language.getString("default"));
-        }
-
-        private static void handleBooleanInput(@NotNull CommandObject commandObject, boolean defaultValue) {
-            if (commandObject.arg == null) {
-                commandObject.player.sendMessage(
-                        ChatColor.GREEN + commandObject.language.getString("send_current_setting_boolean",
-                                                                           commandObject.language.getString(commandObject.type.getLangReference()),
-                                                                           commandObject.modifier.get(commandObject.type).isPresent()
-                                                                                   ? commandObject.modifier.<Boolean>get(commandObject.type).orElse(defaultValue)
-                                                                                   ? commandObject.language.getString("enabled") : commandObject.language.getString("disabled")
-                                                                                   : commandObject.language.getString("default_setting")));
+            String s = itemMeta.getPersistentDataContainer().get(PAINTER, PersistentDataType.STRING);
+            if (s == null)
                 return;
-            }
-            if (commandObject.arg.equalsIgnoreCase(commandObject.language.getString("default"))) {
-                commandObject.modifier.set(commandObject.type, null);
-                return;
-            }
-            if (commandObject.arg.equalsIgnoreCase(commandObject.language.getString("true_"))) {
-                commandObject.modifier.set(commandObject.type, true);
-                commandObject.player.sendMessage(ChatColor.GREEN + commandObject.language.getString("send_change_enable", commandObject.language.getString(commandObject.type.getLangReference())));
-                return;
-            }
-            if (commandObject.arg.equalsIgnoreCase(commandObject.language.getString("false_"))) {
-                commandObject.modifier.set(commandObject.type, false);
-                commandObject.player.sendMessage(ChatColor.GREEN + commandObject.language.getString("send_change_disable", commandObject.language.getString(commandObject.type.getLangReference())));
-                return;
-            }
-            commandObject.player.sendMessage(ChatColor.DARK_RED + commandObject.language.getString("error_no_true_or_false"));
-        }
 
-        private static void handleTabPainter(@NotNull TabObject tabObject) {
-            Painter.PAINTER_MAP.values().forEach(painter -> {
-                if (painter.getName().toLowerCase().startsWith(tabObject.key.toLowerCase()))
-                    tabObject.strings.add(painter.getName());
+            Painter painter = Painter.getPainter(s);
+            Painter newPainter = null;
+            boolean returnOnNext = false;
 
-            });
-            if (tabObject.language.getString("default").startsWith(tabObject.key.toLowerCase()))
-                tabObject.strings.add(tabObject.language.getString("default"));
-        }
+            Painter first = null;
+            for (Painter painter1 : Painter.getPainter()) {
+                if (first == null)
+                    first = painter1;
 
-        private static void handlePainterInput(@NotNull CommandObject commandObject) {
-            if (commandObject.arg == null) {
-                Optional<String> painterClass = commandObject.modifier.get(PersonalModifier.ModifierType.PAINTER_CLASS);
-                if (painterClass.isPresent()) {
-                    try{
-                        Painter painter = Painter.PAINTER_MAP.get(Class.forName(painterClass.get()));
-
-                        commandObject.player.sendMessage(ChatColor.GREEN + commandObject.language.getString("send_current_board_style", painter.getName()));
-                    }catch(ClassNotFoundException e){
-                        commandObject.player.sendMessage(ChatColor.DARK_RED + commandObject.language.getString("send_unknown_error"));
-                    }
-                } else
-                    commandObject.player.sendMessage(ChatColor.GREEN + commandObject.language.getString("send_current_board_style", painterClass.orElse("default")));
-                return;
-            }
-            if (commandObject.arg.equalsIgnoreCase(commandObject.language.getString("default"))) {
-                GameManager gameManager = Minesweeper.getPlugin(Minesweeper.class).getGameManager();
-                Board board = gameManager.getBoard(commandObject.player);
-                if (board == null) {
-                    board = gameManager.getBoardWatched(commandObject.player);
+                if (painter == null || returnOnNext) {
+                    newPainter = painter1;
+                    break;
                 }
 
-                if (board != null) {
-                    Painter painter = Painter.PAINTER_MAP.get(Painter.loadPainterClass(commandObject.player));
-                    painter.drawBlancField(board, Collections.singletonList(commandObject.player));
-                }
-
-
-                commandObject.modifier.set(PersonalModifier.ModifierType.PAINTER_CLASS, null);
-                Painter.storePainterClass(commandObject.player.getPersistentDataContainer(), Painter.DEFAULT_PAINTER);
-
-
-                if (board != null)
-                    Painter.getPainter(commandObject.player).drawField(board, Collections.singletonList(commandObject.player));
-
-                return;
+                if (painter.equals(painter1))
+                    returnOnNext = true;
             }
-            for (Painter painter : Painter.PAINTER_MAP.values()) {
-                if (painter.getName().equalsIgnoreCase(commandObject.arg)) {
-                    commandObject.player.sendMessage(ChatColor.GREEN + commandObject.language.getString("send_board_style_applied"));
+            if (newPainter == null)
+                newPainter = first;
 
-                    GameManager gameManager = Minesweeper.getPlugin(Minesweeper.class).getGameManager();
-                    Board board = gameManager.getBoard(commandObject.player);
-                    if (board == null) {
-                        board = gameManager.getBoardWatched(commandObject.player);
-                    }
+            if (newPainter != null)
+                clickObject.modifier.set(clickObject.type(), newPainter.getClass().getName());
 
-                    if (board != null) {
-                        Painter painter2 = Painter.PAINTER_MAP.get(Painter.loadPainterClass(commandObject.player));
-                        painter2.drawBlancField(board, Collections.singletonList(commandObject.player));
-                    }
-
-
-                    commandObject.modifier.set(PersonalModifier.ModifierType.PAINTER_CLASS, painter.getClass().getName());
-                    Painter.storePainterClass(commandObject.player.getPersistentDataContainer(), painter.getClass());
-
-
-                    if (board != null)
-                        painter.drawField(board, Collections.singletonList(commandObject.player));
-
-                    return;
-                }
-            }
-            commandObject.player.sendMessage(ChatColor.DARK_RED + commandObject.language.getString("error_no_valid_number"));
+            clickObject.inventory.setItem(clickObject.clickedSlot,
+                                          clickObject.manager.insertItemId(getPainter(clickObject.player(), clickObject.language(), clickObject.type()), clickObject.itemId).getSecond());
         }
 
-        private static void handleResourcePackLinkInput(@NotNull CommandObject commandObject) {
-            if (commandObject.arg == null) {
-                commandObject.player.sendMessage(ChatColor.GREEN + commandObject.language.getString("send_current_resource_pack_url", commandObject.modifier.<String>get(PersonalModifier.ModifierType.RESOURCE_PACK_URL).orElse("default")));
-                return;
+        public static ItemStack getPainter(Player player, Language language, ModifierType type) {
+            String s = player == null ? null : type.get(player.getPersistentDataContainer());
+
+            s = s == null ? (String) type.defaultValue : s;
+
+            ItemStack itemStack = new ItemStack(Material.LIME_TERRACOTTA);
+
+            ItemMeta itemMeta = itemStack.getItemMeta();
+
+            if (itemMeta != null) {
+                Painter painter = Painter.getPainter(s);
+                if (painter == null)
+                    return itemStack;
+
+                String string = language.getString(type.langReference);
+
+                itemMeta.setDisplayName(ChatColor.GREEN + string + ": " + painter.getName());
+
+                itemMeta.getPersistentDataContainer().set(PAINTER, PersistentDataType.STRING, s);
             }
-            if (commandObject.arg.equalsIgnoreCase(commandObject.language.getString("default"))) {
-                commandObject.modifier.set(PersonalModifier.ModifierType.RESOURCE_PACK_URL, null);
-                return;
-            }
-            String url = commandObject.arg;
-            if (!(url.toLowerCase().startsWith("http://") || url.toLowerCase().startsWith("https://"))) {
-                commandObject.player.sendMessage(ChatColor.DARK_RED + commandObject.language.getString("send_start_with_http"));
-                return;
-            }
-            commandObject.modifier.set(PersonalModifier.ModifierType.RESOURCE_PACK_URL, url);
-            commandObject.player.sendMessage(ChatColor.GREEN + commandObject.language.getString("send_resource_pack_applied"));
-            commandObject.packHandler.apply(commandObject.player);
+
+            itemStack.setItemMeta(itemMeta);
+
+            return itemStack;
         }
 
         @SuppressWarnings("unchecked")
@@ -329,6 +237,159 @@ public class PersonalModifier {
             if (container == null) return null;
 
             return container.get(namespacedKey, (PersistentDataType<?, Z>) persistentDataType);
+        }
+
+        public static ItemStack getPainter(GetObject getObject) {
+            return getPainter(getObject.player, getObject.language, getObject.type);
+        }
+
+        private static void handleIntegerClick(@NotNull ClickObject clickObject) {
+            ItemStack item = clickObject.inventory.getItem(clickObject.clickedSlot);
+            if (item == null)
+                return;
+
+            ItemMeta itemMeta = item.getItemMeta();
+            if (itemMeta == null)
+                return;
+
+            Integer integer = itemMeta.getPersistentDataContainer().get(INTEGER, PersistentDataType.INTEGER);
+            if (integer == null)
+                integer = (Integer) clickObject.type.defaultValue;
+
+            integer += clickObject.clickType.isLeftClick() ? 1 : clickObject.clickType.isRightClick() ? -1 : 0;
+
+            clickObject.modifier.set(clickObject.type(), integer);
+
+            clickObject.inventory.setItem(clickObject.clickedSlot,
+                                          clickObject.manager.insertItemId(getInteger(clickObject.player(), clickObject.language(), clickObject.type()), clickObject.itemId).getSecond());
+        }
+
+        public static ItemStack getInteger(Player player, Language language, ModifierType type) {
+            Integer integer = player == null ? null : type.get(player.getPersistentDataContainer());
+
+            integer = integer == null ? (Integer) type.defaultValue : integer;
+
+            ItemStack itemStack = new ItemStack(HeadGenerator.getHeadFromUrl("https://textures.minecraft.net/texture/33cd934f11f0766f5410eba9e7b5f0ceb66f6b317e845cb6a501f37258556a43"));
+
+            ItemMeta itemMeta = itemStack.getItemMeta();
+
+            if (itemMeta != null) {
+                String string = language.getString(type.langReference);
+
+                itemMeta.setDisplayName(ChatColor.GREEN + string + ": " + integer);
+                itemMeta.setLore(List.of(
+                        ChatColor.GRAY + "Press left click to" + ChatColor.GREEN + " increment " + ChatColor.GRAY + "by one.",
+                        ChatColor.GRAY + "Press right click to" + ChatColor.RED + " decrement " + ChatColor.GRAY + "by one."
+                ));
+
+                itemMeta.getPersistentDataContainer().set(INTEGER, PersistentDataType.INTEGER, integer);
+            }
+
+            itemStack.setItemMeta(itemMeta);
+
+            return itemStack;
+        }
+
+        public static ItemStack getInteger(GetObject getObject) {
+            return getInteger(getObject.player, getObject.language, getObject.type);
+        }
+
+        private static void handleDoubleClick(@NotNull ClickObject clickObject) {
+            ItemStack item = clickObject.inventory.getItem(clickObject.clickedSlot);
+            if (item == null)
+                return;
+
+            ItemMeta itemMeta = item.getItemMeta();
+            if (itemMeta == null)
+                return;
+
+            Double d = itemMeta.getPersistentDataContainer().get(DOUBLE, PersistentDataType.DOUBLE);
+            if (d == null)
+                d = (Double) clickObject.type.defaultValue;
+
+            d += clickObject.clickType.isLeftClick() ? 0.1 : clickObject.clickType.isRightClick() ? -0.1 : 0;
+
+            clickObject.modifier.set(clickObject.type(), d);
+
+            clickObject.inventory.setItem(clickObject.clickedSlot,
+                                          clickObject.manager.insertItemId(getDouble(clickObject.player(), clickObject.language(), clickObject.type()), clickObject.itemId).getSecond());
+        }
+
+        public static ItemStack getDouble(Player player, Language language, ModifierType type) {
+            Double d = player == null ? null : type.get(player.getPersistentDataContainer());
+
+            d = d == null ? (Double) type.defaultValue : d;
+
+            ItemStack itemStack = new ItemStack(HeadGenerator.getHeadFromUrl("https://textures.minecraft.net/texture/33cd934f11f0766f5410eba9e7b5f0ceb66f6b317e845cb6a501f37258556a43"));
+
+            ItemMeta itemMeta = itemStack.getItemMeta();
+
+            if (itemMeta != null) {
+                String string = language.getString(type.langReference);
+
+                itemMeta.setDisplayName(ChatColor.GREEN + string + ": " + df.format(d));
+                itemMeta.setLore(List.of(
+                        ChatColor.GRAY + "Press left click to" + ChatColor.GREEN + " increment " + ChatColor.GRAY + "by 0,1.",
+                        ChatColor.GRAY + "Press right click to" + ChatColor.RED + " decrement " + ChatColor.GRAY + "by 0,1."
+                ));
+
+                itemMeta.getPersistentDataContainer().set(DOUBLE, PersistentDataType.DOUBLE, d);
+            }
+
+            itemStack.setItemMeta(itemMeta);
+
+            return itemStack;
+        }
+
+        public static ItemStack getDouble(GetObject getObject) {
+            return getDouble(getObject.player, getObject.language, getObject.type);
+        }
+
+        private static void handleBooleanClick(@NotNull ClickObject clickObject) {
+            ItemStack item = clickObject.inventory.getItem(clickObject.clickedSlot);
+            if (item == null)
+                return;
+
+            ItemMeta itemMeta = item.getItemMeta();
+            if (itemMeta == null)
+                return;
+
+            Boolean aBoolean = itemMeta.getPersistentDataContainer().get(BOOLEAN, CustomPersistentDataType.PERSISTENT_BOOLEAN);
+            if (aBoolean == null)
+                aBoolean = (Boolean) clickObject.type.defaultValue;
+
+            clickObject.modifier.set(clickObject.type(), !aBoolean);
+
+            clickObject.inventory.setItem(clickObject.clickedSlot,
+                                          clickObject.manager.insertItemId(getBoolean(clickObject.player(), clickObject.language(), clickObject.type()), clickObject.itemId).getSecond());
+        }
+
+        public static ItemStack getBoolean(Player player, Language language, ModifierType type) {
+            Boolean bool = player == null ? null : type.get(player.getPersistentDataContainer());
+
+            bool = bool == null ? (Boolean) type.defaultValue : bool;
+
+            ItemStack itemStack = new ItemStack(bool ? Material.LIME_CONCRETE : Material.RED_CONCRETE);
+
+            ItemMeta itemMeta = itemStack.getItemMeta();
+
+            if (itemMeta != null) {
+                String string = language.getString(type.langReference);
+
+                itemMeta.setDisplayName(
+                        bool ? ChatColor.GREEN + string + ": " + language.getString("enabled")
+                                : ChatColor.RED + string + ": " + language.getString("disabled"));
+
+                itemMeta.getPersistentDataContainer().set(BOOLEAN, CustomPersistentDataType.PERSISTENT_BOOLEAN, bool);
+            }
+
+            itemStack.setItemMeta(itemMeta);
+
+            return itemStack;
+        }
+
+        public static ItemStack getBoolean(GetObject getObject) {
+            return getBoolean(getObject.player, getObject.language, getObject.type);
         }
 
         @SuppressWarnings("unchecked")
@@ -340,25 +401,22 @@ public class PersonalModifier {
                 container.remove(namespacedKey);
         }
 
-        public void fillList(String arg, List<String> strings, Language language) {
-            this.tabConsumer.accept(new TabObject(arg, strings, language));
+        public void click(ModifierType type, Player player, PersonalModifier modifier, Inventory inventory,
+                          ClickType clickType, Language language, int clickedSlot, InventoryManager manager, int itemId) {
+            this.clickObjectConsumer.accept(new ClickObject(type, player, modifier, inventory, clickType, language, clickedSlot, manager, itemId));
         }
 
-        public void performAction(ModifierType type, Player player, PersonalModifier modifier, String arg,
-                                  Language language, ResourcePackHandler packHandler) {
-            this.commandObject.accept(new CommandObject(type, player, modifier, arg, language, packHandler));
-        }
-
-        public String getLangReference() {
-            return langReference;
+        public ItemStack get(Player player, Language language, ModifierType type) {
+            return this.getObjectConsumer.apply(new GetObject(player, language, type));
         }
     }
 
-    private record TabObject(String key, List<String> strings, Language language) {
+    private record ClickObject(ModifierType type, Player player, PersonalModifier modifier, Inventory inventory,
+                               ClickType clickType, Language language, int clickedSlot, InventoryManager manager,
+                               int itemId) {
     }
 
-    private record CommandObject(ModifierType type, Player player, PersonalModifier modifier, String arg,
-                                 Language language, ResourcePackHandler packHandler) {
+    private record GetObject(Player player, Language language, ModifierType type) {
     }
 
 }

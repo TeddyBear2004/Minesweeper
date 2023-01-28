@@ -4,12 +4,14 @@ import de.teddybear2004.minesweeper.game.Board;
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
 import de.teddybear2004.minesweeper.game.exceptions.BombExplodeException;
-import de.teddybear2004.minesweeper.game.inventory.Inventories;
+import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
 import de.teddybear2004.minesweeper.game.statistic.GameStatistic;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -18,18 +20,20 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public class InventoryClickEvents implements Listener {
 
     private final GameManager gameManager;
+    private final InventoryManager inventoryManager;
 
     /**
      * @param gameManager The game manger to start games.
      */
     @Contract(pure = true)
-    public InventoryClickEvents(GameManager gameManager) {
+    public InventoryClickEvents(GameManager gameManager, InventoryManager inventoryManager) {
         this.gameManager = gameManager;
+        this.inventoryManager = inventoryManager;
     }
 
     @EventHandler
@@ -38,17 +42,15 @@ public class InventoryClickEvents implements Listener {
             return;
 
         Inventory clickedInventory = event.getClickedInventory();
+        event.setCancelled(true);
 
-        if (!Inventories.isValidInventory(event.getView())) {
-            event.setCancelled(true);
+        if (!inventoryManager.isValidInventory(event.getView())) {
             return;
         }
 
-        event.setCancelled(true);
-
-        Consumer<Inventory> runnable = Inventories.getConsumer(event.getCurrentItem(), ((Player) event.getWhoClicked()));
+        BiConsumer<Inventory, ClickType> runnable = inventoryManager.getConsumer(event.getCurrentItem());
         if (runnable != null)
-            runnable.accept(clickedInventory);
+            runnable.accept(clickedInventory, event.getClick());
     }
 
     public boolean handleStats(@NotNull InventoryClickEvent event) {
@@ -88,6 +90,11 @@ public class InventoryClickEvents implements Listener {
         }
 
         return true;
+    }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+        inventoryManager.onClose(event.getInventory());
     }
 
 }

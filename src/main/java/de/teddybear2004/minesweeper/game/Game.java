@@ -1,6 +1,6 @@
 package de.teddybear2004.minesweeper.game;
 
-import de.teddybear2004.minesweeper.game.inventory.Inventories;
+import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
 import de.teddybear2004.minesweeper.game.modifier.Modifier;
 import de.teddybear2004.minesweeper.util.ConnectionBuilder;
 import de.teddybear2004.minesweeper.util.IsBetween;
@@ -105,8 +105,8 @@ public class Game {
             }
         });
 
-        p.getInventory().clear();
-        p.getInventory().setContents(Inventories.GAME_INVENTORY);
+        InventoryManager.PlayerInventory.GAME.apply(p);
+
         boolean allowFly = Modifier.getInstance().allowFly() || Modifier.getInstance().isInside(getViewingSpawn());
 
         if (allowFly)

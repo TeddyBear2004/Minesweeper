@@ -3,7 +3,7 @@ package de.teddybear2004.minesweeper.scheduler;
 import de.teddybear2004.minesweeper.game.GameManager;
 import de.teddybear2004.minesweeper.game.modifier.PersonalModifier;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -22,20 +22,32 @@ public class HidePlayerScheduler extends BukkitRunnable {
         Bukkit.getOnlinePlayers().forEach(player -> {
             PersonalModifier modifier = PersonalModifier.getPersonalModifier(player);
 
-            boolean hidePlayer = modifier.<Boolean>get(PersonalModifier.ModifierType.HIDE_PLAYER).orElse(false)
-                    && (modifier.<Boolean>get(PersonalModifier.ModifierType.JUST_HIDE_WHILE_IN_GAME).orElse(false)
-                    && gameManager.getGame(player) != null);
-            double distance = Math.pow(modifier.<Double>get(PersonalModifier.ModifierType.HIDE_PLAYER_DISTANCE).orElse(3.0), 2);
-            Location location = player.getLocation();
+            boolean b1 = modifier.<Boolean>get(PersonalModifier.ModifierType.HIDE_PLAYER);
+            boolean justHideInGame = modifier.<Boolean>get(PersonalModifier.ModifierType.JUST_HIDE_WHILE_IN_GAME);
+            double distance = Math.pow(modifier.<Double>get(PersonalModifier.ModifierType.HIDE_PLAYER_DISTANCE), 2);
 
             player.getWorld().getPlayers().forEach(other -> {
-                if (hidePlayer && location.distanceSquared(other.getLocation()) < distance) {
-                    player.hidePlayer(plugin, other);
-                } else {
+                if (b1) {
+                    if (justHideInGame) {
+                        if (gameManager.getBoard(player) == null)
+                            player.showPlayer(plugin, other);
+                        else
+                            hide(player, other, distance);
+                    } else
+                        hide(player, other, distance);
+                } else
                     player.showPlayer(plugin, other);
-                }
             });
         });
+    }
+
+    private void hide(Player player, Player other, double distance) {
+        boolean b3 = player.getLocation().distanceSquared(other.getLocation()) < distance;
+        if (b3) {
+            player.hidePlayer(plugin, other);
+        } else {
+            player.showPlayer(plugin, other);
+        }
     }
 
 }

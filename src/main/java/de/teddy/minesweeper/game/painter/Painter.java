@@ -14,10 +14,10 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public interface Painter {
 
@@ -31,19 +31,32 @@ public interface Painter {
         container.set(PAINTER_KEY, PersistentDataType.STRING, clazz.getName());
     }
 
+    static Painter getPainter(String className) {
+        try{
+            return getPainter(Class.forName(className).asSubclass(Painter.class));
+        }catch(ClassNotFoundException e){
+            return null;
+        }
+    }
+
+    static Painter getPainter(Class<? extends Painter> clazz) {
+        return PAINTER_MAP.get(clazz);
+    }
+
+    static Collection<Painter> getPainter() {
+        return PAINTER_MAP.values();
+    }
+
     static Painter getPainter(@NotNull Player player) {
         return PAINTER_MAP.get(loadPainterClass(player));
     }
 
-    @SuppressWarnings("unchecked")
     static Class<? extends Painter> loadPainterClass(@NotNull Player player) {
         PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
 
         Class<? extends Painter> clazz;
         try{
-            Optional<String> cl = personalModifier.get(PersonalModifier.ModifierType.PAINTER_CLASS);
-
-            clazz = cl.isPresent() ? (Class<? extends Painter>) Class.forName(cl.get()) : DEFAULT_PAINTER;
+            clazz = Class.forName(personalModifier.get(PersonalModifier.ModifierType.PAINTER_CLASS)).asSubclass(Painter.class);
         }catch(ClassCastException | ClassNotFoundException e){
             e.printStackTrace();
             clazz = DEFAULT_PAINTER;

@@ -16,7 +16,7 @@ import de.teddybear2004.minesweeper.game.GameManager;
 import de.teddybear2004.minesweeper.game.TutorialGame;
 import de.teddybear2004.minesweeper.game.click.ClickHandler;
 import de.teddybear2004.minesweeper.game.expansions.StatsExpansion;
-import de.teddybear2004.minesweeper.game.inventory.Inventories;
+import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
 import de.teddybear2004.minesweeper.game.modifier.Modifier;
 import de.teddybear2004.minesweeper.game.modifier.ModifierArea;
 import de.teddybear2004.minesweeper.game.texture.pack.DisableResourceHandler;
@@ -54,13 +54,14 @@ public final class Minesweeper extends JavaPlugin {
     private String langPath;
     private ResourcePackHandler resourcePackHandler;
     private GameManager gameManager;
+    private Language language;
 
     public GameManager getGameManager() {
         return gameManager;
     }
 
-    public @NotNull List<Game> getGames() {
-        return gameManager.getGames();
+    public Language getLanguage() {
+        return language;
     }
 
     @Override
@@ -102,7 +103,7 @@ public final class Minesweeper extends JavaPlugin {
         Painter.PAINTER_MAP.put(ArmorStandPainter.class, new ArmorStandPainter(Minesweeper.getPlugin(Minesweeper.class), clickHandler, gameManager));
 
 
-        Language language = loadLanguage();
+        language = loadLanguage();
         List<ModifierArea> modifierAreas = loadAreas();
         loadWorld();
         loadModifier(modifierAreas);
@@ -127,19 +128,19 @@ public final class Minesweeper extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-        Inventories.initialise(getConfig().getInt("available_games_inventory_lines"), language, gameManager);
+        InventoryManager inventoryManager = new InventoryManager(gameManager);
 
 
         Objects.requireNonNull(this.getCommand("bypassEventCancellation")).setExecutor(new BypassEventCommand());
-        Objects.requireNonNull(this.getCommand("minesweeper")).setExecutor(new MinesweeperCommand(gameManager, customGame, language));
-        Objects.requireNonNull(this.getCommand("settings")).setExecutor(new SettingsCommand(resourcePackHandler, language));
+        Objects.requireNonNull(this.getCommand("minesweeper")).setExecutor(new MinesweeperCommand(gameManager, customGame, language, inventoryManager));
+        Objects.requireNonNull(this.getCommand("settings")).setExecutor(new SettingsCommand(resourcePackHandler, language, inventoryManager));
         Objects.requireNonNull(this.getCommand("minestats")).setExecutor(new MineStatsCommand(gameManager, connectionBuilder, language));
         Objects.requireNonNull(this.getCommand("mineduel")).setExecutor(new DuelCommand(this, gameManager, language));
 
         getServer().getPluginManager().registerEvents(new CancelableEvents(getConfig().getConfigurationSection("events"), modifierAreas), this);
         getServer().getPluginManager().registerEvents(new GenericEvents(resourcePackHandler, customGame, gameManager), this);
-        getServer().getPluginManager().registerEvents(new GenericRightClickEvent(gameManager), this);
-        getServer().getPluginManager().registerEvents(new InventoryClickEvents(gameManager), this);
+        getServer().getPluginManager().registerEvents(new GenericRightClickEvent(gameManager, inventoryManager), this);
+        getServer().getPluginManager().registerEvents(new InventoryClickEvents(gameManager, inventoryManager), this);
         getServer().getPluginManager().registerEvents(new GenericLongClickEvent(gameManager, clickHandler), this);
 
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
@@ -147,7 +148,7 @@ public final class Minesweeper extends JavaPlugin {
         protocolManager.addPacketListener(new LeftClickEvent(this, gameManager));
 
         Bukkit.getOnlinePlayers().forEach(player -> {
-            player.getInventory().setContents(Inventories.VIEWER_INVENTORY);
+            InventoryManager.PlayerInventory.VIEWER.apply(player);
             if (games.size() != 0)
                 games.get(0).startViewing(player, null);
         });
