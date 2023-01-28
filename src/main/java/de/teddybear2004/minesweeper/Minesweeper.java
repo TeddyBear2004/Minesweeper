@@ -23,6 +23,7 @@ import de.teddybear2004.minesweeper.game.texture.pack.DisableResourceHandler;
 import de.teddybear2004.minesweeper.game.texture.pack.ExternalWebServerHandler;
 import de.teddybear2004.minesweeper.game.texture.pack.InternalWebServerHandler;
 import de.teddybear2004.minesweeper.game.texture.pack.ResourcePackHandler;
+import de.teddybear2004.minesweeper.scheduler.BossBarScheduler;
 import de.teddybear2004.minesweeper.scheduler.HidePlayerScheduler;
 import de.teddybear2004.minesweeper.util.ConnectionBuilder;
 import de.teddybear2004.minesweeper.util.JarWalker;
@@ -158,6 +159,16 @@ public final class Minesweeper extends JavaPlugin {
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new StatsExpansion(connectionBuilder).register();
         }
+
+        BossBarScheduler bossBarScheduler = new BossBarScheduler(List.of(
+                () -> "Sponsor und Entwickler: twitch.tv/teddybear_2004",
+                () -> "Sponsor: twitch.tv/polizeidreamy",
+                () -> "Sponsor: twitch.tv/onlyjosh"
+        ));
+
+        bossBarScheduler.runTaskTimer(this, 0, 7);
+        getServer().getPluginManager().registerEvents(bossBarScheduler, this);
+
     }
 
     private @NotNull Language loadLanguage() {
