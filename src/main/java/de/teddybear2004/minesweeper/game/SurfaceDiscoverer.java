@@ -1,6 +1,7 @@
 package de.teddybear2004.minesweeper.game;
 
 import de.teddybear2004.minesweeper.game.exceptions.BombExplodeException;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -132,9 +133,71 @@ public class SurfaceDiscoverer {
 
     }
 
-    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-    public static int calculate3BV(@NotNull Board board) {
-        return -1; //todo implement me
+    public static int calculate3BV(boolean[][] board, int[][] ints) {
+        int clickCount = 0;
+        List<Pair<Integer, Integer>> list = new ArrayList<>();
+
+        if (board.length != ints.length || board[0].length != ints[0].length)
+            return -1;
+
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board.length; j++) {
+                if (board[i][j])
+                    continue;
+
+                Pair<Integer, Integer> ints3 = Pair.of(i, j);
+                if (list.contains(ints3))
+                    continue;
+
+                if (ints[i][j] == 0) {
+                    Stack<Pair<Integer, Integer>> stack = new Stack<>();
+                    stack.push(ints3);
+
+                    while (!stack.isEmpty()) {
+                        Pair<Integer, Integer> ints1 = stack.pop();
+
+                        if (ints[ints1.getLeft()][ints1.getRight()] == 0) {
+                            list.add(ints1);
+
+                            for (int[] surrounding : SURROUNDINGS) {
+                                //filter out of bound
+                                if (ints1.getLeft() + surrounding[0] >= 0 && ints1.getLeft() + surrounding[0] < ints.length && ints1.getRight() + surrounding[1] >= 0 && ints1.getRight() + surrounding[1] < ints[0].length) {
+
+                                    Pair<Integer, Integer> ints2 = Pair.of(ints1.getLeft() + surrounding[0], ints1.getRight() + surrounding[1]);
+                                    //has surrounding no bombs around it
+                                    if (ints[ints1.getLeft() + surrounding[0]][ints1.getRight() + surrounding[1]] == 0) {
+                                        //is surrounding already checked
+                                        if (!list.contains(ints2)) {
+                                            list.add(ints2);
+                                            stack.push(ints2);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    clickCount++;
+                    continue;
+                }
+
+                int notNull = 0;
+                int all = 0;
+                for (int[] surrounding : SURROUNDINGS) {
+                    if (i + surrounding[0] >= 0 && i + surrounding[0] < ints.length && j + surrounding[1] >= 0 && j + surrounding[1] < ints[0].length) {
+                        if (!board[i + surrounding[0]][j + surrounding[1]]) {
+                            if (ints[i + surrounding[0]][j + surrounding[1]] != 0) {
+                                notNull++;
+                            }
+                            all++;
+                        }
+                    }
+                }
+                if (notNull == all)
+                    clickCount++;
+            }
+        }
+
+        return clickCount;
     }
 
 }
