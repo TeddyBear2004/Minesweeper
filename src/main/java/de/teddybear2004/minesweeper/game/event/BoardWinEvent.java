@@ -9,8 +9,8 @@ public class BoardWinEvent extends BoardFinishEvent {
 
     private static final HandlerList HANDLER_LIST = new HandlerList();
 
-    public BoardWinEvent(Board board, Player player, long time, int flagScore) {
-        super(board, player, time, flagScore);
+    public BoardWinEvent(Board board, Player player) {
+        super(board, player);
     }
 
     @SuppressWarnings("unused")

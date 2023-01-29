@@ -113,7 +113,7 @@ public class DuelGame implements Listener {
         if (!this.playerBoardMap.containsKey(event.getPlayer()))
             return;
 
-        onBoardFinish(new BoardLoseEvent(this.playerBoardMap.get(event.getPlayer()), event.getPlayer(), 0, 0));
+        onBoardFinish(new BoardLoseEvent(this.playerBoardMap.get(event.getPlayer()), event.getPlayer()));
     }
 
     @EventHandler

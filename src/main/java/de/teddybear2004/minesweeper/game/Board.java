@@ -358,7 +358,7 @@ public class Board implements Comparable<Board> {
         duration = getActualTimeNeeded(now);
         String actualTimeNeededString = getActualTimeNeededString(now);
 
-        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getServer().getPluginManager().callEvent(new BoardWinEvent(this, player, duration, getBombCount())));
+        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getServer().getPluginManager().callEvent(new BoardWinEvent(this, player)));
 
         this.finish(true, true, duration);
 
@@ -397,7 +397,7 @@ public class Board implements Comparable<Board> {
         this.win = false;
         duration = finish(false);
 
-        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getServer().getPluginManager().callEvent(new BoardLoseEvent(this, player, duration, calculateFlagScore())));
+        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getServer().getPluginManager().callEvent(new BoardLoseEvent(this, player)));
 
         getCurrentPlayerPainters().forEach((painter, players) -> {
             if (painter != null)

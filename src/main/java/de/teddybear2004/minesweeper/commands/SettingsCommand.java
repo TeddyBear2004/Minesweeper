@@ -2,8 +2,6 @@ package de.teddybear2004.minesweeper.commands;
 
 import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
 import de.teddybear2004.minesweeper.game.inventory.content.SettingsGenerator;
-import de.teddybear2004.minesweeper.game.texture.pack.ResourcePackHandler;
-import de.teddybear2004.minesweeper.util.Language;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -16,18 +14,10 @@ import java.util.List;
 
 public class SettingsCommand implements TabExecutor {
 
-    private final ResourcePackHandler packHandler;
-    private final Language language;
     private final InventoryManager manager;
 
-    /**
-     * @param packHandler The {@link ResourcePackHandler} to load the url from
-     * @param language    A language class to load strings from.
-     */
     @Contract(pure = true)
-    public SettingsCommand(ResourcePackHandler packHandler, Language language, InventoryManager manager) {
-        this.packHandler = packHandler;
-        this.language = language;
+    public SettingsCommand(InventoryManager manager) {
         this.manager = manager;
     }
 

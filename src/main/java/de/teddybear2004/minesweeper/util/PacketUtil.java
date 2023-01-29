@@ -174,14 +174,8 @@ public class PacketUtil {
     }
 
     public static @NotNull PacketContainer joinTeam(String teamName, @NotNull List<UUID> uuids) {
-        PacketContainer scoreboardTeamPacket = new PacketContainer(PacketType.Play.Server.SCOREBOARD_TEAM);
-        List<String> strings = uuids.stream().map(UUID::toString).toList();
 
-        /*scoreboardTeamPacket.getStrings().write(0, teamName);
-        scoreboardTeamPacket.getIntegers().write(0, 3);
-        scoreboardTeamPacket.getSpecificModifier(List.class).write(0, strings);*/
-
-        return scoreboardTeamPacket;
+        return new PacketContainer(PacketType.Play.Server.SCOREBOARD_TEAM);
     }
 
     public static @NotNull PacketContainer getRemoveEntity(int @NotNull ... entityId) {

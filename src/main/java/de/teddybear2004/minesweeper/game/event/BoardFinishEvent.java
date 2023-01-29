@@ -8,13 +8,9 @@ import org.jetbrains.annotations.NotNull;
 public abstract class BoardFinishEvent extends BoardEvent {
 
     private static final HandlerList HANDLER_LIST = new HandlerList();
-    private final long time;
-    private final int flagScore;
 
-    public BoardFinishEvent(Board board, Player player, long time, int flagScore) {
+    public BoardFinishEvent(Board board, Player player) {
         super(board, player);
-        this.time = time;
-        this.flagScore = flagScore;
     }
 
     @SuppressWarnings("unused")
