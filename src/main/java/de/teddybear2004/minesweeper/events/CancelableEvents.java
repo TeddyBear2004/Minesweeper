@@ -1,8 +1,12 @@
 package de.teddybear2004.minesweeper.events;
 
 import de.teddybear2004.minesweeper.Minesweeper;
+import de.teddybear2004.minesweeper.game.Board;
+import de.teddybear2004.minesweeper.game.Game;
+import de.teddybear2004.minesweeper.game.GameManager;
 import de.teddybear2004.minesweeper.game.modifier.Modifier;
 import de.teddybear2004.minesweeper.game.modifier.ModifierArea;
+import de.teddybear2004.minesweeper.game.modifier.PersonalModifier;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -33,13 +37,15 @@ public class CancelableEvents implements Listener {
     public static final NamespacedKey BYPASS_EVENTS = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "bypass_events");
     private final Map<CancelableEvent, Boolean> cancelableEventBooleanMap = new HashMap<>();
     private final List<ModifierArea> areas;
+    private final GameManager gameManager;
 
     /**
      * @param section The {@link ConfigurationSection} to load the event cancellation from
      * @param areas   A list of all areas to determine where/if an event should be cancelled
      */
-    public CancelableEvents(@Nullable ConfigurationSection section, List<ModifierArea> areas) {
+    public CancelableEvents(@Nullable ConfigurationSection section, List<ModifierArea> areas, GameManager gameManager) {
         this.areas = areas;
+        this.gameManager = gameManager;
 
         for (CancelableEvent cancelableEvent : CancelableEvent.values()) {
             cancelableEventBooleanMap.put(cancelableEvent, section == null
@@ -124,9 +130,29 @@ public class CancelableEvents implements Listener {
 
     @EventHandler
     public void onPlayerSwapHandItems(@NotNull PlayerSwapHandItemsEvent event) {
+        Player player = event.getPlayer();
+        PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(player);
+        if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.RESTART_ON_ITEM_SWAP)) {
+            Game game = gameManager.getGame(player);
+            if (game != null) {
+                Board board = gameManager.getBoard(player);
+                if (board.isGenerated()) {
+                    gameManager.finishGame(player, false);
+                    game.getStarter()
+                            .setBombCount(board.getBombCount())
+                            .setShouldTeleport(false)
+                            .setWidth(board.getWidth())
+                            .setHeight(board.getHeight())
+                            .build(player);
+                    event.setCancelled(true);
+                }
+            }
+            event.setCancelled(true);
+            return;
+        }
         if (cancelableEventBooleanMap.get(CancelableEvent.SWAP_ITEMS)
-                || isInsideAreaAndShouldBeCanceled(event.getPlayer().getLocation(), CancelableEvent.SWAP_ITEMS)) {
-            if (shouldCancel(event.getPlayer()))
+                || isInsideAreaAndShouldBeCanceled(player.getLocation(), CancelableEvent.SWAP_ITEMS)) {
+            if (shouldCancel(player))
                 event.setCancelled(true);
         }
 

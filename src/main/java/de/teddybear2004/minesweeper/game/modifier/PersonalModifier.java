@@ -144,7 +144,14 @@ public class PersonalModifier {
                 "hide_while_in_game",
                 ModifierType::getBoolean,
                 ModifierType::handleBooleanClick,
-                false);
+                false),
+        RESTART_ON_ITEM_SWAP(
+                new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "restart_on_item_swap"),
+                CustomPersistentDataType.PERSISTENT_BOOLEAN,
+                "restart_on_item_swap",
+                ModifierType::getBoolean,
+                ModifierType::handleBooleanClick,
+                true);
         private static final NamespacedKey BOOLEAN = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "boolean");
         private static final NamespacedKey PAINTER = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "painter");
         private static final NamespacedKey INTEGER = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "integer");

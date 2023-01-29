@@ -142,20 +142,19 @@ public class GameStatistic {
             PreparedStatement preparedStatement
                     = connection.prepareStatement("""
                                                           SELECT *, SUM(duration) / COUNT(duration) as average
-                                                                   FROM (SELECT *,
-                                                                                ROW_NUMBER() OVER (PARTITION BY uuid ORDER BY CAST(duration AS INTEGER)) AS row_num
-                                                                         FROM minesweeper_stats
-                                                                         WHERE won = 1
-                                                                           AND bomb_count = ?
-                                                                           AND map = ?
-                                                                           AND set_seed = 0
-                                                                         ORDER BY CAST(duration AS INTEGER)) ranked
-                                                                   WHERE row_num <= ?
-                                                                   GROUP BY uuid
-                                                                   HAVING COUNT(duration) >=?
-                                                                   ORDER BY average
-                                                                   LIMIT 1
-                                                                   OFFSET ?;
+                                                                            FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY uuid ORDER BY CAST(duration AS INTEGER)) AS row_num
+                                                                                  FROM minesweeper_stats
+                                                                                  WHERE won = 1
+                                                                                    AND map = ?
+                                                                                    AND bomb_count = ?
+                                                                                    AND set_seed = 0
+                                                                                  ORDER BY CAST(duration AS INTEGER)) s
+                                                                            WHERE row_num <= ?
+                                                                            group by uuid
+                                                                            HAVING COUNT(duration) >= ?
+                                                                            order by SUM(duration)
+                                                                            LIMIT 1
+                                                                            OFFSET ?;
                                                           """);
 
             preparedStatement.setString(1, map);
@@ -170,7 +169,7 @@ public class GameStatistic {
                 return new GameStatistic(
                         resultSet.getString("uuid"),
                         resultSet.getLong("start"),
-                        resultSet.getLong("duration"),
+                        resultSet.getLong("average"),
                         resultSet.getInt("bomb_count"),
                         resultSet.getString("map"),
                         resultSet.getBoolean("set_seed"),

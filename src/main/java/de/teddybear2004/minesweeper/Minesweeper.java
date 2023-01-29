@@ -136,7 +136,7 @@ public final class Minesweeper extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("minestats")).setExecutor(new MineStatsCommand(gameManager, connectionBuilder, language));
         Objects.requireNonNull(this.getCommand("mineduel")).setExecutor(new DuelCommand(this, gameManager, language));
 
-        getServer().getPluginManager().registerEvents(new CancelableEvents(getConfig().getConfigurationSection("events"), modifierAreas), this);
+        getServer().getPluginManager().registerEvents(new CancelableEvents(getConfig().getConfigurationSection("events"), modifierAreas, gameManager), this);
         getServer().getPluginManager().registerEvents(new GenericEvents(resourcePackHandler, customGame, gameManager), this);
         getServer().getPluginManager().registerEvents(new GenericRightClickEvent(gameManager, inventoryManager), this);
         getServer().getPluginManager().registerEvents(new InventoryClickEvents(gameManager, inventoryManager), this);
