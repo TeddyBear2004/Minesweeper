@@ -4,9 +4,7 @@ import de.teddybear2004.minesweeper.game.exceptions.BombExplodeException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SurfaceDiscoverer {
@@ -135,7 +133,7 @@ public class SurfaceDiscoverer {
 
     public static int calculate3BV(boolean[][] board, int[][] ints) {
         int clickCount = 0;
-        List<Pair<Integer, Integer>> list = new ArrayList<>();
+        boolean[][] visited = new boolean[board.length][board[0].length];
 
         if (board.length != ints.length || board[0].length != ints[0].length)
             return -1;
@@ -146,18 +144,18 @@ public class SurfaceDiscoverer {
                     continue;
 
                 Pair<Integer, Integer> ints3 = Pair.of(i, j);
-                if (list.contains(ints3))
+                if (visited[i][j])
                     continue;
 
                 if (ints[i][j] == 0) {
-                    Stack<Pair<Integer, Integer>> stack = new Stack<>();
-                    stack.push(ints3);
+                    Queue<Pair<Integer, Integer>> stack = new LinkedList<>();
+                    stack.offer(ints3);
 
                     while (!stack.isEmpty()) {
-                        Pair<Integer, Integer> ints1 = stack.pop();
+                        Pair<Integer, Integer> ints1 = stack.poll();
 
                         if (ints[ints1.getLeft()][ints1.getRight()] == 0) {
-                            list.add(ints1);
+                            visited[ints1.getLeft()][ints1.getRight()] = true;
 
                             for (int[] surrounding : SURROUNDINGS) {
                                 //filter out of bound
@@ -167,9 +165,9 @@ public class SurfaceDiscoverer {
                                     //has surrounding no bombs around it
                                     if (ints[ints1.getLeft() + surrounding[0]][ints1.getRight() + surrounding[1]] == 0) {
                                         //is surrounding already checked
-                                        if (!list.contains(ints2)) {
-                                            list.add(ints2);
-                                            stack.push(ints2);
+                                        if (!visited[ints2.getLeft()][ints2.getRight()]) {
+                                            visited[ints2.getLeft()][ints2.getRight()] = true;
+                                            stack.offer(ints2);
                                         }
                                     }
                                 }

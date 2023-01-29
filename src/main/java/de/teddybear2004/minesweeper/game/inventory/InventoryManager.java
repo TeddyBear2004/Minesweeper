@@ -44,9 +44,8 @@ public class InventoryManager {
             InventoryGenerator inventoryGenerator1 = inventoryGenerator.getConstructor(GameManager.class).newInstance(manager);
             Inventory inventory = Bukkit.createInventory(null, inventoryGenerator1.getSize(), inventoryGenerator1.getName());
 
-            inventoryGenerator1.insertConsumerItems(inventory, this).forEach((integer1, playerConsumerFunction) -> {
-                itemStackFunctionMap.put(integer1, playerConsumerFunction.apply(player));
-            });
+            inventoryGenerator1.insertConsumerItems(inventory, this)
+                    .forEach((integer1, playerConsumerFunction) -> itemStackFunctionMap.put(integer1, playerConsumerFunction.apply(player)));
 
             return inventory;
         }catch(InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e){
@@ -120,9 +119,10 @@ public class InventoryManager {
                 Pair.of(40, Items.SLIME_BALL.getItemStack())
         ),
         VIEWER(
-                Pair.of(1, Items.WATCH_OTHER.getItemStack()),
-                Pair.of(4, Items.START.getItemStack()),
-                Pair.of(7, Items.TUTORIAL.getItemStack())
+                Pair.of(0, Items.WATCH_OTHER.getItemStack()),
+                Pair.of(2, Items.START.getItemStack()),
+                Pair.of(6, Items.TUTORIAL.getItemStack()),
+                Pair.of(8, Items.SETTINGS.getItemStack())
         );
 
         private final ItemStack[] inventory;
@@ -150,7 +150,8 @@ public class InventoryManager {
             SLIME_BALL(new ItemStack(Material.SLIME_BALL)),
             WATCH_OTHER(getWatchOthers()),
             START(getStartItem()),
-            TUTORIAL(getTutorialBook());
+            TUTORIAL(getTutorialBook()),
+            SETTINGS(getSettings());
 
 
             private final ItemStack itemStack;
@@ -225,6 +226,18 @@ public class InventoryManager {
                 hourGlass.setItemMeta(timeMeta);
                 return hourGlass;
             }
+
+            private static ItemStack getSettings() {
+                ItemStack settings = HeadGenerator.getHeadFromUrl("https://textures.minecraft.net/texture/e4d49bae95c790c3b1ff5b2f01052a714d6185481d5b1c85930b3f99d2321674");
+
+                SkullMeta settingsMeta = (SkullMeta) settings.getItemMeta();
+                if (settingsMeta != null)
+                    settingsMeta.setDisplayName(ChatColor.AQUA + Minesweeper.getPlugin(Minesweeper.class).getLanguage().getString("settings"));
+
+                settings.setItemMeta(settingsMeta);
+                return settings;
+            }
+
 
             public ItemStack getItemStack() {
                 return itemStack;

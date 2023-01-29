@@ -5,6 +5,7 @@ import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
 import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
 import de.teddybear2004.minesweeper.game.inventory.content.ChooseGameGenerator;
+import de.teddybear2004.minesweeper.game.inventory.content.SettingsGenerator;
 import de.teddybear2004.minesweeper.game.inventory.content.ViewGamesGenerator;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -66,6 +67,9 @@ public class GenericRightClickEvent implements Listener {
                 event.setCancelled(true);
             } else if (itemStack.equals(InventoryManager.PlayerInventory.Items.START.getItemStack())) {
                 player.openInventory(manager.getInventory(ChooseGameGenerator.class, player));
+                event.setCancelled(true);
+            } else if (itemStack.equals(InventoryManager.PlayerInventory.Items.SETTINGS.getItemStack())) {
+                player.openInventory(manager.getInventory(SettingsGenerator.class, player));
                 event.setCancelled(true);
             }
         }
