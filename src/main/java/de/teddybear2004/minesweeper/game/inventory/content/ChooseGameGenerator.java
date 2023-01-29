@@ -44,7 +44,7 @@ public class ChooseGameGenerator extends InventoryGenerator {
 
     @Override
     public int getSize() {
-        return 9;
+        return Minesweeper.getPlugin(Minesweeper.class).getChooseGameLines() * 9;
     }
 
     @Override

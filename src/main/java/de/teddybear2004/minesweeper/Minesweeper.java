@@ -54,6 +54,7 @@ public final class Minesweeper extends JavaPlugin {
     private ResourcePackHandler resourcePackHandler;
     private GameManager gameManager;
     private Language language;
+    private int lines;
 
     public GameManager getGameManager() {
         return gameManager;
@@ -61,6 +62,10 @@ public final class Minesweeper extends JavaPlugin {
 
     public Language getLanguage() {
         return language;
+    }
+
+    public int getChooseGameLines() {
+        return lines;
     }
 
     @Override
@@ -93,6 +98,7 @@ public final class Minesweeper extends JavaPlugin {
         saveDefaultConfig();
         reloadConfig();
         List<Game> games = new ArrayList<>();
+        this.lines = getConfig().getInt("available_games_inventory_lines");
 
         this.gameManager = new GameManager(games);
 
