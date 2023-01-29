@@ -134,6 +134,57 @@ public class GameStatistic {
         }
     }
 
+    public static GameStatistic retrieveNthAveragePerMap(@Nullable ConnectionBuilder connectionBuilder, String map, int bombCount, int n, int averageOf) {
+        if (connectionBuilder == null)
+            return null;
+
+        try(Connection connection = connectionBuilder.getConnection()){
+            PreparedStatement preparedStatement
+                    = connection.prepareStatement("""
+                                                          SELECT *, SUM(duration) / COUNT(duration) as average
+                                                                   FROM (SELECT *,
+                                                                                ROW_NUMBER() OVER (PARTITION BY uuid ORDER BY CAST(duration AS INTEGER)) AS row_num
+                                                                         FROM minesweeper_stats
+                                                                         WHERE won = 1
+                                                                           AND bomb_count = ?
+                                                                           AND map = ?
+                                                                           AND set_seed = 0
+                                                                         ORDER BY CAST(duration AS INTEGER)) ranked
+                                                                   WHERE row_num <= ?
+                                                                   GROUP BY uuid
+                                                                   HAVING COUNT(duration) >=?
+                                                                   ORDER BY average
+                                                                   LIMIT 1
+                                                                   OFFSET ?;
+                                                          """);
+
+            preparedStatement.setString(1, map);
+            preparedStatement.setObject(2, bombCount);
+            preparedStatement.setObject(3, averageOf);
+            preparedStatement.setObject(4, averageOf);
+            preparedStatement.setObject(5, n - 1);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next())
+                return new GameStatistic(
+                        resultSet.getString("uuid"),
+                        resultSet.getLong("start"),
+                        resultSet.getLong("duration"),
+                        resultSet.getInt("bomb_count"),
+                        resultSet.getString("map"),
+                        resultSet.getBoolean("set_seed"),
+                        resultSet.getLong("seed"),
+                        resultSet.getInt("x"),
+                        resultSet.getInt("y"),
+                        resultSet.getBoolean("won")
+                );
+            return null;
+        }catch(SQLException e){
+            throw new RuntimeException(e);
+        }
+    }
+
     public static @NotNull List<GameStatistic> retrieveTopPerMap(@Nullable ConnectionBuilder connectionBuilder, String map, int bombCount, int number) {
         if (connectionBuilder == null)
             return new ArrayList<>();

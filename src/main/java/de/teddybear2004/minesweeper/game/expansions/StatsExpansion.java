@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 
 public class StatsExpansion extends PlaceholderExpansion {
+
     private final ConnectionBuilder connectionBuilder;
 
     public StatsExpansion(ConnectionBuilder connectionBuilder) {
@@ -44,24 +45,42 @@ public class StatsExpansion extends PlaceholderExpansion {
 
         String[] map = args[0].split("@");
 
-        if (map.length != 2)
-            return null;
+        if (map.length == 2) {
+            try{
+                GameStatistic gameStatistic = GameStatistic.retrieveNthPerMap(connectionBuilder,
+                                                                              map[0],
+                                                                              Integer.parseInt(map[1]),
+                                                                              Integer.parseInt(args[1]));
 
-        try{
-            GameStatistic gameStatistic = GameStatistic.retrieveNthPerMap(connectionBuilder,
-                                                                          map[0],
-                                                                          Integer.parseInt(map[1]),
-                                                                          Integer.parseInt(args[1]));
+                if (gameStatistic == null)
+                    return null;
 
-            if (gameStatistic == null)
+                return args[1] + ". " + gameStatistic.getName() + ": " + Time.parse(false, gameStatistic.getDuration());
+
+
+            }catch(NumberFormatException e){
                 return null;
+            }
+        } else if (map.length == 3) {
+            if (map[0].toLowerCase().startsWith("avg")) {
+                try{
+                    GameStatistic gameStatistic = GameStatistic.retrieveNthAveragePerMap(connectionBuilder,
+                                                                                         map[1],
+                                                                                         Integer.parseInt(map[2]),
+                                                                                         Integer.parseInt(args[1]),
+                                                                                         Integer.parseInt(map[0].substring(3)));
 
-            return args[1] + ". " + gameStatistic.getName() + ": " + Time.parse(false, gameStatistic.getDuration());
+                    if (gameStatistic == null)
+                        return null;
 
-
-        }catch(NumberFormatException e){
-            return null;
+                    return args[1] + ". " + gameStatistic.getName() + ": " + Time.parse(false, gameStatistic.getDuration());
+                }catch(NumberFormatException e){
+                    return null;
+                }
+            }
         }
+
+        return null;
     }
 
 }
