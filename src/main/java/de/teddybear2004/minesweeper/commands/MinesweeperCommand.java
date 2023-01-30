@@ -67,21 +67,18 @@ public record MinesweeperCommand(GameManager manager, Game customGame, Language 
             }
 
             try{
-                if (args.length == 3) {
-                    customGame.getStarter()
-                            .setBombCount(bombCount)
-                            .setWidth(w)
-                            .setHeight(h)
-                            .build(player);
-                } else {
-                    customGame.getStarter()
-                            .setBombCount(bombCount)
-                            .setWidth(w)
-                            .setHeight(h)
+                Game.Builder builder = customGame
+                        .getStarter()
+                        .setBombCount(bombCount)
+                        .setWidth(w)
+                        .setHeight(h);
+
+                if (args.length != 3)
+                    builder
                             .setSeed(Long.parseLong(args[3]))
-                            .setSetSeed(true)
-                            .build(player);
-                }
+                            .setSetSeed(true);
+
+                builder.build(player);
             }catch(IllegalArgumentException e){
                 player.sendMessage(ChatColor.DARK_RED + language.getString("error_bomb_size_not_valid"));
             }
