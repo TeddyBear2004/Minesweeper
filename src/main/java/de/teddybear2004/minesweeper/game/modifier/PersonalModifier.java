@@ -102,7 +102,7 @@ public class PersonalModifier {
                 "quick_reveal",
                 ModifierType::getBoolean,
                 ModifierType::handleBooleanClick,
-                false),
+                true),
         HIDE_PLAYER(
                 new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "hide_player"),
                 CustomPersistentDataType.PERSISTENT_BOOLEAN,
@@ -123,7 +123,7 @@ public class PersonalModifier {
                 "reveal_on_double_click",
                 ModifierType::getBoolean,
                 ModifierType::handleBooleanClick,
-                true),
+                false),
         USE_MULTI_FLAG(
                 new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "use_multi_flag"),
                 CustomPersistentDataType.PERSISTENT_BOOLEAN,
