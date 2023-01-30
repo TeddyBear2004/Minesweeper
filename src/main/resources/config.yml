@@ -58,6 +58,7 @@ location_based:
 
 
 use_default_map: true
+map_url: http://plugins.teddybear2004.de:8080/MineSweeper.zip
 available_games_inventory_lines: 1
 
 custom_game:

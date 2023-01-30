@@ -39,6 +39,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -109,7 +110,7 @@ public final class Minesweeper extends JavaPlugin {
 
         language = loadLanguage();
         List<ModifierArea> modifierAreas = loadAreas();
-        loadWorld();
+        loadWorld(getConfig().getString("map_url"));
         loadModifier(modifierAreas);
         ConnectionBuilder connectionBuilder = loadConnectionBuilder(getConfig().getConfigurationSection("database"));
 
@@ -189,7 +190,7 @@ public final class Minesweeper extends JavaPlugin {
         return list;
     }
 
-    private void loadWorld() {
+    private void loadWorld(String url) {
         if (!getConfig().getBoolean("use_default_map"))
             return;
 
@@ -203,7 +204,8 @@ public final class Minesweeper extends JavaPlugin {
             return;
         }
 
-        try(ZipInputStream zis = new ZipInputStream(Objects.requireNonNull(getResource("MineSweeper.zip")))){
+        getLogger().info("Downloading world...");
+        try(ZipInputStream zis = new ZipInputStream(new URL(url).openStream())){
             ZipEntry zipEntry;
             byte[] buffer = new byte[1024];
             while ((zipEntry = zis.getNextEntry()) != null) {
@@ -234,7 +236,9 @@ public final class Minesweeper extends JavaPlugin {
                 }
 
             }
+            getLogger().info("Successfully loaded world.");
         }catch(IOException e){
+            getLogger().severe("Failed to download/load world:");
             e.printStackTrace();
         }
 
