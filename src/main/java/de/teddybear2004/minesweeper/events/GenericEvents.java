@@ -103,11 +103,10 @@ public class GenericEvents implements Listener {
     @EventHandler
     public void onPlayerQuitEvent(@NotNull PlayerQuitEvent event) {
         Game game = gameManager.getGame(event.getPlayer());
-        if (game != null) {
+        Board board = gameManager.getBoard(event.getPlayer());
+        if (game != null && board != null && board.getPlayer().equals(event.getPlayer())) {
             gameManager.finishGame(event.getPlayer(), false);
-            Board board = gameManager.getBoard(event.getPlayer());
-            if (board != null)
-                board.breakGame();
+            board.breakGame();
         }
     }
 
