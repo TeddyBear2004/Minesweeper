@@ -14,6 +14,7 @@ import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
 import de.teddybear2004.minesweeper.game.click.ClickHandler;
 import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
+import de.teddybear2004.minesweeper.scheduler.RemoveMarkerScheduler;
 import de.teddybear2004.minesweeper.util.PacketUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -21,7 +22,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -107,6 +107,7 @@ public class BlockPainter implements Painter {
         }
 
         sendMultiBlockChange(players, subChunkMap);
+        players.forEach(PacketUtil::removeBlockHighlights);
         if (bombTask != null)
             this.bombTask.cancel();
     }
@@ -302,23 +303,13 @@ public class BlockPainter implements Painter {
     }
 
     @Override
-    public void highlightField(@NotNull Field field, @NotNull List<Player> players) {
-        PacketContainer spawnEntityContainer = PacketUtil.getSpawnEntityContainer(field.getLocation().clone().add(0.5, 0, 0.5), EntityType.SLIME);
-        int entityId = spawnEntityContainer.getIntegers().read(0);
-
-        PacketContainer slimeMetadata = PacketUtil.getSlimeMetadata(entityId);
-        PacketContainer noCollision = PacketUtil.joinTeam("no_collision", Collections.singletonList(spawnEntityContainer.getUUIDs().read(0)));
-
-        ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
+    public void highlightFields(@NotNull List<Field> fields, @NotNull List<Player> players, RemoveMarkerScheduler removeMarkerScheduler) {
         players.forEach(player -> {
-            try{
-                protocolManager.sendServerPacket(player, spawnEntityContainer);
-                protocolManager.sendServerPacket(player, slimeMetadata);
-                protocolManager.sendServerPacket(player, noCollision);
-            }catch(InvocationTargetException e){
-                throw new RuntimeException(e);
-            }
+            PacketUtil.removeBlockHighlights(player);
+            fields.forEach(field -> PacketUtil.sendBlockHighlight(player, field.getLocation().getBlockX(), field.getLocation().getBlockY(), field.getLocation().getBlockZ(), 60, 1000));
+            removeMarkerScheduler.add(player, 1000);
         });
+
     }
 
     public Material getActualMaterial(@NotNull Field field) {

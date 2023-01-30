@@ -8,6 +8,7 @@ import de.teddybear2004.minesweeper.game.Board;
 import de.teddybear2004.minesweeper.game.Field;
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.modifier.PersonalModifier;
+import de.teddybear2004.minesweeper.scheduler.RemoveMarkerScheduler;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -81,6 +82,6 @@ public interface Painter {
 
     void onLeftClick(Player player, PacketEvent event, Game game, PacketContainer packet);
 
-    void highlightField(Field field, List<Player> players);
+    void highlightFields(List<Field> field, List<Player> players, RemoveMarkerScheduler removeMarkerScheduler);
 
 }

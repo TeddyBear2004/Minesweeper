@@ -1,6 +1,7 @@
 package de.teddybear2004.minesweeper.game;
 
 import de.teddybear2004.minesweeper.game.modifier.Modifier;
+import de.teddybear2004.minesweeper.scheduler.RemoveMarkerScheduler;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -16,9 +17,11 @@ public class GameManager {
     private final Map<Player, Board> runningGames = new HashMap<>();
     private final Map<Player, Game> playerLocation = new HashMap<>();
     private final List<Game> games;
+    private final RemoveMarkerScheduler removeMarkerScheduler;
 
-    public GameManager(List<Game> games) {
+    public GameManager(List<Game> games, RemoveMarkerScheduler removeMarkerScheduler) {
         this.games = games;
+        this.removeMarkerScheduler = removeMarkerScheduler;
     }
 
     public void startWatching(@NotNull Player p, @NotNull Board b) {
@@ -108,6 +111,10 @@ public class GameManager {
                 return true;
 
         return false;
+    }
+
+    public RemoveMarkerScheduler getRemoveMarkerScheduler() {
+        return removeMarkerScheduler;
     }
 
 }

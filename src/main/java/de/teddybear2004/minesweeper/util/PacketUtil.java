@@ -4,7 +4,10 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.utility.MinecraftReflection;
 import com.comphenix.protocol.wrappers.*;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
@@ -15,10 +18,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -26,10 +30,8 @@ import java.util.stream.Collectors;
 public class PacketUtil {
 
     private static final AtomicInteger ATOMIC_INTEGER = new AtomicInteger(Integer.MIN_VALUE + 1000);
-    private static final WrappedDataWatcher.Serializer INT_SERIALIZER = WrappedDataWatcher.Registry.get(Integer.class);
     private static final WrappedDataWatcher.Serializer BYTE_SERIALIZER = WrappedDataWatcher.Registry.get(Byte.class);
     private static WrappedDataWatcher armorStandDataWatcher;
-    private static WrappedDataWatcher slimeDataWatcher;
 
     public static void sendActionBar(@NotNull Player player, String message) {
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
@@ -43,6 +45,17 @@ public class PacketUtil {
         player.playSound(blockPosition, sound, volume, 1f);
     }
 
+    public static void sendBlockChange(Player player, BlockPosition blockPosition, WrappedBlockData wrappedBlockData) {
+        ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
+        PacketContainer packet = getBlockChange(blockPosition, wrappedBlockData);
+
+        try{
+            protocolManager.sendServerPacket(player, packet);
+        }catch(InvocationTargetException e){
+            e.printStackTrace();
+        }
+    }
+
     public static @NotNull PacketContainer getBlockChange(BlockPosition blockPosition, WrappedBlockData wrappedBlockData) {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.BLOCK_CHANGE, true);
@@ -54,17 +67,6 @@ public class PacketUtil {
                 .write(0, blockPosition);
 
         return packet;
-    }
-
-    public static void sendBlockChange(Player player, BlockPosition blockPosition, WrappedBlockData wrappedBlockData) {
-        ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
-        PacketContainer packet = getBlockChange(blockPosition, wrappedBlockData);
-
-        try{
-            protocolManager.sendServerPacket(player, packet);
-        }catch(InvocationTargetException e){
-            e.printStackTrace();
-        }
     }
 
     public static @NotNull PacketContainer getMultiBlockChange(short[] shorts, BlockPosition blockPosition, WrappedBlockData[] wrappedBlockData, boolean b) {
@@ -146,36 +148,52 @@ public class PacketUtil {
         return packet;
     }
 
-    public static @NotNull PacketContainer getSlimeMetadata(int entityId) {
-        WrappedDataWatcher dataWatcher = getDefaultWrappedDataWatcherForSlimes();
+    public static void sendBlockHighlight(Player pl, int x, int y, int z, int alpha, int time) {
+        ByteBuf packet = Unpooled.buffer();
+        packet.writeLong(PacketUtil.blockPosToLong(x, y, z));
+        packet.writeInt(new Color(0xF0, 0xF8, 0xFF, alpha).getRGB());
 
-        PacketContainer metadataPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
+        packet.writeInt(time);
+        writeString(packet);
 
-        metadataPacket.getIntegers().write(0, entityId);
-
-        metadataPacket.getWatchableCollectionModifier().write(0, dataWatcher.getWatchableObjects());
-
-        return metadataPacket;
+        PacketUtil.sendPayload(pl, "debug/game_test_add_marker", packet);
     }
 
-    private static @NotNull WrappedDataWatcher getDefaultWrappedDataWatcherForSlimes() {
-        if (slimeDataWatcher != null)
-            return slimeDataWatcher;
-        WrappedDataWatcher wrappedDataWatcher = new WrappedDataWatcher();
-
-
-        wrappedDataWatcher.setObject(0, BYTE_SERIALIZER, (byte) (/*0x20 | */0x40));
-        wrappedDataWatcher.setObject(9, INT_SERIALIZER, 20);
-        wrappedDataWatcher.setObject(15, BYTE_SERIALIZER, (byte) 0x01);
-        wrappedDataWatcher.setObject(16, INT_SERIALIZER, 0);
-
-        slimeDataWatcher = wrappedDataWatcher;
-        return wrappedDataWatcher;
+    private static long blockPosToLong(int x, int y, int z) {
+        return ((long) x & 67108863L) << 38 | (long) y & 4095L | ((long) z & 67108863L) << 12;
     }
 
-    public static @NotNull PacketContainer joinTeam(String teamName, @NotNull List<UUID> uuids) {
+    private static void writeString(ByteBuf packet) {
+        byte[] abyte = " ".getBytes(StandardCharsets.UTF_8);
+        d(packet, abyte.length);
+        packet.writeBytes(abyte);
+    }
 
-        return new PacketContainer(PacketType.Play.Server.SCOREBOARD_TEAM);
+    private static void sendPayload(Player receiver, String channel, ByteBuf bytes) {
+        PacketContainer handle = new PacketContainer(PacketType.Play.Server.CUSTOM_PAYLOAD);
+        handle.getMinecraftKeys().write(0, new MinecraftKey(channel));
+
+        Object serializer = MinecraftReflection.getPacketDataSerializer(bytes);
+        handle.getModifier().withType(ByteBuf.class).write(0, serializer);
+
+        try{
+            ProtocolLibrary.getProtocolManager().sendServerPacket(receiver, handle);
+        }catch(InvocationTargetException e){
+            throw new RuntimeException("Unable to send the packet", e);
+        }
+    }
+
+    private static void d(ByteBuf packet, int i) {
+        while ((i & -128) != 0) {
+            packet.writeByte(i & 127 | 128);
+            i >>>= 7;
+        }
+
+        packet.writeByte(i);
+    }
+
+    public static void removeBlockHighlights(Player pl) {
+        PacketUtil.sendPayload(pl, "debug/game_test_clear", Unpooled.wrappedBuffer(new byte[0]));
     }
 
     public static @NotNull PacketContainer getRemoveEntity(int @NotNull ... entityId) {
@@ -188,6 +206,5 @@ public class PacketUtil {
 
         return packet;
     }
-
 
 }

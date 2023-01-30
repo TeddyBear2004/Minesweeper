@@ -23,6 +23,7 @@ import de.teddybear2004.minesweeper.game.texture.pack.ExternalWebServerHandler;
 import de.teddybear2004.minesweeper.game.texture.pack.InternalWebServerHandler;
 import de.teddybear2004.minesweeper.game.texture.pack.ResourcePackHandler;
 import de.teddybear2004.minesweeper.scheduler.HidePlayerScheduler;
+import de.teddybear2004.minesweeper.scheduler.RemoveMarkerScheduler;
 import de.teddybear2004.minesweeper.util.ConnectionBuilder;
 import de.teddybear2004.minesweeper.util.JarWalker;
 import de.teddybear2004.minesweeper.util.Language;
@@ -52,13 +53,8 @@ public final class Minesweeper extends JavaPlugin {
     private final List<BukkitTask> tasks = new ArrayList<>();
     private String langPath;
     private ResourcePackHandler resourcePackHandler;
-    private GameManager gameManager;
     private Language language;
     private int lines;
-
-    public GameManager getGameManager() {
-        return gameManager;
-    }
 
     public Language getLanguage() {
         return language;
@@ -100,7 +96,10 @@ public final class Minesweeper extends JavaPlugin {
         List<Game> games = new ArrayList<>();
         this.lines = getConfig().getInt("available_games_inventory_lines");
 
-        this.gameManager = new GameManager(games);
+        RemoveMarkerScheduler removeMarkerScheduler = new RemoveMarkerScheduler();
+        removeMarkerScheduler.runTaskTimer(this, 0, 5);
+
+        GameManager gameManager = new GameManager(games, removeMarkerScheduler);
 
         ClickHandler clickHandler = new ClickHandler();
 
@@ -352,4 +351,5 @@ public final class Minesweeper extends JavaPlugin {
 
         return new DisableResourceHandler();
     }
+
 }

@@ -13,6 +13,7 @@ import de.teddybear2004.minesweeper.game.Field;
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
 import de.teddybear2004.minesweeper.game.click.ClickHandler;
+import de.teddybear2004.minesweeper.scheduler.RemoveMarkerScheduler;
 import de.teddybear2004.minesweeper.util.HeadGenerator;
 import de.teddybear2004.minesweeper.util.PacketUtil;
 import org.bukkit.Bukkit;
@@ -292,7 +293,7 @@ public class ArmorStandPainter implements Painter {
     }
 
     @Override
-    public void highlightField(Field field, List<Player> players) {
+    public void highlightFields(List<Field> fields, List<Player> players, RemoveMarkerScheduler removeMarkerScheduler) {
 
     }
 

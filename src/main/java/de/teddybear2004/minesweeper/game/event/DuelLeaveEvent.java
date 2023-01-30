@@ -26,8 +26,4 @@ public class DuelLeaveEvent extends DuelEvent {
         return HANDLER_LIST;
     }
 
-    public DuelGame.Builder getBuilder() {
-        return builder;
-    }
-
 }

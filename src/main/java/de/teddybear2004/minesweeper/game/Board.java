@@ -16,6 +16,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+import static de.teddybear2004.minesweeper.game.SurfaceDiscoverer.SURROUNDINGS;
+
 public class Board implements Comparable<Board> {
 
     private final Game game;
@@ -216,7 +218,7 @@ public class Board implements Comparable<Board> {
         }
 
         for (int[] ints1 : this.bombList) {
-            SurfaceDiscoverer.SURROUNDINGS.parallelStream().forEach(ints2 -> {
+            SURROUNDINGS.parallelStream().forEach(ints2 -> {
                 int xCoord = ints1[0] + ints2[0];
                 int yCoord = ints1[1] + ints2[1];
 
@@ -471,7 +473,15 @@ public class Board implements Comparable<Board> {
     }
 
     public void highlightBlocksAround(Field field) {
-        getCurrentPlayerPainters().forEach((painter, players) -> painter.highlightField(field, players));
+        List<Field> surroundings = new ArrayList<>();
+        SURROUNDINGS.forEach(ints -> {
+            Field relativeTo = field.getRelativeTo(ints[0], ints[1]);
+
+            if (relativeTo != null && relativeTo.isCovered() && !relativeTo.isMarked())
+                surroundings.add(relativeTo);
+        });
+
+        getCurrentPlayerPainters().forEach((painter, players) -> painter.highlightFields(surroundings, players, game.getGameManager().getRemoveMarkerScheduler()));
     }
 
     @Override
