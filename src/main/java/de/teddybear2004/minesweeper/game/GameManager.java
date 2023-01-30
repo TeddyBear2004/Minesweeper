@@ -6,7 +6,6 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,6 @@ public class GameManager {
         if (cur != b.getGame()) {
             switchToMap(p, b.getGame());
         }
-        b.draw(Collections.singletonList(p));
         getGameWatched().put(p, b);
         b.addViewer(p);
     }
