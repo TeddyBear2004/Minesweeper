@@ -89,7 +89,7 @@ public class DuelCommand implements TabExecutor, Listener {
 
                 if (builder != null) {
                     if (builder.kick(player)) {
-                        DuelLeaveEvent event = new DuelLeaveEvent(player, builder);
+                        DuelLeaveEvent event = new DuelLeaveEvent(player);
                         Bukkit.getServer().getPluginManager().callEvent(event);
                         player1.sendMessage(language.getString("send_leave", player.getName()));
                         builder.broadcast(language.getString("broadcast_leave", player1.getName()));
@@ -107,7 +107,7 @@ public class DuelCommand implements TabExecutor, Listener {
 
                 if (builder != null) {
                     if (builder.kick(Bukkit.getPlayer(args[1]))) {
-                        DuelLeaveEvent event = new DuelLeaveEvent(player, builder);
+                        DuelLeaveEvent event = new DuelLeaveEvent(player);
                         Bukkit.getServer().getPluginManager().callEvent(event);
 
                         player1.sendMessage(language.getString("send_kick", player.getName()));
