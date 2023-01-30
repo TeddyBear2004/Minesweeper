@@ -447,14 +447,6 @@ public class Board implements Comparable<Board> {
         finish(false);
     }
 
-    protected void generateBoard(Field[] @NotNull [] board) {
-        if (this.isGenerated)
-            throw new RuntimeException(language.getString("error_already_generated"));
-
-        System.arraycopy(board, 0, this.board, 0, board.length);
-        this.isGenerated = true;
-    }
-
     public void updateScoreBoard() {
         Team flagCounter = scoreboard.getTeam("flagCounter");
         if (flagCounter != null)
