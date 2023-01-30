@@ -55,6 +55,7 @@ public final class Minesweeper extends JavaPlugin {
     private String langPath;
     private ResourcePackHandler resourcePackHandler;
     private Language language;
+    private GameManager gameManager;
     private int lines;
 
     public Language getLanguage() {
@@ -63,6 +64,10 @@ public final class Minesweeper extends JavaPlugin {
 
     public int getChooseGameLines() {
         return lines;
+    }
+
+    public GameManager getGameManager() {
+        return gameManager;
     }
 
     @Override
@@ -100,7 +105,7 @@ public final class Minesweeper extends JavaPlugin {
         RemoveMarkerScheduler removeMarkerScheduler = new RemoveMarkerScheduler();
         removeMarkerScheduler.runTaskTimer(this, 0, 5);
 
-        GameManager gameManager = new GameManager(games, removeMarkerScheduler);
+        gameManager = new GameManager(games, removeMarkerScheduler);
 
         ClickHandler clickHandler = new ClickHandler();
 

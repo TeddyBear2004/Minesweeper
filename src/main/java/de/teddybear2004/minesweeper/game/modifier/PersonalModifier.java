@@ -2,6 +2,7 @@ package de.teddybear2004.minesweeper.game.modifier;
 
 import de.teddy.minesweeper.game.painter.Painter;
 import de.teddybear2004.minesweeper.Minesweeper;
+import de.teddybear2004.minesweeper.game.Board;
 import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
 import de.teddybear2004.minesweeper.util.CustomPersistentDataType;
 import de.teddybear2004.minesweeper.util.HeadGenerator;
@@ -20,10 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -187,6 +185,11 @@ public class PersonalModifier {
                 return;
 
             Painter painter = Painter.getPainter(s);
+            Board board = Minesweeper.getPlugin(Minesweeper.class).getGameManager().getBoardWatched(clickObject.player());
+            List<Player> players = Collections.singletonList(clickObject.player);
+            if (painter != null && board != null)
+                painter.drawBlancField(board, players);
+
             Painter newPainter = null;
             boolean returnOnNext = false;
 
@@ -206,8 +209,11 @@ public class PersonalModifier {
             if (newPainter == null)
                 newPainter = first;
 
-            if (newPainter != null)
+            if (newPainter != null) {
                 clickObject.modifier.set(clickObject.type(), newPainter.getClass().getName());
+                if (board != null)
+                    newPainter.drawField(board, players);
+            }
 
             clickObject.inventory.setItem(clickObject.clickedSlot,
                                           clickObject.manager.insertItemId(getPainter(clickObject.player(), clickObject.language(), clickObject.type()), clickObject.itemId).getSecond());
