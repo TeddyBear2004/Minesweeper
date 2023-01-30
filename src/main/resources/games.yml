@@ -1,0 +1,80 @@
+custom_game:
+  enable: true
+  corner:
+    x: 31
+    y: 35
+    z: -214
+    world: MineSweeper
+  min-size:
+    width: 4
+    height: 4
+  max-size:
+    width: 50
+    height: 50
+  spawn:
+    x: 58
+    y: 40
+    z: -222
+    yaw: 0
+    pitch: 30
+    world: MineSweeper
+
+
+games:
+  Map10x10:
+    corner:
+      x: 53
+      y: 17
+      z: -331
+      world: MineSweeper
+    spawn:
+      x: 58
+      y: 20
+      z: -318.5
+      yaw: -180
+      pitch: 30
+      world: MineSweeper
+    border_size: 10
+    bomb_count: 10
+    difficulty_lang_path: easy
+    inventory_material: LIME_STAINED_GLASS_PANE
+    inventory_position: 2
+
+
+  Map18x18:
+    corner:
+      x: 49
+      y: 16
+      z: -198
+      world: MineSweeper
+    spawn:
+      x: 57
+      y: 20
+      z: -177.5
+      yaw: -180
+      pitch: 30
+      world: MineSweeper
+    border_size: 18
+    bomb_count: 40
+    difficulty_lang_path: normal
+    inventory_material: YELLOW_STAINED_GLASS_PANE
+    inventory_position: 4
+
+  Map24x24:
+    corner:
+      x: 49
+      y: 14
+      z: -63
+      world: MineSweeper
+    spawn:
+      x: 61
+      y: 18
+      z: -37.5
+      yaw: -180
+      pitch: 30
+      world: MineSweeper
+    border_size: 24
+    bomb_count: 99
+    difficulty_lang_path: hard
+    inventory_material: RED_STAINED_GLASS_PANE
+    inventory_position: 6

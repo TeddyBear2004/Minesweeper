@@ -29,6 +29,7 @@ import de.teddybear2004.minesweeper.util.JarWalker;
 import de.teddybear2004.minesweeper.util.Language;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
@@ -99,6 +100,12 @@ public final class Minesweeper extends JavaPlugin {
 
         saveDefaultConfig();
         reloadConfig();
+
+        File gameFile = new File(getDataFolder(), "games.yml");
+        if (!gameFile.exists()) {
+            saveResource("games.yml", false);
+        }
+
         List<Game> games = new ArrayList<>();
         this.lines = getConfig().getInt("available_games_inventory_lines");
 
@@ -119,8 +126,9 @@ public final class Minesweeper extends JavaPlugin {
         loadModifier(modifierAreas);
         ConnectionBuilder connectionBuilder = loadConnectionBuilder(getConfig().getConfigurationSection("database"));
 
-        loadGames(games, language, connectionBuilder, gameManager);
-        Game customGame = loadCustomGame(getConfig().getConfigurationSection("custom_game"), connectionBuilder, gameManager, language);
+        YamlConfiguration gameConfig = YamlConfiguration.loadConfiguration(gameFile);
+        loadGames(games, language, connectionBuilder, gameManager, gameConfig);
+        Game customGame = loadCustomGame(gameConfig.getConfigurationSection("custom_game"), connectionBuilder, gameManager, language);
 
         if (customGame != null)
             games.add(customGame);
@@ -279,8 +287,8 @@ public final class Minesweeper extends JavaPlugin {
         }
     }
 
-    private void loadGames(@NotNull List<Game> games, @NotNull Language language, ConnectionBuilder connectionBuilder, GameManager gameManager) {
-        ConfigurationSection gameSection = getConfig().getConfigurationSection("games");
+    private void loadGames(@NotNull List<Game> games, @NotNull Language language, ConnectionBuilder connectionBuilder, GameManager gameManager, YamlConfiguration configuration) {
+        ConfigurationSection gameSection = configuration.getConfigurationSection("games");
         if (gameSection == null)
             return;
 
