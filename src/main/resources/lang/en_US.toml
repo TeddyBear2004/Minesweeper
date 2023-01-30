@@ -66,6 +66,8 @@ break_flags = "Break flags"
 hide_while_in_game = "Just hide players while ingame"
 restart_on_item_swap = "Press F to restart"
 
+settings = "Settings"
+
 send_current_setting_number = "Your current {0} is {1}."
 send_current_setting_boolean = "Currently {0} is {1}."
 send_was_applied = "The specified {0} was applied."

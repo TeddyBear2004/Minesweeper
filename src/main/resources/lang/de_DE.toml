@@ -67,6 +67,8 @@ break_flags = "Zerstöre Flaggen"
 hide_while_in_game = "Verstecke Spieler nur während eines Spiels"
 restart_on_item_swap = "F für Neustart"
 
+settings = "Einstellungen"
+
 send_current_setting_number = "Deine aktuelle {0} ist {1}."
 send_current_setting_boolean = "Derzeit ist {0} {1}."
 send_was_applied = "Die angegebene {0} wurde angewendet."
