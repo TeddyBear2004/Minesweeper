@@ -51,24 +51,21 @@ public record MinesweeperCommand(GameManager manager, Game customGame, Language 
             }
             int w, h, bombCount;
 
-            try{
-                bombCount = Integer.parseInt(args[1]);
-            }catch(NumberFormatException e){
-                player.sendMessage(ChatColor.DARK_RED + language.getString("error_no_valid_number"));
-                return true;
-
-            }
             int i = args[2].toLowerCase().indexOf("x");
             String s1 = args[2].substring(0, i);
             String s2 = args[2].substring(i + 1);
 
+
             try{
+                bombCount = Integer.parseInt(args[1]);
                 w = Integer.parseInt(s1);
                 h = Integer.parseInt(s2);
             }catch(NumberFormatException e){
                 player.sendMessage(ChatColor.DARK_RED + language.getString("error_no_valid_number"));
                 return true;
+
             }
+
             try{
                 if (args.length == 3) {
                     customGame.getStarter()
