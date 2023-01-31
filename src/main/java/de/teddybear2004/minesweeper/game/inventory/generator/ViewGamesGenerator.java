@@ -1,4 +1,4 @@
-package de.teddybear2004.minesweeper.game.inventory.content;
+package de.teddybear2004.minesweeper.game.inventory.generator;
 
 import com.mojang.datafixers.util.Pair;
 import de.teddybear2004.minesweeper.game.Board;

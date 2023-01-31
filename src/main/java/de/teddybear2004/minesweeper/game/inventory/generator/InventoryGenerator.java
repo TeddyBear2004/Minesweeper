@@ -1,4 +1,4 @@
-package de.teddybear2004.minesweeper.game.inventory.content;
+package de.teddybear2004.minesweeper.game.inventory.generator;
 
 import de.teddybear2004.minesweeper.game.GameManager;
 import de.teddybear2004.minesweeper.game.inventory.InventoryManager;

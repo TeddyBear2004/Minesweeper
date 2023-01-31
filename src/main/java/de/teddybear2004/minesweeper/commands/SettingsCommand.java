@@ -1,7 +1,7 @@
 package de.teddybear2004.minesweeper.commands;
 
 import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
-import de.teddybear2004.minesweeper.game.inventory.content.SettingsGenerator;
+import de.teddybear2004.minesweeper.game.inventory.generator.SettingsGenerator;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;

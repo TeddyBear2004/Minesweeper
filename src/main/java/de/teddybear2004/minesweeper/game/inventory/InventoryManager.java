@@ -3,7 +3,7 @@ package de.teddybear2004.minesweeper.game.inventory;
 import com.mojang.datafixers.util.Pair;
 import de.teddybear2004.minesweeper.Minesweeper;
 import de.teddybear2004.minesweeper.game.GameManager;
-import de.teddybear2004.minesweeper.game.inventory.content.InventoryGenerator;
+import de.teddybear2004.minesweeper.game.inventory.generator.InventoryGenerator;
 import de.teddybear2004.minesweeper.util.HeadGenerator;
 import de.teddybear2004.minesweeper.util.Language;
 import org.bukkit.Bukkit;

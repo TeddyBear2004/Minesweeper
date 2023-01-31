@@ -3,7 +3,7 @@ package de.teddybear2004.minesweeper.commands;
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
 import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
-import de.teddybear2004.minesweeper.game.inventory.content.ViewGamesGenerator;
+import de.teddybear2004.minesweeper.game.inventory.generator.ViewGamesGenerator;
 import de.teddybear2004.minesweeper.util.Language;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
