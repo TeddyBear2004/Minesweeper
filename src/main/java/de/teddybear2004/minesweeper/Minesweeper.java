@@ -301,7 +301,8 @@ public final class Minesweeper extends JavaPlugin {
             assert spawnSection != null;
             Location spawn = new Location(Bukkit.createWorld(WorldCreator.name(Objects.requireNonNull(spawnSection.getString("world")))), spawnSection.getInt("x"), spawnSection.getInt("y"), spawnSection.getInt("z"), spawnSection.getInt("yaw"), spawnSection.getInt("pitch"));
 
-            int borderSize = gameSection.getInt(key + ".border_size");
+            int width = gameSection.getInt(key + ".width");
+            int height = gameSection.getInt(key + ".height");
             int bombCount = gameSection.getInt(key + ".bomb_count");
             String difficultyLangPath = gameSection.getString(key + ".difficulty_lang_path");
 
@@ -314,8 +315,8 @@ public final class Minesweeper extends JavaPlugin {
                                  connectionBuilder,
                                  corner,
                                  spawn,
-                                 borderSize,
-                                 borderSize,
+                                 width,
+                                 height,
                                  bombCount,
                                  difficultyLangPath,
                                  material,
