@@ -32,6 +32,7 @@ public class InventoryManager {
     public static final NamespacedKey ITEM_ID = new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "item_id");
     private final GameManager manager;
     private final Map<Integer, BiConsumer<Inventory, ClickType>> itemStackFunctionMap = new HashMap<>();
+    private final Map<Class<? extends InventoryGenerator>, InventoryGenerator> inventoryGeneratorMap = new HashMap<>();
     private final AtomicInteger integer;
 
     public InventoryManager(GameManager manager) {
@@ -41,9 +42,17 @@ public class InventoryManager {
 
     public Inventory getInventory(Class<? extends InventoryGenerator> inventoryGenerator, Player player) {
         try{
-            InventoryGenerator inventoryGenerator1 = inventoryGenerator.getConstructor(GameManager.class).newInstance(manager);
-            Inventory inventory = Bukkit.createInventory(null, inventoryGenerator1.getSize(), inventoryGenerator1.getName());
 
+            InventoryGenerator inventoryGenerator1;
+
+            if (inventoryGeneratorMap.containsKey(inventoryGenerator)) {
+                inventoryGenerator1 = inventoryGeneratorMap.get(inventoryGenerator);
+            } else {
+                inventoryGenerator1 = inventoryGenerator.getConstructor(GameManager.class).newInstance(manager);
+                inventoryGeneratorMap.put(inventoryGenerator, inventoryGenerator1);
+            }
+
+            Inventory inventory = Bukkit.createInventory(null, inventoryGenerator1.getSize(), inventoryGenerator1.getName());
             inventoryGenerator1.insertConsumerItems(inventory, this)
                     .forEach((integer1, playerConsumerFunction) -> itemStackFunctionMap.put(integer1, playerConsumerFunction.apply(player)));
 
