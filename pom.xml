@@ -13,7 +13,6 @@
 
 	<properties>
 		<java.version>17</java.version>
-		<project.version>17</project.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
