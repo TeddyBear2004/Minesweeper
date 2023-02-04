@@ -14,6 +14,7 @@
 	<properties>
 		<java.version>17</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<output>target/</output>
 	</properties>
 
 	<build>
@@ -39,7 +40,7 @@
 						</goals>
 						<configuration>
 							<createDependencyReducedPom>false</createDependencyReducedPom>
-							<outputFile>server/plugins/${project.name}-${project.version}.jar</outputFile>
+							<outputFile>${output}${project.name}-${project.version}.jar</outputFile>
 						</configuration>
 					</execution>
 				</executions>
