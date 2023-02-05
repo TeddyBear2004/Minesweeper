@@ -1,6 +1,7 @@
 package de.teddybear2004.retro.games.minesweeper;
 
 import de.teddybear2004.retro.games.game.Board;
+import de.teddybear2004.retro.games.game.Field;
 import de.teddybear2004.retro.games.minesweeper.exceptions.BombExplodeException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;

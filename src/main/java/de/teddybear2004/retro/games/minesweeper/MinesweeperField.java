@@ -1,6 +1,7 @@
 package de.teddybear2004.retro.games.minesweeper;
 
 import de.teddybear2004.retro.games.game.Board;
+import de.teddybear2004.retro.games.game.Field;
 import de.teddybear2004.retro.games.game.modifier.PersonalModifier;
 import org.bukkit.Location;
 import org.bukkit.Material;

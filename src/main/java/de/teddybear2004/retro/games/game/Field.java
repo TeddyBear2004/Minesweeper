@@ -1,6 +1,6 @@
-package de.teddybear2004.retro.games.minesweeper;
+package de.teddybear2004.retro.games.game;
 
-import de.teddybear2004.retro.games.game.Board;
+import de.teddybear2004.retro.games.minesweeper.MinesweeperField;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

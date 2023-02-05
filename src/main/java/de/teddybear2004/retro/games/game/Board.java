@@ -1,7 +1,6 @@
 package de.teddybear2004.retro.games.game;
 
 import de.teddybear2004.retro.games.game.painter.Painter;
-import de.teddybear2004.retro.games.minesweeper.Field;
 import de.teddybear2004.retro.games.minesweeper.exceptions.BombExplodeException;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;

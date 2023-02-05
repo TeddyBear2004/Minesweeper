@@ -2,8 +2,8 @@ package de.teddybear2004.retro.games.game.click;
 
 import com.comphenix.protocol.wrappers.BlockPosition;
 import de.teddybear2004.retro.games.game.Board;
+import de.teddybear2004.retro.games.game.Field;
 import de.teddybear2004.retro.games.game.Game;
-import de.teddybear2004.retro.games.minesweeper.Field;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
