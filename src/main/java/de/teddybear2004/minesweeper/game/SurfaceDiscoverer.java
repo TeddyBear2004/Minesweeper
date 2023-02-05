@@ -26,13 +26,13 @@ public class SurfaceDiscoverer {
      * @param height the height coordinate of the number field
      * @throws BombExplodeException if a bomb is uncovered
      */
-    public static void uncoverFieldsNextToNumber(@NotNull Board board, int width, int height) throws BombExplodeException {
+    public static void uncoverFieldsNextToNumber(@NotNull MinesweeperBoard board, int width, int height) throws BombExplodeException {
         // Check if the given coordinates are within the bounds of the board
         if (width < 0 || width >= board.getBoard().length || height < 0 || height >= board.getBoard()[0].length) {
             throw new IllegalArgumentException();
         }
 
-        Field field = board.getField(width, height);
+        MinesweeperField field = board.getField(width, height);
         if (field == null || field.isCovered())
             return;
 
@@ -73,13 +73,13 @@ public class SurfaceDiscoverer {
      * @param height the height coordinate of the field to uncover
      * @throws BombExplodeException if a bomb is uncovered
      */
-    public static void uncoverFields(@NotNull Board board, int width, int height) throws BombExplodeException {
+    public static void uncoverFields(@NotNull MinesweeperBoard board, int width, int height) throws BombExplodeException {
         // Check if the given coordinates are within the bounds of the board
         if (width < 0 || width >= board.getBoard().length || height < 0 || height >= board.getBoard()[0].length) {
             throw new IllegalArgumentException();
         }
 
-        Field field = board.getField(width, height);
+        MinesweeperField field = board.getField(width, height);
         if (field == null || !field.isCovered()) return;
 
         field.setUncover();
@@ -98,7 +98,7 @@ public class SurfaceDiscoverer {
                 int i = ints[0];
                 int j = ints[1];
 
-                Field relativeTo = current.getRelativeTo(i, j);
+                MinesweeperField relativeTo = current.getRelativeTo(i, j);
                 if (relativeTo == null || !relativeTo.isCovered() || relativeTo.isMarked())
                     return;
 
@@ -111,11 +111,11 @@ public class SurfaceDiscoverer {
         }
     }
 
-    public static void flagFieldsNextToNumber(@NotNull Board board, int width, int height, boolean place) {
+    public static void flagFieldsNextToNumber(@NotNull Board<MinesweeperField> board, int width, int height, boolean place) {
         if (width < 0 || width >= board.getBoard().length || height < 0 || height >= board.getBoard()[0].length)
             throw new IllegalArgumentException();
 
-        Field field = board.getField(width, height);
+        MinesweeperField field = board.getField(width, height);
         if (field == null || field.isCovered())
             return;
 
@@ -124,7 +124,7 @@ public class SurfaceDiscoverer {
             int j = ints[1];
 
 
-            Field field1 = field.getRelativeTo(i, j);
+            MinesweeperField field1 = field.getRelativeTo(i, j);
             if (field1 != null && field1.isCovered())
                 field1.setMark(place ? MarkType.BOMB_MARK : MarkType.NONE);
         });

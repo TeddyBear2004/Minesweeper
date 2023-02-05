@@ -1,8 +1,8 @@
 package de.teddybear2004.minesweeper.game.texture.pack;
 
-import de.teddy.minesweeper.game.painter.ArmorStandPainter;
-import de.teddy.minesweeper.game.painter.Painter;
 import de.teddybear2004.minesweeper.game.modifier.PersonalModifier;
+import de.teddybear2004.minesweeper.game.painter.MinesweeperArmorStandPainter;
+import de.teddybear2004.minesweeper.game.painter.Painter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,7 +15,7 @@ public class DisableResourceHandler implements ResourcePackHandler {
         if (url != null)
             player.setResourcePack(url);
         else
-            Painter.storePainterClass(player.getPersistentDataContainer(), ArmorStandPainter.class);
+            Painter.storePainterClass(player.getPersistentDataContainer(), MinesweeperArmorStandPainter.class);
     }
 
     public @Nullable String getUrl(@NotNull Player player) {

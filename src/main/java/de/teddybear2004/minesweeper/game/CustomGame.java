@@ -30,11 +30,11 @@ public class CustomGame extends Game {
 
 
     @Override
-    public @Nullable Board startGame(@NotNull Player p, boolean shouldTeleport, int bombCount, int width, int height, long seed, boolean setSeed, boolean saveStats) {
+    public @Nullable Board<?> startGame(@NotNull Player p, boolean shouldTeleport, int bombCount, int width, int height, long seed, boolean setSeed, boolean saveStats, Class<? extends Board<?>> boardClass) {
         if (minHeight > height || height > maxHeight || minWidth > width || width > maxWidth)
             return null;
 
-        return super.startGame(p, shouldTeleport, bombCount, width, height, seed, setSeed, saveStats);
+        return super.startGame(p, shouldTeleport, bombCount, width, height, seed, setSeed, saveStats, boardClass);
     }
 
 }

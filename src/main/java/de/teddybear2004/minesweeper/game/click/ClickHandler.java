@@ -10,10 +10,10 @@ import org.bukkit.event.Cancellable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface ClickHandler {
+public interface ClickHandler<F extends Field, B extends Board<F>> {
 
-    void leftClick(@Nullable Player player, @NotNull Game game, @NotNull BlockPosition blockPosition, @NotNull Board board, @Nullable Field field, @NotNull Location location);
+    void leftClick(@Nullable Player player, @NotNull Game game, @NotNull BlockPosition blockPosition, @NotNull B board, @Nullable F field, @NotNull Location location);
 
-    void rightClick(@NotNull Player player, @NotNull Board board, @Nullable Field field, @Nullable Cancellable cancellable);
+    void rightClick(@NotNull Player player, @NotNull B board, @Nullable F field, @Nullable Cancellable cancellable);
 
 }

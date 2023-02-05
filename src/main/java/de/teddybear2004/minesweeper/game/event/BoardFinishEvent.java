@@ -9,7 +9,7 @@ public abstract class BoardFinishEvent extends BoardEvent {
 
     private static final HandlerList HANDLER_LIST = new HandlerList();
 
-    public BoardFinishEvent(Board board, Player player) {
+    public BoardFinishEvent(Board<?> board, Player player) {
         super(board, player);
     }
 

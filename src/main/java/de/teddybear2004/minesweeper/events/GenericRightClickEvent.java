@@ -3,6 +3,7 @@ package de.teddybear2004.minesweeper.events;
 import de.teddybear2004.minesweeper.game.Board;
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
+import de.teddybear2004.minesweeper.game.MinesweeperBoard;
 import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
 import de.teddybear2004.minesweeper.game.inventory.generator.ChooseGameGenerator;
 import de.teddybear2004.minesweeper.game.inventory.generator.SettingsGenerator;
@@ -42,15 +43,15 @@ public class GenericRightClickEvent implements Listener {
         if (itemStack != null) {
             if (game != null) {
                 if (itemStack.equals(InventoryManager.PlayerInventory.Items.RELOAD.getItemStack())) {
-                    Board board = gameManager.getBoard(player);
+                    Board<?> board = gameManager.getBoard(player);
                     if (board.isGenerated()) {
                         gameManager.finishGame(player, false);
                         game.getStarter()
-                                .setBombCount(board.getBombCount())
+                                .setBombCount(((MinesweeperBoard) board).getBombCount())
                                 .setShouldTeleport(false)
                                 .setWidth(board.getWidth())
                                 .setHeight(board.getHeight())
-                                .build(player);
+                                .build(player, MinesweeperBoard.class);
                         event.setCancelled(true);
                     }
                     return;

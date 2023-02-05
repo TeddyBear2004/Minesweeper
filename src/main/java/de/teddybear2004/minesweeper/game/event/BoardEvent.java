@@ -9,10 +9,10 @@ import org.jetbrains.annotations.NotNull;
 public abstract class BoardEvent extends Event {
 
     private static final HandlerList HANDLER_LIST = new HandlerList();
-    private final Board board;
+    private final Board<?> board;
     private final Player player;
 
-    public BoardEvent(Board board, Player player) {
+    public BoardEvent(Board<?> board, Player player) {
         this.board = board;
         this.player = player;
     }
@@ -22,7 +22,7 @@ public abstract class BoardEvent extends Event {
         return HANDLER_LIST;
     }
 
-    public Board getBoard() {
+    public Board<?> getBoard() {
         return board;
     }
 

@@ -1,14 +1,16 @@
 package de.teddybear2004.minesweeper.events;
 
-import de.teddy.minesweeper.game.painter.ArmorStandPainter;
-import de.teddy.minesweeper.game.painter.BlockPainter;
-import de.teddy.minesweeper.game.painter.Painter;
 import de.teddybear2004.minesweeper.game.Board;
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
+import de.teddybear2004.minesweeper.game.MinesweeperBoard;
 import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
 import de.teddybear2004.minesweeper.game.modifier.Modifier;
 import de.teddybear2004.minesweeper.game.modifier.PersonalModifier;
+import de.teddybear2004.minesweeper.game.painter.BlockPainter;
+import de.teddybear2004.minesweeper.game.painter.MinesweeperArmorStandPainter;
+import de.teddybear2004.minesweeper.game.painter.MinesweeperPainter;
+import de.teddybear2004.minesweeper.game.painter.Painter;
 import de.teddybear2004.minesweeper.game.texture.pack.ResourcePackHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
@@ -68,7 +70,7 @@ public class GenericEvents implements Listener {
 
         String s = modifier.get(PersonalModifier.ModifierType.PAINTER_CLASS);
         try{
-            Class<? extends Painter> aClass = Class.forName(s).asSubclass(Painter.class);
+            Class<? extends MinesweeperPainter> aClass = Class.forName(s).asSubclass(MinesweeperPainter.class);
 
             if (aClass != BlockPainter.class) {
                 Painter.storePainterClass(player.getPersistentDataContainer(), aClass);
@@ -86,7 +88,7 @@ public class GenericEvents implements Listener {
         if (Modifier.getInstance().allowDefaultWatch()) {
             boolean watching = false;
             for (Game map : gameManager.getGames()) {
-                Board runningGame = map.getRunningGame();
+                Board<?> runningGame = map.getRunningGame();
                 if (runningGame != null) {
                     map.startViewing(player, runningGame);
                     watching = true;
@@ -103,7 +105,7 @@ public class GenericEvents implements Listener {
     @EventHandler
     public void onPlayerQuitEvent(@NotNull PlayerQuitEvent event) {
         Game game = gameManager.getGame(event.getPlayer());
-        Board board = gameManager.getBoard(event.getPlayer());
+        Board<?> board = gameManager.getBoard(event.getPlayer());
         if (game != null && board != null && board.getPlayer().equals(event.getPlayer())) {
             gameManager.finishGame(event.getPlayer(), false);
             board.breakGame();
@@ -117,7 +119,7 @@ public class GenericEvents implements Listener {
 
         switch(event.getStatus()){
             case DECLINED, FAILED_DOWNLOAD ->
-                    Painter.storePainterClass(player.getPersistentDataContainer(), ArmorStandPainter.class);
+                    Painter.storePainterClass(player.getPersistentDataContainer(), MinesweeperArmorStandPainter.class);
             case SUCCESSFULLY_LOADED ->
                     Painter.storePainterClass(player.getPersistentDataContainer(), BlockPainter.class);
         }
@@ -161,7 +163,7 @@ public class GenericEvents implements Listener {
 
             game.getStarter()
                     .setShouldTeleport(false)
-                    .build(event.getPlayer());
+                    .build(event.getPlayer(), MinesweeperBoard.class);
             break;
         }
     }

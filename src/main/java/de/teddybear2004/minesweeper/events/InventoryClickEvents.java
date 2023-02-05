@@ -3,6 +3,7 @@ package de.teddybear2004.minesweeper.events;
 import de.teddybear2004.minesweeper.game.Board;
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
+import de.teddybear2004.minesweeper.game.MinesweeperBoard;
 import de.teddybear2004.minesweeper.game.exceptions.BombExplodeException;
 import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
 import de.teddybear2004.minesweeper.game.statistic.GameStatistic;
@@ -79,8 +80,8 @@ public class InventoryClickEvents implements Listener {
                         .setSeed(seed)
                         .setSetSeed(true)
                         .setSaveStats(false)
-                        .build(player);
-                Board board = gameManager.getBoard(player);
+                        .build(player, MinesweeperBoard.class);
+                Board<?> board = gameManager.getBoard(player);
                 try{
                     board.checkField(x + board.getCorner().getBlockX(), y + board.getCorner().getBlockZ(), false);
                     board.draw();

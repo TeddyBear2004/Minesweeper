@@ -2,6 +2,7 @@ package de.teddybear2004.minesweeper.commands;
 
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
+import de.teddybear2004.minesweeper.game.MinesweeperBoard;
 import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
 import de.teddybear2004.minesweeper.game.inventory.generator.ViewGamesGenerator;
 import de.teddybear2004.minesweeper.util.Language;
@@ -78,7 +79,7 @@ public record MinesweeperCommand(GameManager manager, Game customGame, Language 
                             .setSeed(Long.parseLong(args[3]))
                             .setSetSeed(true);
 
-                builder.build(player);
+                builder.build(player, MinesweeperBoard.class);
             }catch(IllegalArgumentException e){
                 player.sendMessage(ChatColor.DARK_RED + language.getString("error_bomb_size_not_valid"));
             }
@@ -91,7 +92,7 @@ public record MinesweeperCommand(GameManager manager, Game customGame, Language 
                     try{
                         game.getStarter()
                                 .setBombCount(Integer.parseInt(args[1]))
-                                .build(player);
+                                .build(player, MinesweeperBoard.class);
                     }catch(NumberFormatException e){
                         player.sendMessage(language.getString("error_no_valid_number"));
                     }catch(IllegalArgumentException e){
@@ -109,14 +110,14 @@ public record MinesweeperCommand(GameManager manager, Game customGame, Language 
                                 .setSeed(Long.parseLong(args[2]))
                                 .setSetSeed(true)
                                 .setSaveStats(false)
-                                .build(player);
+                                .build(player, MinesweeperBoard.class);
                     }catch(NumberFormatException ignored){
                         player.sendMessage(language.getString("error_no_valid_number"));
                     }catch(IllegalArgumentException e){
                         player.sendMessage(language.getString("error_bomb_size_too_big"));
                     }
                 } else
-                    game.getStarter().build(player);
+                    game.getStarter().build(player, MinesweeperBoard.class);
                 break;
             }
         }

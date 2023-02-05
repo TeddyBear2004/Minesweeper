@@ -9,7 +9,7 @@ public class BoardLoseEvent extends BoardFinishEvent {
 
     private static final HandlerList HANDLER_LIST = new HandlerList();
 
-    public BoardLoseEvent(Board board, Player player) {
+    public BoardLoseEvent(Board<?> board, Player player) {
         super(board, player);
     }
 

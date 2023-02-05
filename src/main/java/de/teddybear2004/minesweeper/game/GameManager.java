@@ -12,8 +12,8 @@ import java.util.Map;
 
 public class GameManager {
 
-    private final Map<Player, Board> gameWatched = new HashMap<>();
-    private final Map<Player, Board> runningGames = new HashMap<>();
+    private final Map<Player, Board<?>> gameWatched = new HashMap<>();
+    private final Map<Player, Board<?>> runningGames = new HashMap<>();
     private final Map<Player, Game> playerLocation = new HashMap<>();
     private final List<Game> games;
     private final RemoveMarkerScheduler removeMarkerScheduler;
@@ -23,7 +23,7 @@ public class GameManager {
         this.removeMarkerScheduler = removeMarkerScheduler;
     }
 
-    public void startWatching(@NotNull Player p, @NotNull Board b) {
+    public void startWatching(@NotNull Player p, @NotNull Board<?> b) {
         stopWatching(p);
         Game cur = getPlayerLocation().get(p);
         if (cur != b.getGame()) {
@@ -34,7 +34,7 @@ public class GameManager {
     }
 
     private void stopWatching(Player p) {
-        Board b = getGameWatched().remove(p);
+        Board<?> b = getGameWatched().remove(p);
         if (b != null) {
             b.removeViewer(p);
         }
@@ -46,7 +46,7 @@ public class GameManager {
 
     public void switchToMap(@NotNull Player p, @NotNull Game g) {
         stopWatching(p);
-        Board b = getRunningGames().get(p);
+        Board<?> b = getRunningGames().get(p);
         if (b != null) {
             finishGame(p);
         }
@@ -58,11 +58,11 @@ public class GameManager {
         p.teleport(g.getViewingSpawn());
     }
 
-    public @NotNull Map<Player, Board> getGameWatched() {
+    public @NotNull Map<Player, Board<?>> getGameWatched() {
         return gameWatched;
     }
 
-    public @NotNull Map<Player, Board> getRunningGames() {
+    public @NotNull Map<Player, Board<?>> getRunningGames() {
         return runningGames;
     }
 
@@ -79,7 +79,7 @@ public class GameManager {
     }
 
     public void stopGames(Player p, boolean saveStats) {
-        Board b = getRunningGames().get(p);
+        Board<?> b = getRunningGames().get(p);
         if (b != null) {
             b.drawBlancField();
             b.finish(false, saveStats);
@@ -91,12 +91,28 @@ public class GameManager {
         getRunningGames().remove(p);
     }
 
-    public Board getBoard(Player Player) {
+    public Board<?> getBoard(Player Player) {
         return getRunningGames().get(Player);
     }
 
-    public Board getBoardWatched(Player player) {
+    public <F extends Board<?>> F getBoard(Player Player, Class<F> boardClass) {
+        Board<?> board = getRunningGames().get(Player);
+        if (boardClass.isInstance(board))
+            return boardClass.cast(board);
+
+        return null;
+    }
+
+    public Board<?> getBoardWatched(Player player) {
         return getGameWatched().get(player);
+    }
+
+    public <F extends Board<?>> F getBoardWatched(Player player, Class<F> boardClass) {
+        Board<?> board = getGameWatched().get(player);
+        if (boardClass.isInstance(board))
+            return boardClass.cast(board);
+
+        return null;
     }
 
     public List<Game> getGames() {

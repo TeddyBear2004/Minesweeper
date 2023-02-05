@@ -19,7 +19,7 @@ import java.util.*;
 public class DuelGame implements Listener {
 
     private final Game game;
-    private final Map<Player, Board> playerBoardMap;
+    private final Map<Player, Board<?>> playerBoardMap;
 
     public DuelGame(Plugin plugin, Game game, Set<Player> players) {
         this.game = game;
@@ -31,7 +31,7 @@ public class DuelGame implements Listener {
 
     public boolean startGame() {
         for (Player player : this.playerBoardMap.keySet()) {
-            Board board = game.getGameManager().getBoard(player);
+            Board<?> board = game.getGameManager().getBoard(player);
             if (!(board == null || !board.isGenerated())) {
                 broadcastMessage("Der Spieler " + player.getName() + " hat ein Spiel gestartet!");
                 return false;
@@ -42,7 +42,7 @@ public class DuelGame implements Listener {
                 .setSaveStats(true)
                 .setShouldTeleport(true);
 
-        this.playerBoardMap.keySet().forEach(player -> this.playerBoardMap.put(player, builder.build(player)));
+        this.playerBoardMap.keySet().forEach(player -> this.playerBoardMap.put(player, builder.build(player, MinesweeperBoard.class)));
         return true;
     }
 
@@ -69,7 +69,7 @@ public class DuelGame implements Listener {
 
     private int getCompleted() {
         int completed = 0;
-        for (Board value : this.playerBoardMap.values())
+        for (Board<?> value : this.playerBoardMap.values())
             if (value.isFinished())
                 completed++;
         return completed;
@@ -79,14 +79,14 @@ public class DuelGame implements Listener {
         if (completed >= playerBoardMap.size()) {
             String message = "Alle Spieler haben ihr beendet.";
             broadcastMessage(message);
-            List<Board> boards = new ArrayList<>(playerBoardMap.values());
+            List<Board<?>> boards = new ArrayList<>(playerBoardMap.values());
 
             boards.sort(Board::compareTo);
 
             for (int i = 0; i < boards.size(); i++) {
-                Board board = boards.get(i);
+                Board<?> board = boards.get(i);
                 if (board.getDuration() != null) {
-                    message = ChatColor.GOLD.toString() + (i + 1) + ". Platz: " + board.getPlayer().getName() + " Zeit: " + Time.parse(false, board.getDuration()) + " Flaggen Score: " + (board.isWin() ? board.getBombCount() : board.calculateFlagScore());
+                    message = ChatColor.GOLD.toString() + (i + 1) + ". Platz: " + board.getPlayer().getName() + " Zeit: " + Time.parse(false, board.getDuration()) + " Flaggen Score: " + (board.isWin() ? ((MinesweeperBoard) board).getBombCount() : ((MinesweeperBoard) board).calculateFlagScore());
                     broadcastMessage(message);
                 }
             }

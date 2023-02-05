@@ -9,7 +9,7 @@ public class BoardWinEvent extends BoardFinishEvent {
 
     private static final HandlerList HANDLER_LIST = new HandlerList();
 
-    public BoardWinEvent(Board board, Player player) {
+    public BoardWinEvent(Board<?> board, Player player) {
         super(board, player);
     }
 

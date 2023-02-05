@@ -4,6 +4,7 @@ import de.teddybear2004.minesweeper.Minesweeper;
 import de.teddybear2004.minesweeper.game.Board;
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
+import de.teddybear2004.minesweeper.game.MinesweeperBoard;
 import de.teddybear2004.minesweeper.game.modifier.Modifier;
 import de.teddybear2004.minesweeper.game.modifier.ModifierArea;
 import de.teddybear2004.minesweeper.game.modifier.PersonalModifier;
@@ -135,15 +136,15 @@ public class CancelableEvents implements Listener {
         if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.RESTART_ON_ITEM_SWAP)) {
             Game game = gameManager.getGame(player);
             if (game != null) {
-                Board board = gameManager.getBoard(player);
+                Board<?> board = gameManager.getBoard(player);
                 if (board.isGenerated()) {
                     gameManager.finishGame(player, false);
                     game.getStarter()
-                            .setBombCount(board.getBombCount())
+                            .setBombCount(((MinesweeperBoard) board).getBombCount())
                             .setShouldTeleport(false)
                             .setWidth(board.getWidth())
                             .setHeight(board.getHeight())
-                            .build(player);
+                            .build(player, MinesweeperBoard.class);
                     event.setCancelled(true);
                 }
             }

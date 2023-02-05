@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MinesweeperClickHandler implements ClickHandler {
+public class MinesweeperClickHandler implements ClickHandler<MinesweeperField, Board<MinesweeperField>> {
 
     private final Map<Player, Long> lastLeftClick = new HashMap<>();
     private final Map<Player, Long> lastRightClick = new HashMap<>();
@@ -33,7 +33,7 @@ public class MinesweeperClickHandler implements ClickHandler {
      * @param location      The location where this click happened.
      */
     @Override
-    public void leftClick(@Nullable Player player, @NotNull Game game, @NotNull BlockPosition blockPosition, @NotNull Board board, @Nullable Field field, @NotNull Location location) {
+    public void leftClick(@Nullable Player player, @NotNull Game game, @NotNull BlockPosition blockPosition, @NotNull Board<MinesweeperField> board, @Nullable MinesweeperField field, @NotNull Location location) {
         if (board.isFinished())
             return;
 
@@ -71,7 +71,7 @@ public class MinesweeperClickHandler implements ClickHandler {
                     board.checkField(location.getBlockX(), location.getBlockZ());
                 } else if (l - lastLeftClick.getOrDefault(player, (long) -1000) <= personalModifier.<Integer>get(PersonalModifier.ModifierType.DOUBLE_CLICK_DURATION)) {
                     if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.REVEAL_ON_DOUBLE_CLICK)) {
-                        board.checkNumber(location.getBlockX(), location.getBlockZ());
+                        ((MinesweeperBoard) board).checkNumber(location.getBlockX(), location.getBlockZ());
                     } else {
                         board.highlightBlocksAround(field);
                     }
@@ -98,7 +98,7 @@ public class MinesweeperClickHandler implements ClickHandler {
      * @param cancellable A cancellable which is most likely an event.
      */
     @Override
-    public void rightClick(@NotNull Player player, @NotNull Board board, @Nullable Field field, @Nullable Cancellable cancellable) {
+    public void rightClick(@NotNull Player player, @NotNull Board<MinesweeperField> board, @Nullable MinesweeperField field, @Nullable Cancellable cancellable) {
         if (field == null)
             return;
 

@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import de.teddybear2004.minesweeper.Minesweeper;
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
+import de.teddybear2004.minesweeper.game.MinesweeperBoard;
 import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -36,7 +37,7 @@ public class ChooseGameGenerator extends InventoryGenerator {
 
             inventory.setItem(game.getInventoryPosition(), integerItemStackPair.getSecond());
             itemStackFunctionHashMap.put(integerItemStackPair.getFirst(), player ->
-                    (inventory1, clickType) -> game.getStarter().build(player));
+                    (inventory1, clickType) -> game.getStarter().build(player, MinesweeperBoard.class));
         }
 
         return itemStackFunctionHashMap;

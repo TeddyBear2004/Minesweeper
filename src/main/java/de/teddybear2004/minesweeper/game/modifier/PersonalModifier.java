@@ -1,8 +1,8 @@
 package de.teddybear2004.minesweeper.game.modifier;
 
-import de.teddy.minesweeper.game.painter.Painter;
 import de.teddybear2004.minesweeper.Minesweeper;
 import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
+import de.teddybear2004.minesweeper.game.painter.Painter;
 import de.teddybear2004.minesweeper.util.CustomPersistentDataType;
 import de.teddybear2004.minesweeper.util.Language;
 import org.bukkit.NamespacedKey;
@@ -69,7 +69,7 @@ public class PersonalModifier {
                 new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "painter_class"),
                 PersistentDataType.STRING,
                 "board_style",
-                new PainterModifierWrapper(),
+                new MinesweeperPainterModifierWrapper(),
                 Painter.DEFAULT_PAINTER.getName()),
         ENABLE_QUESTION_MARK(
                 new NamespacedKey(Minesweeper.getPlugin(Minesweeper.class), "enable_question_mark"),

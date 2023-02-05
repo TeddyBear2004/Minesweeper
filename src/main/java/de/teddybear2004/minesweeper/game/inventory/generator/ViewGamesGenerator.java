@@ -32,7 +32,7 @@ public class ViewGamesGenerator extends InventoryGenerator {
     public @NotNull Map<Integer, Function<Player, BiConsumer<Inventory, ClickType>>> insertConsumerItems(@NotNull Inventory inventory, InventoryManager manager) {
         Map<Integer, Function<Player, BiConsumer<Inventory, ClickType>>> map = new HashMap<>();
 
-        Map<Player, Board> runningGames = getGameManager().getRunningGames();
+        Map<Player, Board<?>> runningGames = getGameManager().getRunningGames();
         List<Player> players = new ArrayList<>(runningGames.keySet());
 
         ItemStack itemStack = new ItemStack(Material.AIR);
@@ -56,7 +56,7 @@ public class ViewGamesGenerator extends InventoryGenerator {
         return ChatColor.AQUA + "Watch other games!";
     }
 
-    public @NotNull ItemStack generatePlayerView(@NotNull Player player, @NotNull Board board, @NotNull Map<Integer, Function<Player, BiConsumer<Inventory, ClickType>>> map, InventoryManager manager) {
+    public @NotNull ItemStack generatePlayerView(@NotNull Player player, @NotNull Board<?> board, @NotNull Map<Integer, Function<Player, BiConsumer<Inventory, ClickType>>> map, InventoryManager manager) {
         Pair<Integer, ItemStack> integerItemStackPair = manager.insertItemId(HeadGenerator.getHeadFromPlayerProfile(player.getPlayerProfile()));
 
         ItemMeta itemMeta = integerItemStackPair.getSecond().getItemMeta();

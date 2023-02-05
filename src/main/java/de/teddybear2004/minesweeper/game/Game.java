@@ -78,22 +78,11 @@ public class Game {
         return itemStack;
     }
 
-    public @Nullable Board getRunningGame() {
-        for (Board b : gameManager.getRunningGames().values())
-            if (b.getGame() == this)
-                return b;
-        return null;
-    }
-
-    public GameManager getGameManager() {
-        return gameManager;
-    }
-
-    public @Nullable Board startGame(@NotNull Player p, boolean shouldTeleport, int bombCount, int width, int height, long seed, boolean setSeed, boolean saveStats) {
+    public @Nullable Board<?> startGame(@NotNull Player p, boolean shouldTeleport, int bombCount, int width, int height, long seed, boolean setSeed, boolean saveStats, Class<? extends Board<?>> boardClass) {
         gameManager.stopGames(p, saveStats);
-        Board b;
+        Board<?> b;
 
-        b = new Board(plugin, language, connectionBuilder, this, width, height, bombCount, corner, p, seed, setSeed, saveStats);
+        b = new MinesweeperBoard(plugin, language, connectionBuilder, this, width, height, bombCount, corner, p, seed, setSeed, saveStats);
         b.drawBlancField(Collections.singletonList(p));
         gameManager.startWatching(p, b);
         gameManager.getRunningGames().put(p, b);
@@ -120,9 +109,13 @@ public class Game {
         return b;
     }
 
+    public GameManager getGameManager() {
+        return gameManager;
+    }
+
     protected void finish(Player p, boolean saveStats) {
         gameManager.stopGames(p, saveStats);
-        Board b = getRunningGame();
+        Board<?> b = getRunningGame();
         if (b != null) {
             b.drawBlancField(Collections.singletonList(p));
             Bukkit.getOnlinePlayers().forEach(onPlayer -> {
@@ -133,7 +126,14 @@ public class Game {
         }
     }
 
-    public void startViewing(@NotNull Player player, @Nullable Board runningGame) {
+    public @Nullable Board<?> getRunningGame() {
+        for (Board<?> b : gameManager.getRunningGames().values())
+            if (b.getGame() == this)
+                return b;
+        return null;
+    }
+
+    public void startViewing(@NotNull Player player, @Nullable Board<?> runningGame) {
         if (runningGame == null) {
             gameManager.switchToMap(player, gameManager.getGames().get(0));
         } else {
@@ -214,11 +214,11 @@ public class Game {
             return this;
         }
 
-        public Board build(@NotNull Player player) {
+        public Board<?> build(@NotNull Player player, Class<? extends Board<?>> boardClass) {
             if (seed == null)
                 seed = new Random().nextLong();
 
-            return game.startGame(player, shouldTeleport, bombCount, width, height, seed, setSeed, saveStats);
+            return game.startGame(player, shouldTeleport, bombCount, width, height, seed, setSeed, saveStats, boardClass);
         }
 
     }

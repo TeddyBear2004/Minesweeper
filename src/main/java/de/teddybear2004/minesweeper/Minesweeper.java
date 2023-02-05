@@ -3,22 +3,20 @@ package de.teddybear2004.minesweeper;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.moandjiezana.toml.Toml;
-import de.teddy.minesweeper.game.painter.ArmorStandPainter;
-import de.teddy.minesweeper.game.painter.BlockPainter;
-import de.teddy.minesweeper.game.painter.Painter;
 import de.teddybear2004.minesweeper.commands.*;
 import de.teddybear2004.minesweeper.events.*;
 import de.teddybear2004.minesweeper.events.packets.LeftClickEvent;
 import de.teddybear2004.minesweeper.events.packets.RightClickEvent;
-import de.teddybear2004.minesweeper.game.CustomGame;
-import de.teddybear2004.minesweeper.game.Game;
-import de.teddybear2004.minesweeper.game.GameManager;
+import de.teddybear2004.minesweeper.game.*;
 import de.teddybear2004.minesweeper.game.click.ClickHandler;
 import de.teddybear2004.minesweeper.game.click.MinesweeperClickHandler;
 import de.teddybear2004.minesweeper.game.expansions.StatsExpansion;
 import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
 import de.teddybear2004.minesweeper.game.modifier.Modifier;
 import de.teddybear2004.minesweeper.game.modifier.ModifierArea;
+import de.teddybear2004.minesweeper.game.painter.BlockPainter;
+import de.teddybear2004.minesweeper.game.painter.MinesweeperArmorStandPainter;
+import de.teddybear2004.minesweeper.game.painter.Painter;
 import de.teddybear2004.minesweeper.game.texture.pack.DisableResourceHandler;
 import de.teddybear2004.minesweeper.game.texture.pack.ExternalWebServerHandler;
 import de.teddybear2004.minesweeper.game.texture.pack.InternalWebServerHandler;
@@ -44,10 +42,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -115,10 +110,13 @@ public final class Minesweeper extends JavaPlugin {
 
         gameManager = new GameManager(games, removeMarkerScheduler);
 
-        ClickHandler clickHandler = new MinesweeperClickHandler();
+        ClickHandler<MinesweeperField, Board<MinesweeperField>> clickHandler = new MinesweeperClickHandler();
 
-        Painter.PAINTER_MAP.put(BlockPainter.class, new BlockPainter(Minesweeper.getPlugin(Minesweeper.class), clickHandler, gameManager));
-        Painter.PAINTER_MAP.put(ArmorStandPainter.class, new ArmorStandPainter(Minesweeper.getPlugin(Minesweeper.class), clickHandler, gameManager));
+        Painter.PAINTER_MAP.put(MinesweeperField.class, new HashMap<>());
+        Painter.PAINTER_MAP.get(MinesweeperField.class).put(BlockPainter.class,
+                                                            new BlockPainter(Minesweeper.getPlugin(Minesweeper.class), clickHandler, gameManager));
+        Painter.PAINTER_MAP.get(MinesweeperField.class).put(MinesweeperArmorStandPainter.class,
+                                                            new MinesweeperArmorStandPainter(Minesweeper.getPlugin(Minesweeper.class), clickHandler, gameManager));
 
 
         language = loadLanguage();
@@ -163,8 +161,8 @@ public final class Minesweeper extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new GenericLongClickEvent(gameManager, clickHandler), this);
 
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
-        protocolManager.addPacketListener(new RightClickEvent(this, gameManager));
-        protocolManager.addPacketListener(new LeftClickEvent(this, gameManager));
+        protocolManager.addPacketListener(new RightClickEvent<>(this, gameManager));
+        protocolManager.addPacketListener(new LeftClickEvent<>(this, gameManager));
 
         Bukkit.getOnlinePlayers().forEach(player -> {
             InventoryManager.PlayerInventory.VIEWER.apply(player);
