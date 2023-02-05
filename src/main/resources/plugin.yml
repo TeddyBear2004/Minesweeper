@@ -1,13 +1,13 @@
-name: Minesweeper
+name: RetroGames
 version: ${project.version}
-main: de.teddybear2004.minesweeper.Minesweeper
+main: de.teddybear2004.minesweeper.RetroGames
 api-version: 1.19
 authors:
   - TeddyBear_2004
   - Wetterquarz
 database: false
 website: https://github.com/TeddyBear2004/Minesweeper
-description: Play Minesweeper in Minecraft
+description: Play RetroGames in Minecraft
 depend:
   - ProtocolLib
 
