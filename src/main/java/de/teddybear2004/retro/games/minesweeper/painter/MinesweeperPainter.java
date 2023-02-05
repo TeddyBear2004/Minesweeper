@@ -1,6 +1,7 @@
-package de.teddybear2004.retro.games.game.painter;
+package de.teddybear2004.retro.games.minesweeper.painter;
 
 import de.teddybear2004.retro.games.game.Board;
+import de.teddybear2004.retro.games.game.painter.Painter;
 import de.teddybear2004.retro.games.minesweeper.MinesweeperField;
 import org.bukkit.entity.Player;
 

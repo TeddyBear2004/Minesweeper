@@ -6,12 +6,11 @@ import de.teddybear2004.retro.games.game.GameManager;
 import de.teddybear2004.retro.games.game.inventory.InventoryManager;
 import de.teddybear2004.retro.games.game.modifier.Modifier;
 import de.teddybear2004.retro.games.game.modifier.PersonalModifier;
-import de.teddybear2004.retro.games.game.painter.BlockPainter;
-import de.teddybear2004.retro.games.game.painter.MinesweeperArmorStandPainter;
-import de.teddybear2004.retro.games.game.painter.MinesweeperPainter;
 import de.teddybear2004.retro.games.game.painter.Painter;
 import de.teddybear2004.retro.games.game.texture.pack.ResourcePackHandler;
 import de.teddybear2004.retro.games.minesweeper.MinesweeperBoard;
+import de.teddybear2004.retro.games.minesweeper.painter.MinesweeperArmorStandPainter;
+import de.teddybear2004.retro.games.minesweeper.painter.MinesweeperPainter;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -70,9 +69,9 @@ public class GenericEvents implements Listener {
 
         String s = modifier.get(PersonalModifier.ModifierType.PAINTER_CLASS);
         try{
-            Class<? extends MinesweeperPainter> aClass = Class.forName(s).asSubclass(MinesweeperPainter.class);
+            Class<? extends MinesweeperArmorStandPainter> aClass = Class.forName(s).asSubclass(MinesweeperArmorStandPainter.class);
 
-            if (aClass != BlockPainter.class) {
+            if (aClass != MinesweeperArmorStandPainter.class) {
                 Painter.storePainterClass(player.getPersistentDataContainer(), aClass);
                 handleWatching(player);
                 return;
@@ -121,7 +120,7 @@ public class GenericEvents implements Listener {
             case DECLINED, FAILED_DOWNLOAD ->
                     Painter.storePainterClass(player.getPersistentDataContainer(), MinesweeperArmorStandPainter.class);
             case SUCCESSFULLY_LOADED ->
-                    Painter.storePainterClass(player.getPersistentDataContainer(), BlockPainter.class);
+                    Painter.storePainterClass(player.getPersistentDataContainer(), MinesweeperPainter.class);
         }
     }
 

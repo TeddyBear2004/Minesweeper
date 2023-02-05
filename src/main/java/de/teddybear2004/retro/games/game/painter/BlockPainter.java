@@ -13,16 +13,13 @@ import de.teddybear2004.retro.games.game.Game;
 import de.teddybear2004.retro.games.game.GameManager;
 import de.teddybear2004.retro.games.game.click.ClickHandler;
 import de.teddybear2004.retro.games.game.inventory.InventoryManager;
-import de.teddybear2004.retro.games.minesweeper.MinesweeperBoard;
-import de.teddybear2004.retro.games.minesweeper.MinesweeperField;
+import de.teddybear2004.retro.games.minesweeper.Field;
 import de.teddybear2004.retro.games.scheduler.RemoveMarkerScheduler;
 import de.teddybear2004.retro.games.util.PacketUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -32,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-public class BlockPainter implements MinesweeperPainter {
+public abstract class BlockPainter<F extends Field> implements Painter<F> {
 
     public static final Material[] LIGHT_MATERIALS = {
             Material.WHITE_CONCRETE_POWDER,
@@ -57,14 +54,16 @@ public class BlockPainter implements MinesweeperPainter {
     public static final Material LIGHT_DEFAULT = Material.LIME_CONCRETE_POWDER;
     public static final Material DARK_DEFAULT = Material.GREEN_CONCRETE_POWDER;
     private final Plugin plugin;
-    private final ClickHandler<MinesweeperField, Board<MinesweeperField>> clickHandler;
+    private final ClickHandler<F, Board<F>> clickHandler;
     private final GameManager gameManager;
+    private final Class<? extends Board<F>> boardClass;
     private BukkitTask bombTask;
 
-    public BlockPainter(Plugin plugin, ClickHandler<MinesweeperField, Board<MinesweeperField>> clickHandler, GameManager gameManager) {
+    public BlockPainter(Plugin plugin, ClickHandler<F, Board<F>> clickHandler, GameManager gameManager, Class<? extends Board<F>> boardClass) {
         this.plugin = plugin;
         this.clickHandler = clickHandler;
         this.gameManager = gameManager;
+        this.boardClass = boardClass;
     }
 
     @Override
@@ -73,7 +72,7 @@ public class BlockPainter implements MinesweeperPainter {
     }
 
     @Override
-    public void drawBlancField(@Nullable Board<MinesweeperField> board, @NotNull List<Player> players) {
+    public void drawBlancField(@Nullable Board<F> board, @NotNull List<Player> players) {
         if (board == null)
             return;
         Map<BlockPosition, Pair<List<Short>, List<WrappedBlockData>>> subChunkMap = new HashMap<>();
@@ -132,7 +131,7 @@ public class BlockPainter implements MinesweeperPainter {
     }
 
     @Override
-    public void drawField(@Nullable Board<MinesweeperField> board, @NotNull List<Player> players) {
+    public void drawField(@Nullable Board<F> board, @NotNull List<Player> players) {
         if (board == null) return;
         Map<BlockPosition, Pair<List<Short>, List<WrappedBlockData>>> subChunkMap = new HashMap<>();
 
@@ -152,13 +151,13 @@ public class BlockPainter implements MinesweeperPainter {
                 if (!subChunkMap.containsKey(subChunkTuplePlusOne))
                     subChunkMap.put(subChunkTuplePlusOne, Pair.of(new ArrayList<>(), new ArrayList<>()));
 
-                MinesweeperField field = board.getBoard()[i][j];
+                F field = board.getBoard()[i][j];
 
                 boolean b = Board.isLightField(i, j);
-                Material m;
+                Material[] m;
 
                 if (field == null) {
-                    m = (b ? LIGHT_DEFAULT : DARK_DEFAULT);
+                    m = new Material[]{(b ? LIGHT_DEFAULT : DARK_DEFAULT), Material.AIR};
                 } else {
                     m = getActualMaterial(field);
                 }
@@ -171,11 +170,7 @@ public class BlockPainter implements MinesweeperPainter {
                 Pair<List<Short>, List<WrappedBlockData>> listListTuple2PlusOne = subChunkMap.get(subChunkTuplePlusOne);
 
                 listListTuple2PlusOne.getLeft().add(Board.convertToLocal(location.getBlockX(), location.getBlockY() + 1, location.getBlockZ()));
-
-                if (field != null && field.isMarked()) {
-                    listListTuple2PlusOne.getRight().add(WrappedBlockData.createData(field.getMark()));
-                } else
-                    listListTuple2PlusOne.getRight().add(WrappedBlockData.createData(Material.AIR));
+                listListTuple2PlusOne.getRight().add(WrappedBlockData.createData(m[1]));
             }
         }
 
@@ -197,22 +192,22 @@ public class BlockPainter implements MinesweeperPainter {
         BlockPosition blockPosition = packet.getMovingBlockPositions().read(0).getBlockPosition();
         Location location = blockPosition.toLocation(player.getWorld());
 
-        MinesweeperBoard board = gameManager.getBoard(player, MinesweeperBoard.class);
+        Board<F> board = boardClass.cast(gameManager.getBoard(player));
 
         if (board != null && board.isBlockOutsideGame(location))
             return;
 
         if (board == null) {
-            MinesweeperBoard watching = gameManager.getBoardWatched(player, MinesweeperBoard.class);
+            Board<F> watching = boardClass.cast(gameManager.getBoardWatched(player));
 
             if (watching != null) {
-                MinesweeperField field = watching.getField(location);
+                F field = watching.getField(location);
 
                 if (watching.isBlockOutsideGame(location))
                     return;
 
                 if (field != null) {
-                    Material[] materials = new Material[]{getActualMaterial(field), field.getMark()};
+                    Material[] materials = getActualMaterial(field);
                     int i = location.getBlockY() - game.getFieldHeight();
                     if (i < materials.length && i > 0)
                         PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(materials[i]));
@@ -223,7 +218,7 @@ public class BlockPainter implements MinesweeperPainter {
             return;
         }
 
-        MinesweeperField field = board.getField(location);
+        F field = board.getField(location);
         if (packet.getHands().read(0) == EnumWrappers.Hand.OFF_HAND) {
             event.setCancelled(true);
             return;
@@ -238,21 +233,21 @@ public class BlockPainter implements MinesweeperPainter {
         BlockPosition blockPosition = packet.getBlockPositionModifier().read(0);
         Location location = blockPosition.toLocation(player.getWorld());
 
-        MinesweeperBoard board = gameManager.getBoard(player, MinesweeperBoard.class);
+        Board<F> board = boardClass.cast(gameManager.getBoard(player));
         if (board != null && board.isBlockOutsideGame(location))
             return;
 
         if (board == null)
-            board = gameManager.getBoardWatched(player, MinesweeperBoard.class);
+            board = boardClass.cast(gameManager.getBoardWatched(player));
 
         if (board == null) {
-            MinesweeperBoard watching = gameManager.getBoardWatched(player, MinesweeperBoard.class);
+            Board<F> watching = boardClass.cast(gameManager.getBoardWatched(player));
 
             if (watching != null) {
-                MinesweeperField field = watching.getField(location);
+                F field = watching.getField(location);
                 if (field == null)
                     return;
-                Material[] materials = new Material[]{getActualMaterial(field), field.getMark()};
+                Material[] materials = getActualMaterial(field);
 
                 if (game.getFieldHeight() - location.getBlockY() < 0)
                     return;
@@ -262,14 +257,14 @@ public class BlockPainter implements MinesweeperPainter {
             return;
         }
 
-        MinesweeperField field = board.getField(location);
+        F field = board.getField(location);
 
         EnumWrappers.PlayerDigType digType = packet.getPlayerDigTypes().read(0);
         if (field != null && digType == EnumWrappers.PlayerDigType.START_DESTROY_BLOCK) {
             if (location.getBlockY() - game.getFieldHeight() == 0) {
                 event.setCancelled(true);
             } else if (location.getBlockY() - game.getFieldHeight() == 1) {
-                PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(field.getMark()));
+                PacketUtil.sendBlockChange(player, blockPosition, WrappedBlockData.createData(getActualMaterial(field)[1]));
             }
         }
 
@@ -280,7 +275,7 @@ public class BlockPainter implements MinesweeperPainter {
     }
 
     @Override
-    public void highlightFields(@NotNull List<MinesweeperField> fields, @NotNull List<Player> players, RemoveMarkerScheduler removeMarkerScheduler) {
+    public void highlightFields(@NotNull List<F> fields, @NotNull List<Player> players, RemoveMarkerScheduler removeMarkerScheduler) {
         players.forEach(player -> {
             PacketUtil.removeBlockHighlights(player);
             fields.forEach(field -> PacketUtil.sendBlockHighlight(player, field.getLocation().getBlockX(), field.getLocation().getBlockY(), field.getLocation().getBlockZ(), 60, 1000));
@@ -289,40 +284,18 @@ public class BlockPainter implements MinesweeperPainter {
 
     }
 
-    public Material getActualMaterial(@NotNull MinesweeperField field) {
-        boolean lightField = Board.isLightField(field.getX(), field.getY());
+    public abstract Material[] getActualMaterial(@NotNull F field);
 
-        if (field.getBoard().isFinished() && field.isBomb() && (!field.isCovered() || field.getBoard().isLose()))
-            return Material.COAL_BLOCK;
-
-        if (field.isCovered())
-            return lightField ? LIGHT_DEFAULT : DARK_DEFAULT;
-
-        return (lightField ? LIGHT_MATERIALS : DARK_MATERIALS)[field.getNeighborCount()];
+    public Plugin getPlugin() {
+        return plugin;
     }
 
-    @Override
-    public void drawBombs(@NotNull Board<MinesweeperField> board, @NotNull List<Player> players) {
-        double explodeDuration = 0.5d;
+    public BukkitTask getBombTask() {
+        return bombTask;
+    }
 
-        for (int[] point2D : ((MinesweeperBoard) board).getBombList()) {
-            Location clone = board.getCorner().clone();
-
-            clone.setX(board.getCorner().getBlockX() + point2D[0]);
-            clone.setZ(board.getCorner().getBlockZ() + point2D[1]);
-
-            if (bombTask != null)
-                bombTask.cancel();
-
-            bombTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                for (Player p : players) {
-                    PacketUtil.sendBlockChange(p, new BlockPosition(clone.toVector()), WrappedBlockData.createData(Material.COAL_BLOCK));
-                    PacketUtil.sendSoundEffect(p, Sound.BLOCK_STONE_PLACE, 1f, clone);
-                }
-            }, (long) (20 * explodeDuration));
-
-            explodeDuration *= 0.7;
-        }
+    public void setBombTask(BukkitTask bombTask) {
+        this.bombTask = bombTask;
     }
 
 }

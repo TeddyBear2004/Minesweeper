@@ -2,10 +2,10 @@ package de.teddybear2004.retro.games.game.modifier;
 
 import de.teddybear2004.retro.games.RetroGames;
 import de.teddybear2004.retro.games.game.inventory.InventoryManager;
-import de.teddybear2004.retro.games.game.painter.MinesweeperPainter;
 import de.teddybear2004.retro.games.game.painter.Painter;
 import de.teddybear2004.retro.games.minesweeper.MinesweeperBoard;
 import de.teddybear2004.retro.games.minesweeper.MinesweeperField;
+import de.teddybear2004.retro.games.minesweeper.painter.MinesweeperPainter;
 import de.teddybear2004.retro.games.util.Language;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;

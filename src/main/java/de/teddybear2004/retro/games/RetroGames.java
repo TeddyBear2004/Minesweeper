@@ -16,8 +16,6 @@ import de.teddybear2004.retro.games.game.expansions.StatsExpansion;
 import de.teddybear2004.retro.games.game.inventory.InventoryManager;
 import de.teddybear2004.retro.games.game.modifier.Modifier;
 import de.teddybear2004.retro.games.game.modifier.ModifierArea;
-import de.teddybear2004.retro.games.game.painter.BlockPainter;
-import de.teddybear2004.retro.games.game.painter.MinesweeperArmorStandPainter;
 import de.teddybear2004.retro.games.game.painter.Painter;
 import de.teddybear2004.retro.games.game.texture.pack.DisableResourceHandler;
 import de.teddybear2004.retro.games.game.texture.pack.ExternalWebServerHandler;
@@ -25,6 +23,8 @@ import de.teddybear2004.retro.games.game.texture.pack.InternalWebServerHandler;
 import de.teddybear2004.retro.games.game.texture.pack.ResourcePackHandler;
 import de.teddybear2004.retro.games.minesweeper.MinesweeperField;
 import de.teddybear2004.retro.games.minesweeper.click.MinesweeperClickHandler;
+import de.teddybear2004.retro.games.minesweeper.painter.MinesweeperArmorStandPainter;
+import de.teddybear2004.retro.games.minesweeper.painter.MinesweeperBlockPainter;
 import de.teddybear2004.retro.games.scheduler.HidePlayerScheduler;
 import de.teddybear2004.retro.games.scheduler.RemoveMarkerScheduler;
 import de.teddybear2004.retro.games.util.ConnectionBuilder;
@@ -117,10 +117,12 @@ public final class RetroGames extends JavaPlugin {
         ClickHandler<MinesweeperField, Board<MinesweeperField>> clickHandler = new MinesweeperClickHandler();
 
         Painter.PAINTER_MAP.put(MinesweeperField.class, new HashMap<>());
-        Painter.PAINTER_MAP.get(MinesweeperField.class).put(BlockPainter.class,
-                                                            new BlockPainter(RetroGames.getPlugin(RetroGames.class), clickHandler, gameManager));
-        Painter.PAINTER_MAP.get(MinesweeperField.class).put(MinesweeperArmorStandPainter.class,
-                                                            new MinesweeperArmorStandPainter(RetroGames.getPlugin(RetroGames.class), clickHandler, gameManager));
+        Painter.PAINTER_MAP.get(MinesweeperField.class)
+                .put(MinesweeperBlockPainter.class,
+                     new MinesweeperBlockPainter(RetroGames.getPlugin(RetroGames.class), clickHandler, gameManager));
+        Painter.PAINTER_MAP.get(MinesweeperField.class)
+                .put(MinesweeperArmorStandPainter.class,
+                     new MinesweeperArmorStandPainter(RetroGames.getPlugin(RetroGames.class), clickHandler, gameManager));
 
 
         language = loadLanguage();

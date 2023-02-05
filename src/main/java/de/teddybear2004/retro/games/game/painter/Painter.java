@@ -8,6 +8,7 @@ import de.teddybear2004.retro.games.game.Board;
 import de.teddybear2004.retro.games.game.Game;
 import de.teddybear2004.retro.games.game.modifier.PersonalModifier;
 import de.teddybear2004.retro.games.minesweeper.Field;
+import de.teddybear2004.retro.games.minesweeper.painter.MinesweeperPainter;
 import de.teddybear2004.retro.games.scheduler.RemoveMarkerScheduler;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -21,7 +22,7 @@ public interface Painter<F extends Field> {
 
     NamespacedKey PAINTER_KEY = new NamespacedKey(RetroGames.getPlugin(RetroGames.class), "painter_class");
 
-    Class<? extends Painter<?>> DEFAULT_PAINTER = BlockPainter.class;
+    Class<? extends Painter<?>> DEFAULT_PAINTER = MinesweeperPainter.class;
 
     Map<Class<? extends Field>, Map<Class<? extends Painter<?>>, Painter<?>>> PAINTER_MAP = new HashMap<>();
 

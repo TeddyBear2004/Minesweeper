@@ -1,4 +1,4 @@
-package de.teddybear2004.retro.games.game.painter;
+package de.teddybear2004.retro.games.minesweeper.painter;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
@@ -6,6 +6,7 @@ import com.comphenix.protocol.events.PacketContainer;
 import de.teddybear2004.retro.games.game.Board;
 import de.teddybear2004.retro.games.game.GameManager;
 import de.teddybear2004.retro.games.game.click.ClickHandler;
+import de.teddybear2004.retro.games.game.painter.ArmorStandPainter;
 import de.teddybear2004.retro.games.minesweeper.MinesweeperBoard;
 import de.teddybear2004.retro.games.minesweeper.MinesweeperField;
 import de.teddybear2004.retro.games.util.PacketUtil;
