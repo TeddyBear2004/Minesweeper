@@ -30,27 +30,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public abstract class BlockPainter<F extends Field> implements Painter<F> {
-
-    public static final Material[] LIGHT_MATERIALS = {
-            Material.WHITE_CONCRETE_POWDER,
-            Material.LIME_TERRACOTTA,
-            Material.GREEN_CONCRETE,
-            Material.YELLOW_TERRACOTTA,
-            Material.ORANGE_TERRACOTTA,
-            Material.MAGENTA_TERRACOTTA,
-            Material.PINK_TERRACOTTA,
-            Material.PURPLE_TERRACOTTA,
-            Material.RED_TERRACOTTA};
-    public static final Material[] DARK_MATERIALS = {
-            Material.LIGHT_GRAY_CONCRETE_POWDER,
-            Material.TERRACOTTA,
-            Material.GREEN_TERRACOTTA,
-            Material.BROWN_TERRACOTTA,
-            Material.BLUE_TERRACOTTA,
-            Material.CYAN_TERRACOTTA,
-            Material.LIGHT_GRAY_TERRACOTTA,
-            Material.GRAY_TERRACOTTA,
-            Material.LIGHT_BLUE_TERRACOTTA};
     public static final Material LIGHT_DEFAULT = Material.LIME_CONCRETE_POWDER;
     public static final Material DARK_DEFAULT = Material.GREEN_CONCRETE_POWDER;
     private final Plugin plugin;
