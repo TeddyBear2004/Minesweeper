@@ -14,6 +14,7 @@ import de.teddybear2004.minesweeper.game.CustomGame;
 import de.teddybear2004.minesweeper.game.Game;
 import de.teddybear2004.minesweeper.game.GameManager;
 import de.teddybear2004.minesweeper.game.click.ClickHandler;
+import de.teddybear2004.minesweeper.game.click.MinesweeperClickHandler;
 import de.teddybear2004.minesweeper.game.expansions.StatsExpansion;
 import de.teddybear2004.minesweeper.game.inventory.InventoryManager;
 import de.teddybear2004.minesweeper.game.modifier.Modifier;
@@ -114,7 +115,7 @@ public final class Minesweeper extends JavaPlugin {
 
         gameManager = new GameManager(games, removeMarkerScheduler);
 
-        ClickHandler clickHandler = new ClickHandler();
+        ClickHandler clickHandler = new MinesweeperClickHandler();
 
         Painter.PAINTER_MAP.put(BlockPainter.class, new BlockPainter(Minesweeper.getPlugin(Minesweeper.class), clickHandler, gameManager));
         Painter.PAINTER_MAP.put(ArmorStandPainter.class, new ArmorStandPainter(Minesweeper.getPlugin(Minesweeper.class), clickHandler, gameManager));
