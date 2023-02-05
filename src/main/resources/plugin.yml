@@ -1,6 +1,6 @@
 name: RetroGames
 version: ${project.version}
-main: de.teddybear2004.minesweeper.RetroGames
+main: de.teddybear2004.retro.games.RetroGames
 api-version: 1.19
 authors:
   - TeddyBear_2004
