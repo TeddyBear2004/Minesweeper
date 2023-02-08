@@ -5,9 +5,9 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import de.teddybear2004.retro.games.game.Board;
-import de.teddybear2004.retro.games.game.Field;
 import de.teddybear2004.retro.games.game.Game;
 import de.teddybear2004.retro.games.game.GameManager;
+import de.teddybear2004.retro.games.game.painter.Atelier;
 import de.teddybear2004.retro.games.game.painter.Painter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -17,23 +17,32 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashSet;
 import java.util.Set;
 
-public class RightClickEvent<F extends Field> extends PacketAdapter {
+public class RightClickEvent extends PacketAdapter {
 
     private final GameManager gameManager;
+    private final Atelier atelier;
 
-    public RightClickEvent(Plugin plugin, GameManager gameManager) {
-        super(plugin, getPacketTypes());
+    public RightClickEvent(Plugin plugin, GameManager gameManager, Atelier atelier) {
+        super(plugin, getPacketTypes(atelier));
         this.gameManager = gameManager;
+        this.atelier = atelier;
     }
 
-    private static PacketType @NotNull [] getPacketTypes() {
+    @SuppressWarnings("unchecked")
+    private static PacketType @NotNull [] getPacketTypes(Atelier atelier) {
         Set<PacketType> types = new HashSet<>();
-        Painter.PAINTER_MAP.values().forEach(painterMap -> painterMap.values().forEach(painter -> types.addAll(painter.getRightClickPacketType())));
+
+        atelier.getPainters().forEach(painter -> {
+            Set<PacketType> rightClickPacketType = painter.getRightClickPacketType();
+
+            types.addAll(rightClickPacketType);
+        });
+
 
         return types.toArray(new PacketType[0]);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     @Override
     public void onPacketReceiving(@NotNull PacketEvent event) {
         Player player = event.getPlayer();
@@ -44,14 +53,15 @@ public class RightClickEvent<F extends Field> extends PacketAdapter {
 
         Game game = gameManager.getGame(player);
         Board<?> board = gameManager.getBoard(player);
-        Class<? extends Painter<F>> painterClass = (Class<? extends Painter<F>>) board.getPainterClass();
-        Class<F> fieldClass = (Class<F>) board.getFieldClass();
 
-        Painter<?> painter = Painter.getPainter(player, painterClass, fieldClass);
+        Class<? extends Board> boardClass = board.getBoardClass();
+
+        Painter<?> painter = atelier.getPainter(player, boardClass);
         if (game == null || painter == null)
             return;
 
         if (painter.getRightClickPacketType().contains(packet.getType()))
             painter.onRightClick(player, event, game, packet);
     }
+
 }

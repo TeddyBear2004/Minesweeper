@@ -56,7 +56,7 @@ public class ViewGamesGenerator extends InventoryGenerator {
         return ChatColor.AQUA + "Watch other games!";
     }
 
-    public @NotNull ItemStack generatePlayerView(@NotNull Player player, @NotNull Board<?> board, @NotNull Map<Integer, Function<Player, BiConsumer<Inventory, ClickType>>> map, InventoryManager manager) {
+    public @NotNull ItemStack generatePlayerView(@NotNull Player player, @NotNull Board<?> board, @NotNull Map<? super Integer, Function<Player, BiConsumer<Inventory, ClickType>>> map, InventoryManager manager) {
         Pair<Integer, ItemStack> integerItemStackPair = manager.insertItemId(HeadGenerator.getHeadFromPlayerProfile(player.getPlayerProfile()));
 
         ItemMeta itemMeta = integerItemStackPair.getSecond().getItemMeta();

@@ -42,12 +42,12 @@ public class MinesweeperBlockPainter extends BlockPainter<MinesweeperField> impl
             Material.GRAY_TERRACOTTA,
             Material.LIGHT_BLUE_TERRACOTTA};
 
-    public MinesweeperBlockPainter(Plugin plugin, ClickHandler<MinesweeperField, Board<MinesweeperField>> clickHandler, GameManager gameManager) {
+    public MinesweeperBlockPainter(Plugin plugin, ClickHandler<? super MinesweeperField, ? super Board<MinesweeperField>> clickHandler, GameManager gameManager) {
         super(plugin, clickHandler, gameManager, MinesweeperBoard.class);
     }
 
     @Override
-    public void drawBombs(@NotNull Board<MinesweeperField> board, @NotNull List<Player> players) {
+    public void drawBombs(@NotNull Board<MinesweeperField> board, List<? extends Player> players) {
         double explodeDuration = 0.5d;
 
         for (int[] point2D : ((MinesweeperBoard) board).getBombList()) {

@@ -25,9 +25,9 @@ public interface Board<F extends Field> extends Comparable<Board<F>> {
 
     void draw();
 
-    void draw(@NotNull List<Player> players);
+    void draw(List<? extends Player> players);
 
-    @NotNull Map<Painter<F>, List<Player>> getCurrentPlayerPainters(@NotNull List<Player> viewers);
+    @NotNull Map<Painter<F>, List<Player>> getCurrentPlayerPainters(List<? extends Player> viewers);
 
     boolean isFinished();
 
@@ -49,7 +49,7 @@ public interface Board<F extends Field> extends Comparable<Board<F>> {
 
     void drawBlancField();
 
-    void drawBlancField(@NotNull List<Player> players);
+    void drawBlancField(List<? extends Player> players);
 
     boolean isGenerated();
 
@@ -109,7 +109,6 @@ public interface Board<F extends Field> extends Comparable<Board<F>> {
 
     Long getDuration();
 
-    Class<F> getFieldClass();
+    Class<? extends Board<?>> getBoardClass();
 
-    Class<? extends Painter<?>> getPainterClass();
 }

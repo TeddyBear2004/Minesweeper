@@ -5,7 +5,8 @@ public class BombExplodeException extends Exception {
     /**
      * Gets called when a RetroGames Bomb got clicked on.
      */
-    public BombExplodeException(String s){
+    public BombExplodeException(String s) {
         super(s);
     }
+
 }

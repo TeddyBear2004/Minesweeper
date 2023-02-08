@@ -4,6 +4,7 @@ import de.teddybear2004.retro.games.game.Board;
 import de.teddybear2004.retro.games.game.Game;
 import de.teddybear2004.retro.games.game.event.BoardLoseEvent;
 import de.teddybear2004.retro.games.game.event.BoardWinEvent;
+import de.teddybear2004.retro.games.game.painter.Atelier;
 import de.teddybear2004.retro.games.game.painter.Painter;
 import de.teddybear2004.retro.games.game.statistic.GameStatistic;
 import de.teddybear2004.retro.games.minesweeper.exceptions.BombExplodeException;
@@ -36,6 +37,7 @@ public class MinesweeperBoard implements Board<MinesweeperField> {
     private final Player player;
     private final @NotNull Random random;
     private final boolean saveStats;
+    private final Atelier atelier;
     private final long seed;
     private final ConnectionBuilder connectionBuilder;
     private final boolean setSeed;
@@ -49,7 +51,7 @@ public class MinesweeperBoard implements Board<MinesweeperField> {
     private int startY;
 
 
-    public MinesweeperBoard(@NotNull Plugin plugin, Language language, ConnectionBuilder connectionBuilder, Game game, int width, int height, int bombCount, Location corner, Player player, long seed, boolean setSeed, boolean saveStats) {
+    public MinesweeperBoard(@NotNull Plugin plugin, Language language, ConnectionBuilder connectionBuilder, Game game, int width, int height, int bombCount, Location corner, Player player, long seed, boolean setSeed, boolean saveStats, Atelier atelier) {
         this.connectionBuilder = connectionBuilder;
         this.setSeed = setSeed;
         this.plugin = plugin;
@@ -59,6 +61,7 @@ public class MinesweeperBoard implements Board<MinesweeperField> {
         this.seed = seed;
         this.random = new Random(seed);
         this.saveStats = saveStats;
+        this.atelier = atelier;
         if (width * height - 9 <= bombCount || width * height <= bombCount)
             throw new IllegalArgumentException("bombCount cannot be bigger than width * height");
 
@@ -83,7 +86,7 @@ public class MinesweeperBoard implements Board<MinesweeperField> {
     }
 
     @Override
-    public void draw(@NotNull List<Player> players) {
+    public void draw(List<? extends Player> players) {
         getCurrentPlayerPainters(players).forEach((painter, players2) -> {
             if (painter != null)
                 painter.drawField(this, players2);
@@ -91,20 +94,20 @@ public class MinesweeperBoard implements Board<MinesweeperField> {
     }
 
     @Override
-    public @NotNull Map<Painter<MinesweeperField>, List<Player>> getCurrentPlayerPainters(@NotNull List<Player> viewers) {
-        Map<Class<? extends Painter<MinesweeperField>>, List<Player>> map1 = new HashMap<>();
+    public @NotNull Map<Painter<MinesweeperField>, List<Player>> getCurrentPlayerPainters(List<? extends Player> viewers) {
+        @SuppressWarnings("rawtypes")
+        Map<Painter, List<Player>> map1 = new HashMap<>();
 
         viewers.forEach(player -> {
-            Class<? extends Painter<MinesweeperField>> painterClass = Painter.loadPainterClass(player);
-            map1.computeIfAbsent(painterClass, p -> new ArrayList<>()).add(player);
+            Painter<?> painter = atelier.getPainter(player, getBoardClass());
+            map1.computeIfAbsent(painter, p -> new ArrayList<>()).add(player);
         });
 
-        Class<? extends Painter<MinesweeperField>> playerClass = Painter.loadPainterClass(player);
-        map1.computeIfAbsent(playerClass, p -> new ArrayList<>()).add(player);
+        Painter<?> painter1 = atelier.getPainter(player, getBoardClass());
+        map1.computeIfAbsent(painter1, p -> new ArrayList<>()).add(player);
 
         Map<Painter<MinesweeperField>, List<Player>> map2 = new HashMap<>();
-        map1.forEach((painterClass, players) -> {
-            Painter<?> painter = Painter.PAINTER_MAP.get(MinesweeperField.class).get(painterClass);
+        map1.forEach((painter, players) -> {
             if (painter instanceof MinesweeperPainter minesweeperPainter)
                 map2.put(minesweeperPainter, players);
         });
@@ -167,7 +170,7 @@ public class MinesweeperBoard implements Board<MinesweeperField> {
     }
 
     @Override
-    public void drawBlancField(@NotNull List<Player> players) {
+    public void drawBlancField(List<? extends Player> players) {
         getCurrentPlayerPainters(players).forEach((painter, players2) -> {
             if (painter != null)
                 painter.drawBlancField(this, players2);
@@ -428,13 +431,8 @@ public class MinesweeperBoard implements Board<MinesweeperField> {
     }
 
     @Override
-    public Class<MinesweeperField> getFieldClass() {
-        return MinesweeperField.class;
-    }
-
-    @Override
-    public Class<? extends Painter<?>> getPainterClass() {
-        return MinesweeperPainter.class;
+    public Class<? extends Board<?>> getBoardClass() {
+        return MinesweeperBoard.class;
     }
 
     private long getActualTimeNeeded() {

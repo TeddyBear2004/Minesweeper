@@ -17,7 +17,7 @@ public class JarWalker {
     /**
      * @author SkytAsul
      */
-    public static void walkResources(@NotNull Class<?> clazz, @NotNull String path, int depth, Consumer<Path> consumer) throws URISyntaxException, IOException {
+    public static void walkResources(@NotNull Class<?> clazz, @NotNull String path, int depth, Consumer<? super Path> consumer) throws URISyntaxException, IOException {
         URL resource = clazz.getResource(path);
         if (resource == null)
             return;

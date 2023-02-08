@@ -5,9 +5,9 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import de.teddybear2004.retro.games.game.Board;
-import de.teddybear2004.retro.games.game.Field;
 import de.teddybear2004.retro.games.game.Game;
 import de.teddybear2004.retro.games.game.GameManager;
+import de.teddybear2004.retro.games.game.painter.Atelier;
 import de.teddybear2004.retro.games.game.painter.Painter;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -16,24 +16,30 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashSet;
 import java.util.Set;
 
-public class LeftClickEvent<F extends Field> extends PacketAdapter {
-
+public class LeftClickEvent extends PacketAdapter {
 
     private final GameManager gameManager;
+    private final Atelier atelier;
 
-    public LeftClickEvent(Plugin plugin, GameManager gameManager) {
-        super(plugin, getPacketTypes());
+    public LeftClickEvent(Plugin plugin, GameManager gameManager, Atelier atelier) {
+        super(plugin, getPacketTypes(atelier));
         this.gameManager = gameManager;
+        this.atelier = atelier;
     }
 
-    private static PacketType @NotNull [] getPacketTypes() {
+    @SuppressWarnings("unchecked")
+    private static PacketType @NotNull [] getPacketTypes(Atelier atelier) {
         Set<PacketType> types = new HashSet<>();
-        Painter.PAINTER_MAP.values().forEach(painterMap -> painterMap.values().forEach(painter -> types.addAll(painter.getLeftClickPacketType())));
+
+        atelier.getPainters().forEach(painter -> {
+            Set<PacketType> leftClickPacketType = painter.getLeftClickPacketType();
+
+            types.addAll(leftClickPacketType);
+        });
 
         return types.toArray(new PacketType[0]);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void onPacketReceiving(@NotNull PacketEvent event) {
         Player player = event.getPlayer();
@@ -44,10 +50,7 @@ public class LeftClickEvent<F extends Field> extends PacketAdapter {
         if (board == null)
             return;
 
-        Class<? extends Painter<F>> painterClass = (Class<? extends Painter<F>>) board.getPainterClass();
-        Class<F> fieldClass = (Class<F>) board.getFieldClass();
-
-        Painter<F> painter = Painter.getPainter(player, painterClass, fieldClass);
+        Painter<?> painter = atelier.getPainter(player, board.getBoardClass());
         if (game == null || painter == null)
             return;
 

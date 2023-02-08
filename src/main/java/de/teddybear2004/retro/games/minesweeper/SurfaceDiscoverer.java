@@ -113,7 +113,7 @@ public class SurfaceDiscoverer {
         }
     }
 
-    public static void flagFieldsNextToNumber(@NotNull Board<MinesweeperField> board, int width, int height, boolean place) {
+    public static void flagFieldsNextToNumber(@NotNull Board<? extends MinesweeperField> board, int width, int height, boolean place) {
         if (width < 0 || width >= board.getBoard().length || height < 0 || height >= board.getBoard()[0].length)
             throw new IllegalArgumentException();
 

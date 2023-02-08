@@ -30,15 +30,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public abstract class BlockPainter<F extends Field> implements Painter<F> {
+
     public static final Material LIGHT_DEFAULT = Material.LIME_CONCRETE_POWDER;
     public static final Material DARK_DEFAULT = Material.GREEN_CONCRETE_POWDER;
     private final Plugin plugin;
-    private final ClickHandler<F, Board<F>> clickHandler;
+    private final ClickHandler<? super F, ? super Board<F>> clickHandler;
     private final GameManager gameManager;
     private final Class<? extends Board<F>> boardClass;
     private BukkitTask bombTask;
 
-    public BlockPainter(Plugin plugin, ClickHandler<F, Board<F>> clickHandler, GameManager gameManager, Class<? extends Board<F>> boardClass) {
+    public BlockPainter(Plugin plugin, ClickHandler<? super F, ? super Board<F>> clickHandler, GameManager gameManager, Class<? extends Board<F>> boardClass) {
         this.plugin = plugin;
         this.clickHandler = clickHandler;
         this.gameManager = gameManager;
@@ -51,7 +52,7 @@ public abstract class BlockPainter<F extends Field> implements Painter<F> {
     }
 
     @Override
-    public void drawBlancField(@Nullable Board<F> board, @NotNull List<Player> players) {
+    public void drawBlancField(@Nullable Board<F> board, List<? extends Player> players) {
         if (board == null)
             return;
         Map<BlockPosition, Pair<List<Short>, List<WrappedBlockData>>> subChunkMap = new HashMap<>();
@@ -91,7 +92,7 @@ public abstract class BlockPainter<F extends Field> implements Painter<F> {
             this.bombTask.cancel();
     }
 
-    private static void sendMultiBlockChange(@NotNull List<Player> players, @NotNull Map<BlockPosition, Pair<List<Short>, List<WrappedBlockData>>> subChunkMap) {
+    private static void sendMultiBlockChange(@NotNull List<? extends Player> players, @NotNull Map<? extends BlockPosition, ? extends Pair<List<Short>, List<WrappedBlockData>>> subChunkMap) {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         subChunkMap.forEach((blockPosition, listListTuple) -> {
             PacketContainer multiBlockChange = PacketUtil.getMultiBlockChange(
@@ -110,7 +111,7 @@ public abstract class BlockPainter<F extends Field> implements Painter<F> {
     }
 
     @Override
-    public void drawField(@Nullable Board<F> board, @NotNull List<Player> players) {
+    public void drawField(Board<? extends F> board, List<? extends Player> players) {
         if (board == null) return;
         Map<BlockPosition, Pair<List<Short>, List<WrappedBlockData>>> subChunkMap = new HashMap<>();
 
@@ -144,7 +145,7 @@ public abstract class BlockPainter<F extends Field> implements Painter<F> {
                 Pair<List<Short>, List<WrappedBlockData>> listListTuple2 = subChunkMap.get(subChunkTuple);
 
                 listListTuple2.getLeft().add(Board.convertToLocal(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
-                listListTuple2.getRight().add(WrappedBlockData.createData(m));
+                listListTuple2.getRight().add(WrappedBlockData.createData(m[0]));
 
                 Pair<List<Short>, List<WrappedBlockData>> listListTuple2PlusOne = subChunkMap.get(subChunkTuplePlusOne);
 
@@ -157,13 +158,13 @@ public abstract class BlockPainter<F extends Field> implements Painter<F> {
     }
 
     @Override
-    public @NotNull List<PacketType> getRightClickPacketType() {
-        return Collections.singletonList(PacketType.Play.Client.USE_ITEM);
+    public @NotNull Set<PacketType> getRightClickPacketType() {
+        return Set.of(PacketType.Play.Client.USE_ITEM);
     }
 
     @Override
-    public @NotNull List<PacketType> getLeftClickPacketType() {
-        return Collections.singletonList(PacketType.Play.Client.BLOCK_DIG);
+    public @NotNull Set<PacketType> getLeftClickPacketType() {
+        return Set.of(PacketType.Play.Client.BLOCK_DIG);
     }
 
     @Override
@@ -254,7 +255,7 @@ public abstract class BlockPainter<F extends Field> implements Painter<F> {
     }
 
     @Override
-    public void highlightFields(@NotNull List<F> fields, @NotNull List<Player> players, RemoveMarkerScheduler removeMarkerScheduler) {
+    public void highlightFields(List<? extends F> fields, List<? extends Player> players, RemoveMarkerScheduler removeMarkerScheduler) {
         players.forEach(player -> {
             PacketUtil.removeBlockHighlights(player);
             fields.forEach(field -> PacketUtil.sendBlockHighlight(player, field.getLocation().getBlockX(), field.getLocation().getBlockY(), field.getLocation().getBlockZ(), 60, 1000));

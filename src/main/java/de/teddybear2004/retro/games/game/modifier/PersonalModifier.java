@@ -1,8 +1,11 @@
 package de.teddybear2004.retro.games.game.modifier;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import de.teddybear2004.retro.games.RetroGames;
 import de.teddybear2004.retro.games.game.inventory.InventoryManager;
-import de.teddybear2004.retro.games.game.painter.Painter;
+import de.teddybear2004.retro.games.game.painter.Atelier;
 import de.teddybear2004.retro.games.util.CustomPersistentDataType;
 import de.teddybear2004.retro.games.util.Language;
 import org.bukkit.NamespacedKey;
@@ -15,24 +18,41 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class PersonalModifier {
 
+    private static final CacheLoader<Player, PersonalModifier> CACHE_LOADER = new CacheLoader<>() {
+        @Override
+        public @NotNull PersonalModifier load(@NotNull Player key) {
+            return PersonalModifier.createPersonalModifier(key);
+        }
+    };
+    private static final LoadingCache<Player, PersonalModifier> CACHE
+            = CacheBuilder
+            .newBuilder()
+            .maximumSize(100)
+            .refreshAfterWrite(Duration.of(5, ChronoUnit.MINUTES))
+            .build(CACHE_LOADER);
+
     private final Map<ModifierType, Object> modifierTypeObjectMap = new HashMap<>();
+    private final Player player;
     private final PersistentDataContainer container;
 
 
-    private PersonalModifier(PersistentDataContainer container) {
+    private PersonalModifier(Player player, PersistentDataContainer container) {
+        this.player = player;
         this.container = container;
     }
 
-    public static @NotNull PersonalModifier getPersonalModifier(@NotNull Player player) {
+    private static @NotNull PersonalModifier createPersonalModifier(@NotNull Player player) {
         PersistentDataContainer container = player.getPersistentDataContainer();
 
-        PersonalModifier modifier = new PersonalModifier(container);
+        PersonalModifier modifier = new PersonalModifier(player, container);
 
         for (ModifierType value : ModifierType.values())
             modifier.modifierTypeObjectMap.put(value, value.get(container));
@@ -40,10 +60,21 @@ public class PersonalModifier {
         return modifier;
     }
 
+    public static @NotNull PersonalModifier getPersonalModifier(@NotNull Player player) {
+        return CACHE.getUnchecked(player);
+    }
+
     public void set(@NotNull ModifierType type, Object value) {
         modifierTypeObjectMap.put(type, value);
 
         type.set(container, value);
+
+        refresh(player);
+
+    }
+
+    public static void refresh(@NotNull Player player) {
+        CACHE.refresh(player);
     }
 
     @SuppressWarnings("unchecked")
@@ -69,8 +100,8 @@ public class PersonalModifier {
                 new NamespacedKey(RetroGames.getPlugin(RetroGames.class), "painter_class"),
                 PersistentDataType.STRING,
                 "board_style",
-                new MinesweeperPainterModifierWrapper(),
-                Painter.DEFAULT_PAINTER.getName()),
+                new PainterModifierWrapper(RetroGames.getPlugin(RetroGames.class).getAtelier()),
+                Atelier.getDefault().getName()),
         ENABLE_QUESTION_MARK(
                 new NamespacedKey(RetroGames.getPlugin(RetroGames.class), "enable_question_mark"),
                 CustomPersistentDataType.PERSISTENT_BOOLEAN,
@@ -179,4 +210,5 @@ public class PersonalModifier {
             return this.wrapper.get(player, language, type);
         }
     }
+
 }

@@ -5,6 +5,7 @@ import org.bukkit.ChatColor;
 import org.jetbrains.annotations.NotNull;
 
 public class Language {
+
     private final Toml config;
 
     public Language(Toml config) {
@@ -22,4 +23,5 @@ public class Language {
             string = string.replace("{" + i + "}", args[i]);
         return ChatColor.translateAlternateColorCodes('§', string);
     }
+
 }

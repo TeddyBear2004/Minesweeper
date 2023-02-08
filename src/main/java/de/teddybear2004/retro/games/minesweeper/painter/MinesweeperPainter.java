@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface MinesweeperPainter extends Painter<MinesweeperField> {
 
-    void drawBombs(Board<MinesweeperField> board, List<Player> players);
+    void drawBombs(Board<MinesweeperField> board, List<? extends Player> players);
 
 }

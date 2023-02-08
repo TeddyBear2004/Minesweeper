@@ -11,7 +11,7 @@ import java.util.List;
 
 public class MapStatistic {
 
-    private final List<GameStatistic> statistics;
+    private final List<? extends GameStatistic> statistics;
     private long bestDuration;
     private long averageDuration;
     private long totalDuration;
@@ -19,7 +19,7 @@ public class MapStatistic {
     private int started;
     private int finished;
 
-    public MapStatistic(List<GameStatistic> statistics) {
+    public MapStatistic(List<? extends GameStatistic> statistics) {
         this.statistics = statistics;
 
         this.calculate();

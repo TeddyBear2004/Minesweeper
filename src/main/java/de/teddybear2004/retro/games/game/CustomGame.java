@@ -1,6 +1,7 @@
 package de.teddybear2004.retro.games.game;
 
 import de.teddybear2004.retro.games.RetroGames;
+import de.teddybear2004.retro.games.game.painter.Atelier;
 import de.teddybear2004.retro.games.util.ConnectionBuilder;
 import de.teddybear2004.retro.games.util.Language;
 import org.bukkit.Location;
@@ -16,8 +17,8 @@ public class CustomGame extends Game {
     private final int maxWidth;
     private final int maxHeight;
 
-    public CustomGame(RetroGames plugin, GameManager gameManager, @NotNull Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int minWidth, int minHeight, int maxWidth, int maxHeight, String difficulty) {
-        super(plugin, gameManager, language, connectionBuilder, corner, spawn, -1, -1, -1, difficulty, Material.AIR, -1);
+    public CustomGame(RetroGames plugin, GameManager gameManager, @NotNull Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int minWidth, int minHeight, int maxWidth, int maxHeight, String difficulty, Atelier atelier) {
+        super(plugin, gameManager, language, connectionBuilder, corner, spawn, -1, -1, -1, difficulty, Material.AIR, -1, atelier);
 
         if (minWidth > maxWidth || minHeight > maxHeight)
             throw new IllegalArgumentException("Min size cannot be bigger max size in custom game.");

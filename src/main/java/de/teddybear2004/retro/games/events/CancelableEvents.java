@@ -37,14 +37,14 @@ public class CancelableEvents implements Listener {
 
     public static final NamespacedKey BYPASS_EVENTS = new NamespacedKey(RetroGames.getPlugin(RetroGames.class), "bypass_events");
     private final Map<CancelableEvent, Boolean> cancelableEventBooleanMap = new HashMap<>();
-    private final List<ModifierArea> areas;
+    private final List<? extends ModifierArea> areas;
     private final GameManager gameManager;
 
     /**
      * @param section The {@link ConfigurationSection} to load the event cancellation from
      * @param areas   A list of all areas to determine where/if an event should be cancelled
      */
-    public CancelableEvents(@Nullable ConfigurationSection section, List<ModifierArea> areas, GameManager gameManager) {
+    public CancelableEvents(@Nullable ConfigurationSection section, List<? extends ModifierArea> areas, GameManager gameManager) {
         this.areas = areas;
         this.gameManager = gameManager;
 

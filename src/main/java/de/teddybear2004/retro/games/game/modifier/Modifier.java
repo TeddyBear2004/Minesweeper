@@ -28,7 +28,7 @@ public class Modifier {
     private final boolean allowFly;
     private final boolean allowDefaultWatch;
     private final Map<CancelableEvent, Boolean> temporaryEvents;
-    private final List<ModifierArea> areas;
+    private final List<? extends ModifierArea> areas;
 
     /**
      * Creates a new Modifier instance using the specified configuration and areas.
@@ -36,7 +36,7 @@ public class Modifier {
      * @param config The configuration containing the settings for the modifier.
      * @param areas  The list of areas where the modifier is active.
      */
-    private Modifier(@NotNull FileConfiguration config, List<ModifierArea> areas) {
+    private Modifier(@NotNull FileConfiguration config, List<? extends ModifierArea> areas) {
         this(false,
              config.getBoolean("allow_fly", true),
              config.getBoolean("allow_default_watch", true),
@@ -66,7 +66,7 @@ public class Modifier {
      * @param temporaryEvents   Map of temporary events and their cancellation status.
      * @param areas             List of areas where the modifier is active.
      */
-    private Modifier(boolean temporaryFly, boolean allowFly, boolean allowDefaultWatch, Map<CancelableEvent, Boolean> temporaryEvents, List<ModifierArea> areas) {
+    private Modifier(boolean temporaryFly, boolean allowFly, boolean allowDefaultWatch, Map<CancelableEvent, Boolean> temporaryEvents, List<? extends ModifierArea> areas) {
         this.temporaryFly = temporaryFly;
         this.allowFly = allowFly;
         this.allowDefaultWatch = allowDefaultWatch;
@@ -85,7 +85,7 @@ public class Modifier {
      * @param section The configuration section for the specific modifier.
      * @param areas   The list of areas where the modifier is active.
      */
-    private Modifier(@NotNull ConfigurationSection config, @NotNull ConfigurationSection section, List<ModifierArea> areas) {
+    private Modifier(@NotNull ConfigurationSection config, @NotNull ConfigurationSection section, List<? extends ModifierArea> areas) {
         this(section.getBoolean("temporary_fly", false),
              config.getBoolean("allow_fly", true),
              config.getBoolean("allow_default_watch", true),
@@ -94,12 +94,12 @@ public class Modifier {
         );
     }
 
-    public static void initialise(@NotNull ConfigurationSection config, @NotNull ConfigurationSection section, List<ModifierArea> areas) {
+    public static void initialise(@NotNull ConfigurationSection config, @NotNull ConfigurationSection section, List<? extends ModifierArea> areas) {
         if (modifier == null)
             modifier = new Modifier(config, section, areas);
     }
 
-    public static void initialise(@NotNull FileConfiguration config, List<ModifierArea> areas) {
+    public static void initialise(@NotNull FileConfiguration config, List<? extends ModifierArea> areas) {
         if (modifier == null) modifier = new Modifier(config, areas);
     }
 

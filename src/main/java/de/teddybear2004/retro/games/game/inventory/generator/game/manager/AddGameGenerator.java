@@ -47,7 +47,7 @@ public class AddGameGenerator extends InventoryGenerator {
         return ChatColor.AQUA + "Add Game";
     }
 
-    private void insertSave(Inventory inventory, InventoryManager manager, HashMap<Integer, Function<Player, BiConsumer<Inventory, ClickType>>> map) {
+    private void insertSave(Inventory inventory, InventoryManager manager, HashMap<? super Integer, Function<Player, BiConsumer<Inventory, ClickType>>> map) {
         Pair<Integer, ItemStack> save = manager.insertItemId(new ItemStack(Material.LIME_DYE));
         ItemMeta saveMeta = save.getSecond().getItemMeta();
         if (saveMeta != null) saveMeta.setDisplayName(ChatColor.AQUA + "Save");
@@ -62,7 +62,7 @@ public class AddGameGenerator extends InventoryGenerator {
         });
     }
 
-    private void insertCorner(Inventory inventory, InventoryManager manager, HashMap<Integer, Function<Player, BiConsumer<Inventory, ClickType>>> map) {
+    private void insertCorner(Inventory inventory, InventoryManager manager, HashMap<? super Integer, Function<Player, BiConsumer<Inventory, ClickType>>> map) {
         Pair<Integer, ItemStack> save = manager.insertItemId(new ItemStack(Material.COMPASS));
         ItemMeta saveMeta = save.getSecond().getItemMeta();
         if (saveMeta != null) saveMeta.setDisplayName(ChatColor.AQUA + "Set corner!");
@@ -80,7 +80,7 @@ public class AddGameGenerator extends InventoryGenerator {
         });
     }
 
-    private void insertSpawn(Inventory inventory, InventoryManager manager, HashMap<Integer, Function<Player, BiConsumer<Inventory, ClickType>>> map) {
+    private void insertSpawn(Inventory inventory, InventoryManager manager, HashMap<? super Integer, Function<Player, BiConsumer<Inventory, ClickType>>> map) {
         Pair<Integer, ItemStack> save = manager.insertItemId(new ItemStack(Material.COMPASS));
         ItemMeta saveMeta = save.getSecond().getItemMeta();
         if (saveMeta != null) saveMeta.setDisplayName(ChatColor.AQUA + "Set spawn!");
@@ -98,7 +98,7 @@ public class AddGameGenerator extends InventoryGenerator {
         });
     }
 
-    private void insertLangPath(Inventory inventory, InventoryManager manager, HashMap<Integer, Function<Player, BiConsumer<Inventory, ClickType>>> map) {
+    private void insertLangPath(Inventory inventory, InventoryManager manager, HashMap<? super Integer, Function<Player, BiConsumer<Inventory, ClickType>>> map) {
         Pair<Integer, ItemStack> save = manager.insertItemId(new ItemStack(Material.PAPER));
         ItemMeta saveMeta = save.getSecond().getItemMeta();
         if (saveMeta != null) saveMeta.setDisplayName(ChatColor.AQUA + "Set Language Path!");
@@ -117,7 +117,7 @@ public class AddGameGenerator extends InventoryGenerator {
         });
     }
 
-    private void insertBombCount(Inventory inventory, InventoryManager manager, HashMap<Integer, Function<Player, BiConsumer<Inventory, ClickType>>> map) {
+    private void insertBombCount(Inventory inventory, InventoryManager manager, HashMap<? super Integer, Function<Player, BiConsumer<Inventory, ClickType>>> map) {
         Pair<Integer, ItemStack> save = manager.insertItemId(new ItemStack(Material.COMPASS));
         ItemMeta saveMeta = save.getSecond().getItemMeta();
         if (saveMeta != null) saveMeta.setDisplayName(ChatColor.AQUA + "Set Bomb count!");
@@ -136,7 +136,7 @@ public class AddGameGenerator extends InventoryGenerator {
         });
     }
 
-    private void insertSecondCorner(Inventory inventory, InventoryManager manager, HashMap<Integer, Function<Player, BiConsumer<Inventory, ClickType>>> map) {
+    private void insertSecondCorner(Inventory inventory, InventoryManager manager, HashMap<? super Integer, Function<Player, BiConsumer<Inventory, ClickType>>> map) {
         Pair<Integer, ItemStack> save = manager.insertItemId(new ItemStack(Material.COMPASS));
         ItemMeta saveMeta = save.getSecond().getItemMeta();
         if (saveMeta != null) saveMeta.setDisplayName(ChatColor.AQUA + "Set second corner!");

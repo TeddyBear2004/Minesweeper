@@ -2,6 +2,7 @@ package de.teddybear2004.retro.games.game;
 
 import de.teddybear2004.retro.games.game.inventory.InventoryManager;
 import de.teddybear2004.retro.games.game.modifier.Modifier;
+import de.teddybear2004.retro.games.game.painter.Atelier;
 import de.teddybear2004.retro.games.minesweeper.MinesweeperBoard;
 import de.teddybear2004.retro.games.util.ConnectionBuilder;
 import de.teddybear2004.retro.games.util.IsBetween;
@@ -31,10 +32,11 @@ public class Game {
     private final String difficulty;
     private final int inventoryPosition;
     private final @NotNull ItemStack itemStack;
+    private final Atelier atelier;
     private final GameManager gameManager;
     private final ConnectionBuilder connectionBuilder;
 
-    public Game(Plugin plugin, GameManager gameManager, @NotNull Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int width, int height, int bombCount, String difficulty, @NotNull Material material, int inventoryPosition) {
+    public Game(Plugin plugin, GameManager gameManager, @NotNull Language language, ConnectionBuilder connectionBuilder, Location corner, Location spawn, int width, int height, int bombCount, String difficulty, @NotNull Material material, int inventoryPosition, Atelier atelier) {
         this.gameManager = gameManager;
         this.connectionBuilder = connectionBuilder;
         this.plugin = plugin;
@@ -48,6 +50,7 @@ public class Game {
         this.inventoryPosition = inventoryPosition;
 
         this.itemStack = new ItemStack(material);
+        this.atelier = atelier;
         ItemMeta itemMeta = itemStack.getItemMeta();
 
         if (itemMeta != null) {
@@ -83,7 +86,7 @@ public class Game {
         gameManager.stopGames(p, saveStats);
         Board<?> b;
 
-        b = new MinesweeperBoard(plugin, language, connectionBuilder, this, width, height, bombCount, corner, p, seed, setSeed, saveStats);
+        b = new MinesweeperBoard(plugin, language, connectionBuilder, this, width, height, bombCount, corner, p, seed, setSeed, saveStats, atelier);
         b.drawBlancField(Collections.singletonList(p));
         gameManager.startWatching(p, b);
         gameManager.getRunningGames().put(p, b);

@@ -1,13 +1,18 @@
 package de.teddybear2004.retro.games.game.texture.pack;
 
 import de.teddybear2004.retro.games.game.modifier.PersonalModifier;
-import de.teddybear2004.retro.games.game.painter.Painter;
-import de.teddybear2004.retro.games.minesweeper.painter.MinesweeperArmorStandPainter;
+import de.teddybear2004.retro.games.game.painter.Atelier;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class DisableResourceHandler implements ResourcePackHandler {
+
+    private final Atelier atelier;
+
+    public DisableResourceHandler(Atelier atelier) {
+        this.atelier = atelier;
+    }
 
     @Override
     public void apply(@NotNull Player player) {
@@ -15,7 +20,7 @@ public class DisableResourceHandler implements ResourcePackHandler {
         if (url != null)
             player.setResourcePack(url);
         else
-            Painter.storePainterClass(player.getPersistentDataContainer(), MinesweeperArmorStandPainter.class);
+            atelier.save(player, Atelier.getDefault());
     }
 
     public @Nullable String getUrl(@NotNull Player player) {

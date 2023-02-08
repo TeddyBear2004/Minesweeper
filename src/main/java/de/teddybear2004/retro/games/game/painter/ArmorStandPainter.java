@@ -13,7 +13,6 @@ import de.teddybear2004.retro.games.game.Field;
 import de.teddybear2004.retro.games.game.Game;
 import de.teddybear2004.retro.games.game.GameManager;
 import de.teddybear2004.retro.games.game.click.ClickHandler;
-import de.teddybear2004.retro.games.minesweeper.MinesweeperField;
 import de.teddybear2004.retro.games.scheduler.RemoveMarkerScheduler;
 import de.teddybear2004.retro.games.util.PacketUtil;
 import org.bukkit.Location;
@@ -30,17 +29,19 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public abstract class ArmorStandPainter<F extends Field> implements Painter<F> {
+
     public static final Material LIGHT_DEFAULT = Material.LIME_CONCRETE_POWDER;
     public static final Material DARK_DEFAULT = Material.GREEN_CONCRETE_POWDER;
     private final Plugin plugin;
-    private final ClickHandler<F, Board<F>> clickHandler;
+    private final ClickHandler<? super F, ? super Board<F>> clickHandler;
     private final GameManager gameManager;
     private final Class<? extends Board<F>> boardClass;
     private @Nullable Map<Integer, ItemStack> currentItemStackPerEntityId = new HashMap<>();
     private @Nullable Map<Integer, int[]> armorStandEntityIds;
     private @Nullable Map<int[], Integer> locationEntityIds;
     private BukkitTask bombTask;
-    public ArmorStandPainter(Plugin plugin, ClickHandler<F, Board<F>> clickHandler, GameManager gameManager, Class<? extends Board<F>> boardClass) {
+
+    public ArmorStandPainter(Plugin plugin, ClickHandler<? super F, ? super Board<F>> clickHandler, GameManager gameManager, Class<? extends Board<F>> boardClass) {
         this.plugin = plugin;
         this.clickHandler = clickHandler;
         this.gameManager = gameManager;
@@ -69,7 +70,7 @@ public abstract class ArmorStandPainter<F extends Field> implements Painter<F> {
     }
 
     @Override
-    public void drawBlancField(@Nullable Board<F> board, @NotNull List<Player> players) {
+    public void drawBlancField(@Nullable Board<F> board, List<? extends Player> players) {
         if (board == null)
             return;
 
@@ -103,7 +104,7 @@ public abstract class ArmorStandPainter<F extends Field> implements Painter<F> {
     }
 
     @Override
-    public void drawField(@NotNull Board<F> board, @NotNull List<Player> players) {
+    public void drawField(Board<? extends F> board, List<? extends Player> players) {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
 
         if (this.armorStandEntityIds == null || this.locationEntityIds == null || this.currentItemStackPerEntityId == null) {
@@ -187,19 +188,19 @@ public abstract class ArmorStandPainter<F extends Field> implements Painter<F> {
         }
     }
 
-    public @NotNull List<PacketType> getRightClickPacketType() {
-        return List.of(PacketType.Play.Client.USE_ENTITY, PacketType.Play.Client.USE_ITEM);
+    public @NotNull Set<PacketType> getRightClickPacketType() {
+        return Set.of(PacketType.Play.Client.USE_ENTITY, PacketType.Play.Client.USE_ITEM);
     }
 
     @Override
-    public @NotNull List<PacketType> getLeftClickPacketType() {
-        return List.of(PacketType.Play.Client.USE_ENTITY, PacketType.Play.Client.BLOCK_DIG);
+    public @NotNull Set<PacketType> getLeftClickPacketType() {
+        return Set.of(PacketType.Play.Client.USE_ENTITY, PacketType.Play.Client.BLOCK_DIG);
     }
 
     @Override
     public void onRightClick(@NotNull Player player, @NotNull PacketEvent event, Game game, @NotNull PacketContainer packet) {
         if (packet.getType() == PacketType.Play.Client.USE_ITEM) {
-            PAINTER_MAP.get(MinesweeperField.class).get(BlockPainter.class).onRightClick(player, event, game, packet);
+            PAINTER_MAP.get(BlockPainter.class).onRightClick(player, event, game, packet);
             return;
         }
 
@@ -226,7 +227,7 @@ public abstract class ArmorStandPainter<F extends Field> implements Painter<F> {
     @Override
     public void onLeftClick(Player player, @NotNull PacketEvent event, @NotNull Game game, @NotNull PacketContainer packet) {
         if (packet.getType() == PacketType.Play.Client.BLOCK_DIG) {
-            PAINTER_MAP.get(MinesweeperField.class).get(BlockPainter.class).onLeftClick(player, event, game, packet);
+            PAINTER_MAP.get(BlockPainter.class).onLeftClick(player, event, game, packet);
             return;
         }
 
@@ -256,7 +257,7 @@ public abstract class ArmorStandPainter<F extends Field> implements Painter<F> {
     }
 
     @Override
-    public void highlightFields(List<F> fields, List<Player> players, RemoveMarkerScheduler removeMarkerScheduler) {
+    public void highlightFields(List<? extends F> fields, List<? extends Player> players, RemoveMarkerScheduler removeMarkerScheduler) {
 
     }
 

@@ -16,11 +16,14 @@ import de.teddybear2004.retro.games.game.expansions.StatsExpansion;
 import de.teddybear2004.retro.games.game.inventory.InventoryManager;
 import de.teddybear2004.retro.games.game.modifier.Modifier;
 import de.teddybear2004.retro.games.game.modifier.ModifierArea;
-import de.teddybear2004.retro.games.game.painter.Painter;
+import de.teddybear2004.retro.games.game.painter.ArmorStandPainter;
+import de.teddybear2004.retro.games.game.painter.Atelier;
+import de.teddybear2004.retro.games.game.painter.BlockPainter;
 import de.teddybear2004.retro.games.game.texture.pack.DisableResourceHandler;
 import de.teddybear2004.retro.games.game.texture.pack.ExternalWebServerHandler;
 import de.teddybear2004.retro.games.game.texture.pack.InternalWebServerHandler;
 import de.teddybear2004.retro.games.game.texture.pack.ResourcePackHandler;
+import de.teddybear2004.retro.games.minesweeper.MinesweeperBoard;
 import de.teddybear2004.retro.games.minesweeper.MinesweeperField;
 import de.teddybear2004.retro.games.minesweeper.click.MinesweeperClickHandler;
 import de.teddybear2004.retro.games.minesweeper.painter.MinesweeperArmorStandPainter;
@@ -46,7 +49,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -57,6 +63,7 @@ public final class RetroGames extends JavaPlugin {
     private ResourcePackHandler resourcePackHandler;
     private Language language;
     private GameManager gameManager;
+    private Atelier atelier;
     private int lines;
 
     public Language getLanguage() {
@@ -69,6 +76,10 @@ public final class RetroGames extends JavaPlugin {
 
     public GameManager getGameManager() {
         return gameManager;
+    }
+
+    public Atelier getAtelier() {
+        return atelier;
     }
 
     @Override
@@ -116,13 +127,11 @@ public final class RetroGames extends JavaPlugin {
 
         ClickHandler<MinesweeperField, Board<MinesweeperField>> clickHandler = new MinesweeperClickHandler();
 
-        Painter.PAINTER_MAP.put(MinesweeperField.class, new HashMap<>());
-        Painter.PAINTER_MAP.get(MinesweeperField.class)
-                .put(MinesweeperBlockPainter.class,
-                     new MinesweeperBlockPainter(RetroGames.getPlugin(RetroGames.class), clickHandler, gameManager));
-        Painter.PAINTER_MAP.get(MinesweeperField.class)
-                .put(MinesweeperArmorStandPainter.class,
-                     new MinesweeperArmorStandPainter(RetroGames.getPlugin(RetroGames.class), clickHandler, gameManager));
+        atelier = new Atelier();
+        atelier.register(MinesweeperBoard.class, BlockPainter.class,
+                         new MinesweeperBlockPainter(RetroGames.getPlugin(RetroGames.class), clickHandler, gameManager));
+        atelier.register(MinesweeperBoard.class, ArmorStandPainter.class,
+                         new MinesweeperArmorStandPainter(RetroGames.getPlugin(RetroGames.class), clickHandler, gameManager));
 
 
         language = loadLanguage();
@@ -162,14 +171,14 @@ public final class RetroGames extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("gameManager")).setExecutor(new GameManagerCommand(gameManager, inventoryManager, language));
 
         getServer().getPluginManager().registerEvents(new CancelableEvents(getConfig().getConfigurationSection("events"), modifierAreas, gameManager), this);
-        getServer().getPluginManager().registerEvents(new GenericEvents(resourcePackHandler, customGame, gameManager), this);
+        getServer().getPluginManager().registerEvents(new GenericEvents(resourcePackHandler, customGame, gameManager, atelier), this);
         getServer().getPluginManager().registerEvents(new GenericRightClickEvent(gameManager, inventoryManager), this);
         getServer().getPluginManager().registerEvents(new InventoryClickEvents(gameManager, inventoryManager), this);
         getServer().getPluginManager().registerEvents(new GenericLongClickEvent(gameManager, clickHandler), this);
 
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
-        protocolManager.addPacketListener(new RightClickEvent<>(this, gameManager));
-        protocolManager.addPacketListener(new LeftClickEvent<>(this, gameManager));
+        protocolManager.addPacketListener(new RightClickEvent(this, gameManager, atelier));
+        protocolManager.addPacketListener(new LeftClickEvent(this, gameManager, atelier));
 
         Bukkit.getOnlinePlayers().forEach(player -> {
             InventoryManager.PlayerInventory.VIEWER.apply(player);
@@ -256,6 +265,8 @@ public final class RetroGames extends JavaPlugin {
 
             }
             getLogger().info("Successfully loaded world.");
+        }catch(FileNotFoundException e){
+            throw new RuntimeException(e);
         }catch(IOException e){
             getLogger().severe("Failed to download/load world:");
             e.printStackTrace();
@@ -264,7 +275,7 @@ public final class RetroGames extends JavaPlugin {
         WorldCreator.name("MineSweeper").type(WorldType.FLAT).createWorld();
     }
 
-    private void loadModifier(List<ModifierArea> areas) {
+    private void loadModifier(List<? extends ModifierArea> areas) {
         ConfigurationSection locationBased = getConfig().getConfigurationSection("location_based");
 
         if (locationBased == null || !locationBased.getBoolean("enable", false)) {
@@ -293,7 +304,7 @@ public final class RetroGames extends JavaPlugin {
         }
     }
 
-    private void loadGames(@NotNull List<Game> games, @NotNull Language language, ConnectionBuilder connectionBuilder, GameManager gameManager, YamlConfiguration configuration) {
+    private void loadGames(@NotNull List<? super Game> games, @NotNull Language language, ConnectionBuilder connectionBuilder, GameManager gameManager, YamlConfiguration configuration) {
         ConfigurationSection gameSection = configuration.getConfigurationSection("games");
         if (gameSection == null)
             return;
@@ -326,7 +337,8 @@ public final class RetroGames extends JavaPlugin {
                                  bombCount,
                                  difficultyLangPath,
                                  material,
-                                 inventoryPosition);
+                                 inventoryPosition,
+                                 atelier);
             games.add(game);
         });
     }
@@ -348,12 +360,12 @@ public final class RetroGames extends JavaPlugin {
         int maxWidth = section.getInt("max-size.width");
         int maxHeight = section.getInt("max-size.height");
 
-        return new CustomGame(this, gameManager, language, connectionBuilder, corner, spawn, minWidth, minHeight, maxWidth, maxHeight, "custom");
+        return new CustomGame(this, gameManager, language, connectionBuilder, corner, spawn, minWidth, minHeight, maxWidth, maxHeight, "custom", atelier);
     }
 
     private @NotNull ResourcePackHandler loadTexturePackHandler(@Nullable ConfigurationSection section) throws IOException {
         if (section == null)
-            return new DisableResourceHandler();
+            return new DisableResourceHandler(atelier);
 
         ConfigurationSection internalWebServer = section.getConfigurationSection("internal_web_server");
         if (internalWebServer != null && internalWebServer.getBoolean("enable", false)) {
@@ -373,7 +385,7 @@ public final class RetroGames extends JavaPlugin {
                 return new ExternalWebServerHandler(link);
         }
 
-        return new DisableResourceHandler();
+        return new DisableResourceHandler(atelier);
     }
 
 }

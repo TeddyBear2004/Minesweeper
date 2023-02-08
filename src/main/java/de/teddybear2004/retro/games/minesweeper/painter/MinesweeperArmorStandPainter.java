@@ -37,12 +37,12 @@ public class MinesweeperArmorStandPainter extends ArmorStandPainter<MinesweeperF
             HeadGenerator.getHeadFromUrl("http://textures.minecraft.net/texture/aae59430f811d4037d548e3891f03667393aee15d0ded4da64ca84973b0d60db")
     };
 
-    public MinesweeperArmorStandPainter(Plugin plugin, ClickHandler<MinesweeperField, Board<MinesweeperField>> clickHandler, GameManager gameManager) {
+    public MinesweeperArmorStandPainter(Plugin plugin, ClickHandler<? super MinesweeperField, ? super Board<MinesweeperField>> clickHandler, GameManager gameManager) {
         super(plugin, clickHandler, gameManager, MinesweeperBoard.class);
     }
 
     @Override
-    public void drawBombs(@NotNull Board<MinesweeperField> board, @NotNull List<Player> players) {
+    public void drawBombs(@NotNull Board<MinesweeperField> board, List<? extends Player> players) {
         double explodeDuration = 0.5d;
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
 

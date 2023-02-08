@@ -16,11 +16,11 @@ import java.util.*;
 public class PlayerStatistic {
 
     private static final DecimalFormat df = new DecimalFormat("0.000");
-    private final List<GameStatistic> stats;
-    private final List<Game> games;
+    private final List<? extends GameStatistic> stats;
+    private final List<? extends Game> games;
     private final @NotNull Map<Game, MapStatistic> statsPerMap;
 
-    public PlayerStatistic(List<GameStatistic> stats, List<Game> games) {
+    public PlayerStatistic(List<? extends GameStatistic> stats, List<? extends Game> games) {
         this.stats = stats;
         this.games = games;
         this.statsPerMap = new HashMap<>();

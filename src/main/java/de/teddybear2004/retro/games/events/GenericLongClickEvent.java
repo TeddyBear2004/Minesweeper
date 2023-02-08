@@ -18,9 +18,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 public class GenericLongClickEvent implements Listener {
 
     private final GameManager manager;
-    private final ClickHandler<MinesweeperField, Board<MinesweeperField>> clickHandler;
+    private final ClickHandler<? super MinesweeperField, ? super Board<MinesweeperField>> clickHandler;
 
-    public GenericLongClickEvent(GameManager manager, ClickHandler<MinesweeperField, Board<MinesweeperField>> clickHandler) {
+    public GenericLongClickEvent(GameManager manager, ClickHandler<? super MinesweeperField, ? super Board<MinesweeperField>> clickHandler) {
         this.manager = manager;
         this.clickHandler = clickHandler;
     }
