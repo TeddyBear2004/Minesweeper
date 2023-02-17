@@ -6,7 +6,6 @@ import de.teddybear2004.retro.games.game.GameManager;
 import de.teddybear2004.retro.games.game.inventory.InventoryManager;
 import de.teddybear2004.retro.games.game.statistic.GameStatistic;
 import de.teddybear2004.retro.games.minesweeper.MinesweeperBoard;
-import de.teddybear2004.retro.games.minesweeper.exceptions.BombExplodeException;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -82,11 +81,8 @@ public class InventoryClickEvents implements Listener {
                         .setSaveStats(false)
                         .build(player, MinesweeperBoard.class);
                 Board<?> board = gameManager.getBoard(player);
-                try{
-                    board.checkField(x + board.getCorner().getBlockX(), y + board.getCorner().getBlockZ(), false);
-                    board.draw();
-                }catch(BombExplodeException ignored){
-                }
+                board.checkField(x + board.getCorner().getBlockX(), y + board.getCorner().getBlockZ(), false);
+                board.draw();
             }
         }
 

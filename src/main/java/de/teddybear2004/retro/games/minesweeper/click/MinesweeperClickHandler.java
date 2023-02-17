@@ -49,7 +49,7 @@ public class MinesweeperClickHandler implements ClickHandler<MinesweeperField, B
             try{
                 if (field == null) {
                     try{
-                        board.checkField(location.getBlockX(), location.getBlockZ());
+                        ((MinesweeperBoard) board).checkFieldWithException(location.getBlockX(), location.getBlockZ());
                     }catch(IllegalArgumentException ignore){
                     }
 
@@ -74,7 +74,7 @@ public class MinesweeperClickHandler implements ClickHandler<MinesweeperField, B
                 long l = System.currentTimeMillis();
 
                 if (field.isCovered()) {
-                    board.checkField(location.getBlockX(), location.getBlockZ());
+                    ((MinesweeperBoard) board).checkFieldWithException(location.getBlockX(), location.getBlockZ());
                 } else if (l - lastLeftClick.getOrDefault(player, (long) -1000) <= personalModifier.<Integer>get(PersonalModifier.ModifierType.DOUBLE_CLICK_DURATION)) {
                     if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.REVEAL_ON_DOUBLE_CLICK)) {
                         ((MinesweeperBoard) board).checkNumber(location.getBlockX(), location.getBlockZ());

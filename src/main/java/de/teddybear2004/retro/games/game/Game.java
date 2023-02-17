@@ -1,6 +1,5 @@
 package de.teddybear2004.retro.games.game;
 
-import de.teddybear2004.retro.games.game.inventory.InventoryManager;
 import de.teddybear2004.retro.games.game.modifier.Modifier;
 import de.teddybear2004.retro.games.game.painter.Atelier;
 import de.teddybear2004.retro.games.minesweeper.MinesweeperBoard;
@@ -98,7 +97,7 @@ public class Game {
             }
         });
 
-        InventoryManager.PlayerInventory.GAME.apply(p);
+        b.getPlayerInventory().apply(p);
 
         boolean allowFly = Modifier.getInstance().allowFly() || Modifier.getInstance().isInside(getViewingSpawn());
 
@@ -111,6 +110,22 @@ public class Game {
         }
 
         return b;
+    }
+
+    public Atelier getAtelier() {
+        return atelier;
+    }
+
+    public Location getCorner() {
+        return corner;
+    }
+
+    public ConnectionBuilder getConnectionBuilder() {
+        return connectionBuilder;
+    }
+
+    public @NotNull Language getLanguage() {
+        return language;
     }
 
     public GameManager getGameManager() {
@@ -145,6 +160,10 @@ public class Game {
         }
     }
 
+    public Plugin getPlugin() {
+        return plugin;
+    }
+
     public String getDifficulty() {
         return difficulty;
     }
@@ -172,7 +191,7 @@ public class Game {
         private boolean setSeed;
         private boolean saveStats;
 
-        private Builder(@NotNull Game game) {
+        public Builder(@NotNull Game game) {
             this.game = game;
             this.shouldTeleport = true;
             this.bombCount = game.bombCount;

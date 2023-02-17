@@ -30,6 +30,12 @@ import de.teddybear2004.retro.games.minesweeper.painter.MinesweeperArmorStandPai
 import de.teddybear2004.retro.games.minesweeper.painter.MinesweeperBlockPainter;
 import de.teddybear2004.retro.games.scheduler.HidePlayerScheduler;
 import de.teddybear2004.retro.games.scheduler.RemoveMarkerScheduler;
+import de.teddybear2004.retro.games.sudoku.SudokuBoard;
+import de.teddybear2004.retro.games.sudoku.SudokuField;
+import de.teddybear2004.retro.games.sudoku.SudokuGame;
+import de.teddybear2004.retro.games.sudoku.click.SudokuClickHandler;
+import de.teddybear2004.retro.games.sudoku.painter.SudokuArmorStandPainter;
+import de.teddybear2004.retro.games.sudoku.painter.SudokuBlockPainter;
 import de.teddybear2004.retro.games.util.ConnectionBuilder;
 import de.teddybear2004.retro.games.util.JarWalker;
 import de.teddybear2004.retro.games.util.Language;
@@ -117,22 +123,25 @@ public final class RetroGames extends JavaPlugin {
             saveResource("games.yml", false);
         }
 
-        List<Game> games = new ArrayList<>();
         this.lines = getConfig().getInt("available_games_inventory_lines");
 
         RemoveMarkerScheduler removeMarkerScheduler = new RemoveMarkerScheduler();
         removeMarkerScheduler.runTaskTimer(this, 0, 5);
 
-        gameManager = new GameManager(games, removeMarkerScheduler);
+        gameManager = new GameManager(new ArrayList<>(), removeMarkerScheduler);
 
-        ClickHandler<MinesweeperField, Board<MinesweeperField>> clickHandler = new MinesweeperClickHandler();
+        ClickHandler<MinesweeperField, Board<MinesweeperField>> minesweeperClickHandler = new MinesweeperClickHandler();
+        ClickHandler<SudokuField, Board<SudokuField>> sudokuClickHandler = new SudokuClickHandler();
 
         atelier = new Atelier();
         atelier.register(MinesweeperBoard.class, BlockPainter.class,
-                         new MinesweeperBlockPainter(RetroGames.getPlugin(RetroGames.class), clickHandler, gameManager));
+                         new MinesweeperBlockPainter(this, minesweeperClickHandler, gameManager));
         atelier.register(MinesweeperBoard.class, ArmorStandPainter.class,
-                         new MinesweeperArmorStandPainter(RetroGames.getPlugin(RetroGames.class), clickHandler, gameManager));
-
+                         new MinesweeperArmorStandPainter(this, minesweeperClickHandler, gameManager));
+        atelier.register(SudokuBoard.class, BlockPainter.class,
+                         new SudokuBlockPainter(this, sudokuClickHandler, gameManager));
+        atelier.register(SudokuBoard.class, ArmorStandPainter.class,
+                         new SudokuArmorStandPainter(this, sudokuClickHandler, gameManager));
 
         language = loadLanguage();
         List<ModifierArea> modifierAreas = loadAreas();
@@ -141,11 +150,11 @@ public final class RetroGames extends JavaPlugin {
         ConnectionBuilder connectionBuilder = loadConnectionBuilder(getConfig().getConfigurationSection("database"));
 
         YamlConfiguration gameConfig = YamlConfiguration.loadConfiguration(gameFile);
-        loadGames(games, language, connectionBuilder, gameManager, gameConfig);
+        loadGames(language, connectionBuilder, gameManager, gameConfig);
         Game customGame = loadCustomGame(gameConfig.getConfigurationSection("custom_game"), connectionBuilder, gameManager, language);
 
         if (customGame != null)
-            games.add(customGame);
+            gameManager.getGames().add(customGame);
 
         try{
             this.resourcePackHandler = loadTexturePackHandler(getConfig().getConfigurationSection("resource_pack"));
@@ -174,7 +183,7 @@ public final class RetroGames extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new GenericEvents(resourcePackHandler, customGame, gameManager, atelier), this);
         getServer().getPluginManager().registerEvents(new GenericRightClickEvent(gameManager, inventoryManager), this);
         getServer().getPluginManager().registerEvents(new InventoryClickEvents(gameManager, inventoryManager), this);
-        getServer().getPluginManager().registerEvents(new GenericLongClickEvent(gameManager, clickHandler), this);
+        getServer().getPluginManager().registerEvents(new GenericLongClickEvent(gameManager, minesweeperClickHandler), this);
 
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         protocolManager.addPacketListener(new RightClickEvent(this, gameManager, atelier));
@@ -182,8 +191,8 @@ public final class RetroGames extends JavaPlugin {
 
         Bukkit.getOnlinePlayers().forEach(player -> {
             InventoryManager.PlayerInventory.VIEWER.apply(player);
-            if (games.size() != 0)
-                games.get(0).startViewing(player, null);
+            if (gameManager.getGames().size() != 0)
+                gameManager.getGames().get(0).startViewing(player, null);
         });
 
         tasks.add(new HidePlayerScheduler(this, gameManager).runTaskTimer(this, 20, 5));
@@ -304,46 +313,74 @@ public final class RetroGames extends JavaPlugin {
         }
     }
 
-    private void loadGames(@NotNull List<? super Game> games, @NotNull Language language, ConnectionBuilder connectionBuilder, GameManager gameManager, YamlConfiguration configuration) {
+    private void loadGames(@NotNull Language language, ConnectionBuilder connectionBuilder, GameManager gameManager, YamlConfiguration configuration) {
         ConfigurationSection gameSection = configuration.getConfigurationSection("games");
-        if (gameSection == null)
-            return;
+        if (gameSection != null)
+            gameSection.getKeys(false).forEach(key -> {
+                ConfigurationSection cornerSection = gameSection.getConfigurationSection(key + ".corner");
+                assert cornerSection != null;
+                Location corner = new Location(Bukkit.createWorld(WorldCreator.name(Objects.requireNonNull(cornerSection.getString("world")))), cornerSection.getInt("x"), cornerSection.getInt("y"), cornerSection.getInt("z"));
 
-        gameSection.getKeys(false).forEach(key -> {
-            ConfigurationSection cornerSection = gameSection.getConfigurationSection(key + ".corner");
-            assert cornerSection != null;
-            Location corner = new Location(Bukkit.createWorld(WorldCreator.name(Objects.requireNonNull(cornerSection.getString("world")))), cornerSection.getInt("x"), cornerSection.getInt("y"), cornerSection.getInt("z"));
+                ConfigurationSection spawnSection = gameSection.getConfigurationSection(key + ".spawn");
+                assert spawnSection != null;
+                Location spawn = new Location(Bukkit.createWorld(WorldCreator.name(Objects.requireNonNull(spawnSection.getString("world")))), spawnSection.getInt("x"), spawnSection.getInt("y"), spawnSection.getInt("z"), spawnSection.getInt("yaw"), spawnSection.getInt("pitch"));
 
-            ConfigurationSection spawnSection = gameSection.getConfigurationSection(key + ".spawn");
-            assert spawnSection != null;
-            Location spawn = new Location(Bukkit.createWorld(WorldCreator.name(Objects.requireNonNull(spawnSection.getString("world")))), spawnSection.getInt("x"), spawnSection.getInt("y"), spawnSection.getInt("z"), spawnSection.getInt("yaw"), spawnSection.getInt("pitch"));
+                int width = gameSection.getInt(key + ".width");
+                int height = gameSection.getInt(key + ".height");
+                int bombCount = gameSection.getInt(key + ".bomb_count");
+                String difficultyLangPath = gameSection.getString(key + ".difficulty_lang_path");
 
-            int width = gameSection.getInt(key + ".width");
-            int height = gameSection.getInt(key + ".height");
-            int bombCount = gameSection.getInt(key + ".bomb_count");
-            String difficultyLangPath = gameSection.getString(key + ".difficulty_lang_path");
+                Material material = Material.valueOf(gameSection.getString(key + ".inventory_material"));
+                int inventoryPosition = gameSection.getInt(key + ".inventory_position");
 
-            Material material = Material.valueOf(gameSection.getString(key + ".inventory_material"));
-            int inventoryPosition = gameSection.getInt(key + ".inventory_position");
+                Game game = new Game(this,
+                                     gameManager,
+                                     language,
+                                     connectionBuilder,
+                                     corner,
+                                     spawn,
+                                     width,
+                                     height,
+                                     bombCount,
+                                     difficultyLangPath,
+                                     material,
+                                     inventoryPosition,
+                                     atelier);
+                gameManager.getGames().add(game);
+            });
+        ConfigurationSection sudokusSection = configuration.getConfigurationSection("sudokus");
+        if (sudokusSection != null)
+            sudokusSection.getKeys(false).forEach(key -> {
+                ConfigurationSection cornerSection = sudokusSection.getConfigurationSection(key + ".corner");
+                assert cornerSection != null;
+                Location corner = new Location(Bukkit.createWorld(WorldCreator.name(Objects.requireNonNull(cornerSection.getString("world")))), cornerSection.getInt("x"), cornerSection.getInt("y"), cornerSection.getInt("z"));
 
-            Game game = new Game(this,
-                                 gameManager,
-                                 language,
-                                 connectionBuilder,
-                                 corner,
-                                 spawn,
-                                 width,
-                                 height,
-                                 bombCount,
-                                 difficultyLangPath,
-                                 material,
-                                 inventoryPosition,
-                                 atelier);
-            games.add(game);
-        });
+                ConfigurationSection spawnSection = sudokusSection.getConfigurationSection(key + ".spawn");
+                assert spawnSection != null;
+                Location spawn = new Location(Bukkit.createWorld(WorldCreator.name(Objects.requireNonNull(spawnSection.getString("world")))), spawnSection.getInt("x"), spawnSection.getInt("y"), spawnSection.getInt("z"), spawnSection.getInt("yaw"), spawnSection.getInt("pitch"));
+
+                String difficultyLangPath = sudokusSection.getString(key + ".difficulty_lang_path");
+
+                Material material = Material.valueOf(sudokusSection.getString(key + ".inventory_material"));
+                int inventoryPosition = sudokusSection.getInt(key + ".inventory_position");
+
+                gameManager.getGames().add(new SudokuGame(this,
+                                                          gameManager,
+                                                          language,
+                                                          connectionBuilder,
+                                                          corner,
+                                                          spawn,
+                                                          difficultyLangPath,
+                                                          material,
+                                                          inventoryPosition,
+                                                          atelier));
+
+            });
+
     }
 
-    private Game loadCustomGame(@Nullable ConfigurationSection section, ConnectionBuilder connectionBuilder, GameManager gameManager, @NotNull Language language) {
+    private Game loadCustomGame(@Nullable ConfigurationSection section, ConnectionBuilder
+            connectionBuilder, GameManager gameManager, @NotNull Language language) {
         if (section == null || !section.getBoolean("enable", false))
             return null;
 
@@ -363,7 +400,8 @@ public final class RetroGames extends JavaPlugin {
         return new CustomGame(this, gameManager, language, connectionBuilder, corner, spawn, minWidth, minHeight, maxWidth, maxHeight, "custom", atelier);
     }
 
-    private @NotNull ResourcePackHandler loadTexturePackHandler(@Nullable ConfigurationSection section) throws IOException {
+    private @NotNull ResourcePackHandler loadTexturePackHandler(@Nullable ConfigurationSection section) throws
+            IOException {
         if (section == null)
             return new DisableResourceHandler(atelier);
 

@@ -81,3 +81,20 @@ games:
     difficulty_lang_path: hard
     inventory_material: RED_STAINED_GLASS_PANE
     inventory_position: 6
+sudokus:
+  Map9x9:
+    corner:
+      x: 53
+      y: 17
+      z: -331
+      world: MineSweeper
+    spawn:
+      x: 58
+      y: 20
+      z: -318.5
+      yaw: -180
+      pitch: 30
+      world: MineSweeper
+    difficulty_lang_path: hard
+    inventory_material: RED_STAINED_GLASS_PANE
+    inventory_position: 8

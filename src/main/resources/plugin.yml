@@ -37,3 +37,6 @@ commands:
   mineduel:
     usage: /mineduel
     permission: minesweeper.duel
+  gameManager:
+    usage: /gameManager
+    permission: minesweeper.game.manager

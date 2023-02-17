@@ -3,25 +3,17 @@ package de.teddybear2004.retro.games.minesweeper;
 import de.teddybear2004.retro.games.game.Board;
 import de.teddybear2004.retro.games.game.Field;
 import de.teddybear2004.retro.games.game.modifier.PersonalModifier;
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public class MinesweeperField implements Field {
+public class MinesweeperField extends Field<MinesweeperField> {
 
     private final boolean isBomb;
     private final int bombCount;
-    private final Board<MinesweeperField> board;
-    private final int x;
-    private final int y;
     private boolean isCovered;
     private MarkType markType;
 
     public MinesweeperField(Board<MinesweeperField> board, int x, int y, boolean isBomb, int bombCount) {
-        this.board = board;
-        this.x = x;
-        this.y = y;
+        super(board, x, y);
         this.isCovered = true;
         this.markType = MarkType.NONE;
         this.isBomb = isBomb;
@@ -46,9 +38,9 @@ public class MinesweeperField implements Field {
     }
 
     public void reverseMark() {
-        PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(board.getPlayer());
+        PersonalModifier personalModifier = PersonalModifier.getPersonalModifier(getBoard().getPlayer());
         if (personalModifier.<Boolean>get(PersonalModifier.ModifierType.ENABLE_MARKS))
-            this.markType = this.markType.next(board.getPlayer());
+            this.markType = this.markType.next(getBoard().getPlayer());
         else
             this.markType = MarkType.NONE;
 
@@ -65,30 +57,4 @@ public class MinesweeperField implements Field {
     public boolean isCovered() {
         return isCovered;
     }
-
-    @Override
-    public int getX() {
-        return x;
-    }
-
-    @Override
-    public int getY() {
-        return y;
-    }
-
-    @Override
-    public Board<MinesweeperField> getBoard() {
-        return board;
-    }
-
-    @Override
-    public @Nullable MinesweeperField getRelativeTo(int i, int j) {
-        return board.getField(x + i, y + j);
-    }
-
-    @Override
-    public @NotNull Location getLocation() {
-        return board.getCorner().clone().add(x, 0, y);
-    }
-
 }

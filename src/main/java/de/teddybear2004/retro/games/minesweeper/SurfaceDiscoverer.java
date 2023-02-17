@@ -75,26 +75,31 @@ public class SurfaceDiscoverer {
      * @param height the height coordinate of the field to uncover
      * @throws BombExplodeException if a bomb is uncovered
      */
-    public static void uncoverFields(@NotNull MinesweeperBoard board, int width, int height) throws BombExplodeException {
+    public static <F extends Field<F>> void uncoverFields(@NotNull Board<F> board, int width, int height) throws BombExplodeException {
         // Check if the given coordinates are within the bounds of the board
         if (width < 0 || width >= board.getBoard().length || height < 0 || height >= board.getBoard()[0].length) {
             throw new IllegalArgumentException();
         }
 
-        MinesweeperField field = board.getField(width, height);
-        if (field == null || !field.isCovered()) return;
 
-        field.setUncover();
-        if (field.isBomb())
+        F field = board.getField(width, height);
+        if (!(field instanceof MinesweeperField minesweeperField)) {
+            return;
+        }
+
+        if (!minesweeperField.isCovered()) return;
+
+        minesweeperField.setUncover();
+        if (minesweeperField.isBomb())
             throw new BombExplodeException("Bomb at " + width + " and " + height + " is exploded.");
 
-        if (field.getNeighborCount() != 0) return;
+        if (minesweeperField.getNeighborCount() != 0) return;
 
-        Stack<Field> stack = new Stack<>();
-        stack.push(field);
+        Stack<MinesweeperField> stack = new Stack<>();
+        stack.push(minesweeperField);
 
         while (!stack.isEmpty()) {
-            Field current = stack.pop();
+            MinesweeperField current = stack.pop();
 
             SURROUNDINGS.parallelStream().forEach(ints -> {
                 int i = ints[0];
@@ -113,12 +118,12 @@ public class SurfaceDiscoverer {
         }
     }
 
-    public static void flagFieldsNextToNumber(@NotNull Board<? extends MinesweeperField> board, int width, int height, boolean place) {
+    public static <F extends Field<F>> void flagFieldsNextToNumber(@NotNull Board<F> board, int width, int height, boolean place) {
         if (width < 0 || width >= board.getBoard().length || height < 0 || height >= board.getBoard()[0].length)
             throw new IllegalArgumentException();
 
-        MinesweeperField field = board.getField(width, height);
-        if (field == null || field.isCovered())
+        F field = board.getField(width, height);
+        if (field == null || (field instanceof MinesweeperField && ((MinesweeperField) field).isCovered()))
             return;
 
         SURROUNDINGS.parallelStream().forEach(ints -> {
@@ -126,9 +131,10 @@ public class SurfaceDiscoverer {
             int j = ints[1];
 
 
-            MinesweeperField field1 = field.getRelativeTo(i, j);
-            if (field1 != null && field1.isCovered())
-                field1.setMark(place ? MarkType.BOMB_MARK : MarkType.NONE);
+            F field1 = field.getRelativeTo(i, j);
+            if (field1 != null && field instanceof MinesweeperField minesweeperField)
+                if (minesweeperField.isCovered())
+                    minesweeperField.setMark(place ? MarkType.BOMB_MARK : MarkType.NONE);
         });
 
     }

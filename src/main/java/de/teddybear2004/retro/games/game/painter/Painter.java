@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface Painter<F extends Field> {
+public interface Painter<F extends Field<F>> {
 
 
     Map<Class<? extends Painter<?>>, Painter<?>> PAINTER_MAP = new HashMap<>();
@@ -24,7 +24,7 @@ public interface Painter<F extends Field> {
 
     void drawBlancField(Board<F> board, List<? extends Player> players);
 
-    void drawField(Board<? extends F> board, List<? extends Player> players);
+    void drawField(Board<F> board, List<? extends Player> players);
 
     Set<PacketType> getRightClickPacketType();
 

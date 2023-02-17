@@ -29,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-public abstract class BlockPainter<F extends Field> implements Painter<F> {
+public abstract class BlockPainter<F extends Field<F>> implements Painter<F> {
 
     public static final Material LIGHT_DEFAULT = Material.LIME_CONCRETE_POWDER;
     public static final Material DARK_DEFAULT = Material.GREEN_CONCRETE_POWDER;
@@ -111,7 +111,7 @@ public abstract class BlockPainter<F extends Field> implements Painter<F> {
     }
 
     @Override
-    public void drawField(Board<? extends F> board, List<? extends Player> players) {
+    public void drawField(Board<F> board, List<? extends Player> players) {
         if (board == null) return;
         Map<BlockPosition, Pair<List<Short>, List<WrappedBlockData>>> subChunkMap = new HashMap<>();
 
@@ -147,10 +147,12 @@ public abstract class BlockPainter<F extends Field> implements Painter<F> {
                 listListTuple2.getLeft().add(Board.convertToLocal(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
                 listListTuple2.getRight().add(WrappedBlockData.createData(m[0]));
 
-                Pair<List<Short>, List<WrappedBlockData>> listListTuple2PlusOne = subChunkMap.get(subChunkTuplePlusOne);
+                if (m.length > 1) {
+                    Pair<List<Short>, List<WrappedBlockData>> listListTuple2PlusOne = subChunkMap.get(subChunkTuplePlusOne);
 
-                listListTuple2PlusOne.getLeft().add(Board.convertToLocal(location.getBlockX(), location.getBlockY() + 1, location.getBlockZ()));
-                listListTuple2PlusOne.getRight().add(WrappedBlockData.createData(m[1]));
+                    listListTuple2PlusOne.getLeft().add(Board.convertToLocal(location.getBlockX(), location.getBlockY() + 1, location.getBlockZ()));
+                    listListTuple2PlusOne.getRight().add(WrappedBlockData.createData(m[1]));
+                }
             }
         }
 

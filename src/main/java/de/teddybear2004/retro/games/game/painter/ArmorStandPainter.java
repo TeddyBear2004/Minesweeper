@@ -28,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-public abstract class ArmorStandPainter<F extends Field> implements Painter<F> {
+public abstract class ArmorStandPainter<F extends Field<F>> implements Painter<F> {
 
     public static final Material LIGHT_DEFAULT = Material.LIME_CONCRETE_POWDER;
     public static final Material DARK_DEFAULT = Material.GREEN_CONCRETE_POWDER;
@@ -104,7 +104,7 @@ public abstract class ArmorStandPainter<F extends Field> implements Painter<F> {
     }
 
     @Override
-    public void drawField(Board<? extends F> board, List<? extends Player> players) {
+    public void drawField(Board<F> board, List<? extends Player> players) {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
 
         if (this.armorStandEntityIds == null || this.locationEntityIds == null || this.currentItemStackPerEntityId == null) {

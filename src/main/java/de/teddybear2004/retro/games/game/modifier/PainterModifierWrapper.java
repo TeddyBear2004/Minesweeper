@@ -56,7 +56,7 @@ public class PainterModifierWrapper implements ModifierWrapper {
     }
 
 
-    @SuppressWarnings({"raw", "unchecked"})
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public void handleClick(PersonalModifier.ModifierType type, Player player, PersonalModifier modifier, Inventory inventory,
                             ClickType clickType, Language language, int clickedSlot, InventoryManager manager, int itemId) {
@@ -73,17 +73,16 @@ public class PainterModifierWrapper implements ModifierWrapper {
             return;
 
         Painter<?> painter = atelier.getPainter(Atelier.getPainterClass(s));
-        @SuppressWarnings("rawtypes")
         Board board = RetroGames.getPlugin(RetroGames.class).getGameManager().getBoardWatched(player);
         List<Player> players = Collections.singletonList(player);
         if (painter != null && board != null)
             painter.drawBlancField(board, players);
 
-        Class<? extends Painter<?>> newPainter = null;
-        Class<? extends Painter<?>> first = null;
+        Class<? extends Painter> newPainter = null;
+        Class<? extends Painter> first = null;
         boolean returnOnNext = false;
 
-        for (Class<? extends Painter<?>> painter1 : atelier.getList()) {
+        for (Class<? extends Painter> painter1 : atelier.getList()) {
             if (first == null)
                 first = painter1;
 
